@@ -33,7 +33,7 @@ $ git checkout -b feature/feature_name
 
 ## Bot's artifacts are plain files, yet we differentiate the following types:
 - Tasks: `/today/pay the bills.md` (`today/*.md`, `later/*.md`, `_trash_/*.md`)
-- Notes: `/brain/brain is the most complex object.md` (`/.*/*.md`)
+- Notes: `/brain/brain is the most complex object.md` (`/.*/*.md` also `/inbox/*`)
 - Documents: `/my big project.md` (`/*.md`)
 - Check list items: `/-shop-/cheese.md` (`-*-/*.md`)
 

@@ -748,12 +748,12 @@ func (b *Bot) move(params []string) error {
 
 	oldDir, err := b.fs.Unhash("", oldDirHash)
 	if err != nil {
-		return fmt.Errorf("move: %w", err)
+		return fmt.Errorf("move: can't unhash old dir: %w", err)
 	}
 
 	filename, err := b.fs.Unhash(oldDir, oldFilenameHash)
 	if err != nil {
-		return fmt.Errorf("b.move:can't unhash old filename %s in %s: %w", oldDir, oldFilenameHash, err)
+		return fmt.Errorf("move: can't unhash old filename: %w", err)
 	}
 	newFilename := filename
 	if len(params) > 3 {
@@ -762,14 +762,14 @@ func (b *Bot) move(params []string) error {
 
 	newDir, err := b.fs.Unhash("", newDirHash)
 	if err != nil {
-		return fmt.Errorf("b.move: can't unhash new dir %s: %w", newDir, err)
+		return fmt.Errorf("move: can't unhash new dir %s: %w", newDir, err)
 	}
 
 	// TODO touch
 	// TODO multiline
 	err = b.fs.Rename(oldDir, filename, newDir, newFilename)
 	if err != nil {
-		return fmt.Errorf("b.move: can't move: %w", err)
+		return fmt.Errorf("move: can't move: %w", err)
 	}
 
 	return b.showList(nil)
@@ -781,7 +781,7 @@ func (b *Bot) moveToNewDir(params []string) error {
 
 	err := b.fs.MakeDir(dir)
 	if err != nil {
-		return fmt.Errorf("b.moveToNewDir: can't create dir: %w", err)
+		return fmt.Errorf("move to new dir: %w", err)
 	}
 
 	return b.move([]string{fs.DirInbox, filenameHash, dir})
@@ -794,17 +794,17 @@ func (b *Bot) moveToDoc(params []string) error {
 
 	filename, err := b.fs.Unhash(fs.DirToday, filenameHash)
 	if err != nil {
-		return fmt.Errorf("b.moveToDoc: can't unhash filename '%s': %w", filenameHash, err)
+		return fmt.Errorf("move to doc: can't unhash new filename '%s': %w", filenameHash, err)
 	}
 
 	doc, err := b.fs.Unhash("", docHash)
 	if err != nil {
-		return fmt.Errorf("b.moveToDoc: can't unhash doc '%s' in today: %w", filenameHash, err)
+		return fmt.Errorf("move to doc: can't unhash doc '%s' in today: %w", filenameHash, err)
 	}
 
 	fileContent, err := b.fs.RestoreText(fs.DirToday, filename)
 	if err != nil {
-		return fmt.Errorf("b.MoveToDoc: can't restore file content of '%s': %w", filename, err)
+		return fmt.Errorf("move to dc: can't restore file content of '%s': %w", filename, err)
 	}
 
 	// We can tolerate this
@@ -812,7 +812,7 @@ func (b *Bot) moveToDoc(params []string) error {
 
 	docContent, err := b.fs.Content("", doc)
 	if err != nil {
-		return fmt.Errorf("b.MoveToDoc: can't get doc content of '%s': %w", doc, err)
+		return fmt.Errorf("move to doc: can't get doc content of '%s': %w", doc, err)
 	}
 	docContent = strings.TrimSpace(docContent)
 	if len(docContent) > 0 {
@@ -822,7 +822,7 @@ func (b *Bot) moveToDoc(params []string) error {
 
 	err = b.fs.Put("", doc, docContent)
 	if err != nil {
-		return fmt.Errorf("b.moveTo: can't save file: %w", err)
+		return fmt.Errorf("move to doc: can't save file: %w", err)
 	}
 
 	return b.showToday(nil)
@@ -995,12 +995,12 @@ func (b *Bot) showChooseDay(params []string) error {
 
 	kb, err := b.forADayKeyboard(filenameHash)
 	if err != nil {
-		return fmt.Errorf("forADay: can't get keyboard: %w", err)
+		return fmt.Errorf("choose day: %w", err)
 	}
 
 	err = b.show("choose your destiny", kb, tg.MarkupHTML)
 	if err != nil {
-		return fmt.Errorf("b.showChooseDay: %w", err)
+		return fmt.Errorf("choose day: %w", err)
 	}
 
 	return nil
@@ -1043,27 +1043,27 @@ func (b *Bot) showToNote(params []string) error {
 
 	filename, err := b.fs.Unhash(fs.DirToday, filenameHash)
 	if err != nil {
-		return fmt.Errorf("b.showToNote: %w", err)
+		return fmt.Errorf("show to note: %w", err)
 	}
 
 	err = b.fs.Rename(fs.DirToday, filename, fs.DirInbox, filename)
 	if err != nil {
-		return fmt.Errorf("b.showToNote: can't rename %s: %w", filename, err)
+		return fmt.Errorf("show to note: %w", err)
 	}
 
 	kb, err := b.toNoteKeyboard(filenameHash)
 	if err != nil {
-		return fmt.Errorf("b.showToNote: can't get keyboard: %w", err)
+		return fmt.Errorf("show to note: %w", err)
 	}
 
 	err = b.db.SetInputExpectation(b.userID, tg.NewCmd(cmdMoveToNewDir, []string{filenameHash, "%s"}))
 	if err != nil {
-		return fmt.Errorf("b.showToNote: %w", err)
+		return fmt.Errorf("show to note: %w", err)
 	}
 
 	err = b.show("choose your destiny", kb, tg.MarkupHTML)
 	if err != nil {
-		return fmt.Errorf("b.showToNote: %w", err)
+		return fmt.Errorf("show to note: %w", err)
 	}
 
 	return nil
@@ -1074,17 +1074,17 @@ func (b *Bot) showToDoc(params []string) error {
 
 	kb, err := b.toDocKeyboard(filenameHash)
 	if err != nil {
-		return fmt.Errorf("b.toNote: can't get keyboard: %w", err)
+		return fmt.Errorf("show to doc: can't get keyboard: %w", err)
 	}
 
 	err = b.db.SetInputExpectation(b.userID, tg.NewCmd(cmdMoveToNewDoc, []string{filenameHash, "%s"}))
 	if err != nil {
-		return fmt.Errorf("b.showToDoc: can't set input expectation: %w", err)
+		return fmt.Errorf("show to doc: can't set input expectation: %w", err)
 	}
 
 	err = b.show(b.tr("📝 Choose a doc or name a new one:"), kb, tg.MarkupHTML)
 	if err != nil {
-		return fmt.Errorf("b.showToDoc: %w", err)
+		return fmt.Errorf("show to doc: %w", err)
 	}
 
 	return nil
@@ -1095,17 +1095,17 @@ func (b *Bot) showToChecklist(params []string) error {
 
 	kb, err := b.toChecklistKeyboard(filenameHash)
 	if err != nil {
-		return fmt.Errorf("b.showToChecklist: can't get keyboard: %w", err)
+		return fmt.Errorf("show to checklist: can't get keyboard: %w", err)
 	}
 
 	err = b.db.SetInputExpectation(b.userID, tg.NewCmd(cmdMoveToNewChecklist, []string{filenameHash, "%s"}))
 	if err != nil {
-		return fmt.Errorf("b.showToChecklist: %w", err)
+		return fmt.Errorf("show to checklist: %w", err)
 	}
 
 	err = b.show("choose your checklist", kb, tg.MarkupHTML)
 	if err != nil {
-		return fmt.Errorf("b.ShowToChecklist: %w", err)
+		return fmt.Errorf("show to checklist: %w", err)
 	}
 
 	return nil
@@ -1114,7 +1114,7 @@ func (b *Bot) showToChecklist(params []string) error {
 func (b *Bot) toDocKeyboard(filenameHash string) (*tg.Keyboard, error) {
 	files, err := b.fs.FilesAndDirs("")
 	if err != nil {
-		return nil, fmt.Errorf("b.toNoteKeyboard: can't get files: %w", err)
+		return nil, fmt.Errorf("to doc keyboard: %w", err)
 	}
 	files = fs.OnlyFiles(files)
 	if len(files) == 0 {
@@ -1139,7 +1139,7 @@ func (b *Bot) toNoteKeyboard(filenameHash string) (*tg.Keyboard, error) {
 
 	dirs, err := b.fs.FilesAndDirs("")
 	if err != nil {
-		return nil, fmt.Errorf("b.toNoteKeyboard: can't get dirs: %w", err)
+		return nil, fmt.Errorf("to note keyboard: %w", err)
 	}
 	dirs = fs.OnlyNotes(fs.OnlyDirs(dirs))
 
@@ -1158,7 +1158,7 @@ func (b *Bot) toChecklistKeyboard(filenameHash string) (*tg.Keyboard, error) {
 
 	dirs, err := b.fs.FilesAndDirs("")
 	if err != nil {
-		return nil, fmt.Errorf("b.toNoteKeyboard: can't get dirs: %w", err)
+		return nil, fmt.Errorf("to checklist keyboard: %w", err)
 	}
 	// TODO handle case with zero folders (inline_keyboard is null), for all similar cases
 	dirs = fs.OnlyChecklists(fs.OnlyDirs(dirs))
@@ -1174,14 +1174,14 @@ func (b *Bot) toChecklistKeyboard(filenameHash string) (*tg.Keyboard, error) {
 func (b *Bot) todayLabel() (string, error) {
 	tasks, err := b.fs.FilesAndDirs(cmdShowToday)
 	if err != nil {
-		return "", fmt.Errorf("b.todayLabel: can't get today label: %w", err)
+		return "", fmt.Errorf("today label: %w", err)
 	}
 	tasks = fs.ExcludePomodoro(tasks)
 	todo := len(tasks)
 
 	hasPomodoro, err := b.fs.Exists("today", fs.FilePomodoro)
 	if err != nil {
-		return "", fmt.Errorf("b.todayLabel: can't get pomodoro task's dir: %w", err)
+		return "", fmt.Errorf("today label: can't get pomodoro task's dir: %w", err)
 	}
 
 	// TODO add short labels
@@ -1207,23 +1207,23 @@ func (b *Bot) togglePomodoro(_ []string) error {
 	// Check if Pomodoro is already running
 	hasPomodoroInToday, err := b.fs.Exists(fs.DirToday, fs.FilePomodoro)
 	if err != nil {
-		return fmt.Errorf("b.togglePomodoro: failed to check if pomodoro is already running %w", err)
+		return fmt.Errorf("toggle pomodoro: failed to check if pomodoro is already running %w", err)
 	}
 	hasPomodoroInTrash, err := b.fs.Exists(fs.DirTrash, fs.FilePomodoro)
 	if err != nil {
-		return fmt.Errorf("b.togglePomodoro: failed to check if pomodoro is already running %w", err)
+		return fmt.Errorf("toggle pomodoro: failed to check if pomodoro is already running %w", err)
 	}
 
 	if hasPomodoroInToday {
 		err = b.fs.Del(fs.DirToday, fs.FilePomodoro)
 		if err != nil {
-			return fmt.Errorf("b.togglePomodoro: failed to delete pomodoro file: %w", err)
+			return fmt.Errorf("toggle pomodoro: failed to delete pomodoro file: %w", err)
 		}
 	}
 	if hasPomodoroInTrash {
 		err = b.fs.Del(fs.DirTrash, fs.FilePomodoro)
 		if err != nil {
-			return fmt.Errorf("b.togglePomodoro: failed to delete pomodoro file: %w", err)
+			return fmt.Errorf("toggle pomodoro: failed to delete pomodoro file: %w", err)
 		}
 	}
 
