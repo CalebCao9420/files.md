@@ -52,7 +52,7 @@ type FS struct {
 
 // File represents a file or directory
 type File struct {
-	Name        string
+	Name        string // Filename with extension
 	Hash        string
 	Title       string
 	Ctime       int64
@@ -401,7 +401,7 @@ func (fs FS) SearchNotes(query string) ([]File, error) {
 	if err != nil {
 		return nil, fmt.Errorf("search notes: %w", err)
 	}
-	notesDirs = OnlyNotes(notesDirs)
+	notesDirs = OnlyNoteDirs(notesDirs)
 	for _, noteDir := range notesDirs {
 		if strings.HasPrefix(noteDir.Name, supposedDir) {
 			searchInDirs = append(searchInDirs, noteDir.Name)
@@ -491,7 +491,7 @@ func ExcludePomodoro(files []File) []File {
 	return newFiles
 }
 
-func OnlyNotes(dirs []File) []File {
+func OnlyNoteDirs(dirs []File) []File {
 	return ExcludeSystemDirs(ExcludeTaskDirs(ExcludeChecklists(dirs)))
 }
 
@@ -601,6 +601,7 @@ func (fs FS) Path(dir, filename string) string {
 	path = strings.ReplaceAll(path, "//", "/")
 	// we need to do it twice for the worst case: fs.rootPath == "/", dir == "", filename == "file" -> path: "///file"
 	path = strings.ReplaceAll(path, "//", "/")
+
 	return path
 }
 

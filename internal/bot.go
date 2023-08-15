@@ -513,7 +513,7 @@ func (b *Bot) showNotes(params []string) error {
 	if err != nil {
 		return fmt.Errorf("show notes: can't get dirs: %w", err)
 	}
-	dirs = fs.OnlyNotes(fs.OnlyDirs(dirs))
+	dirs = fs.OnlyNoteDirs(fs.OnlyDirs(dirs))
 
 	var kb tg.Keyboard
 	for _, dir := range dirs {
@@ -1229,7 +1229,7 @@ func (b *Bot) toNoteKeyboard(filenameHash string) (*tg.Keyboard, error) {
 	if err != nil {
 		return nil, fmt.Errorf("to note keyboard: %w", err)
 	}
-	dirs = fs.OnlyNotes(fs.OnlyDirs(dirs))
+	dirs = fs.OnlyNoteDirs(fs.OnlyDirs(dirs))
 
 	kb := tg.NewKeyboard(nil)
 	for _, dir := range dirs {

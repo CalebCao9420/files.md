@@ -173,7 +173,7 @@ func TestCreateBaseDirs(t *testing.T) {
 	err = fs.CreateUserDirs()
 	r.NoError(err)
 
-	dirs, err := fs.Dirs()
+	dirs, err := fs.FilesAndDirs("")
 	r.NoError(err)
 	dirs = OnlyDirs(dirs)
 	dirNames := OnlyFilenames(dirs)
