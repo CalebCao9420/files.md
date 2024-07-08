@@ -317,36 +317,6 @@ func (fs FS) IsMultiline(dir, filename string) (bool, error) {
 	return stat.Size() > 0, nil
 }
 
-// TODO del?
-// RestoreContent restores original user's message text by given file
-func (fs FS) RestoreContent(dir, filename string) (string, error) {
-	path := fs.Path(dir, filename)
-	if !fs.isSafe(path) {
-		return "", fmt.Errorf("can't restore text: unsafe path '%s': %w", path, errUnsafePath)
-	}
-
-	title := Title(filename)
-	content, err := fs.Read(dir, filename)
-	if err != nil {
-		return "", fmt.Errorf("can't restore text: %w", err)
-	}
-	content = strings.TrimSpace(content)
-
-	if strings.HasSuffix(title, "...") {
-		title = strings.TrimSuffix(title, "...")
-		if strings.HasPrefix(strings.ToLower(content), strings.ToLower(title)) {
-			return content, nil
-		}
-	}
-
-	msg := title
-	if len(content) > 0 {
-		msg = fmt.Sprintf("%s\n%s", title, content)
-	}
-
-	return msg, nil
-}
-
 func IsChecklistItem(filename string) bool {
 	validChecklistItem := regexp.MustCompile(`^-.*?-(.+)`)
 
