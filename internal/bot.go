@@ -177,7 +177,7 @@ func (b *Bot) handlers() map[string]func([]string) error {
 		constants.CmdMove:               b.move,
 		constants.CmdMoveToNewDir:       b.moveToNewDir,
 		constants.CmdMoveToFile:         b.moveToFile,
-		constants.CmdMoveToNewDoc:       b.moveToNewDoc,
+		constants.CmdMoveToNewFile:      b.moveToNewFile,
 		constants.CmdMoveToChecklist:    b.moveToChecklist,
 		constants.CmdMoveToNewChecklist: b.moveToNewChecklist,
 		constants.CmdMoveJournal:        b.moveToJournal,
@@ -578,7 +578,7 @@ func (b *Bot) showNotes(params []string) error {
 func (b *Bot) showFiles(params []string) error {
 	files, err := b.fs.FilesAndDirs(fs.DirRoot)
 	if err != nil {
-		return fmt.Errorf("show docs: can't get dirs: %w", err)
+		return fmt.Errorf("show files: can't get dirs: %w", err)
 	}
 
 	dirs := fs.OnlyNoteDirs(fs.OnlyDirs(files))
@@ -615,7 +615,7 @@ func (b *Bot) showFiles(params []string) error {
 
 	err = b.show(b.tr("📄 Your files:"), &kb, tg.MarkupHTML)
 	if err != nil {
-		return fmt.Errorf("show docs: %w", err)
+		return fmt.Errorf("show files: %w", err)
 	}
 
 	return nil
@@ -1039,28 +1039,28 @@ func (b *Bot) moveToChecklist(params []string) error {
 	return b.showToday(nil)
 }
 
-func (b *Bot) moveToNewDoc(params []string) error {
+func (b *Bot) moveToNewFile(params []string) error {
 	filenameHash := params[0]
-	doc := params[1]
+	filename := params[1]
 
-	err := b.fs.Write(fs.DirRoot, txt.Ucfirst(doc), "")
+	err := b.fs.Write(fs.DirRoot, txt.Ucfirst(filename), "")
 	if err != nil {
-		return fmt.Errorf("move to doc: can't create empty doc: %w", err)
+		return fmt.Errorf("move to new file: can't create empty doc: %w", err)
 	}
 
-	return b.moveToFile([]string{filenameHash, fs.Hash(doc)})
+	return b.moveToFile([]string{filenameHash, fs.Hash(filename)})
 }
 
 func (b *Bot) moveToNewChecklist(params []string) error {
 	filenameHash := params[0]
-	doc := params[1]
+	checklist := params[1]
 
-	err := b.fs.Write(fs.DirRoot, txt.Ucfirst(doc), "")
+	err := b.fs.Write(fs.DirRoot, txt.Ucfirst(checklist), "")
 	if err != nil {
-		return fmt.Errorf("move to doc: can't create empty doc: %w", err)
+		return fmt.Errorf("move to new checklist: can't create empty doc: %w", err)
 	}
 
-	return b.moveToFile([]string{filenameHash, fs.Hash(doc)})
+	return b.moveToFile([]string{filenameHash, fs.Hash(checklist)})
 }
 
 func (b *Bot) moveToJournal(params []string) error {
