@@ -187,7 +187,7 @@ func TestToday(t *testing.T) {
 	r.Equal(tg.NewKeyboard([]tg.Row{
 		tg.NewBtn("First task", tg.NewCmd("comp", []string{"today", "0824149b387"})),
 		tg.NewBtn("🥈 Second task", tg.NewCmd("comp", []string{"today", "2940ad40402"})),
-		tg.NewBtn("⏳ Later", tg.NewCmd("later", []string{"later"})),
+		tg.NewBtn("⏳", tg.NewCmd("later", nil)),
 	},
 	), tgram.SentKeyboard)
 }
@@ -207,7 +207,7 @@ func TestToday_QuickMenuFilled(t *testing.T) {
 			tg.NewBtn("☑️", tg.NewCmd("checklists", []string{})),
 			tg.NewBtn("🦥", tg.NewCmd("postpone", []string{})),
 		),
-		tg.NewBtn("⏳ Later", tg.NewCmd("later", []string{"later"})),
+		tg.NewBtn("⏳", tg.NewCmd("later", nil)),
 	},
 	), tgram.SentKeyboard)
 }
@@ -236,27 +236,27 @@ func TestLater(t *testing.T) {
 	r.Equal(tg.NewKeyboard([]tg.Row{
 		tg.NewBtn("First task", tg.NewCmd("comp", []string{"later", "0824149b387"})),
 		tg.NewBtn("🥈 Second task", tg.NewCmd("comp", []string{"later", "2940ad40402"})),
-		tg.NewBtn("🏠 Today", tg.NewCmd("today", []string{"today"})),
+		tg.NewBtn("🏠 Today", tg.NewCmd("today", nil)),
 	},
 	), tgram.SentKeyboard)
 }
 
-func TestLater_QuickMenuFilled(t *testing.T) {
+func TestTodayQuickMenuFilled(t *testing.T) {
 	cfg := &userconfig.Config{}
 	cfg.AddPanelButton("files")
 	cfg.AddPanelButton("checklists")
 	cfg.AddPanelButton("postpone")
 	bot, tgram, r := makeBot(t, cfg)
-	err := bot.Answer(fake.NewUpdCmdFake(-1, tg.NewCmd("later", nil)))
+	err := bot.Answer(fake.NewUpdCmdFake(-1, tg.NewCmd("today", nil)))
 	r.NoError(err)
-	r.Equal("⏳ Your tasks for later:", tgram.LastSentText)
+	r.Equal("<b>1</b> left", tgram.LastSentText)
 	r.Equal(tg.NewKeyboard([]tg.Row{
-		tg.NewBtn("🥈 Second task", tg.NewCmd("comp", []string{"later", "2940ad40402"})),
+		tg.NewBtn("First task", tg.NewCmd("comp", []string{"today", "0824149b387"})),
 		tg.NewRow(tg.NewBtn("📄", tg.NewCmd("files", []string{})),
 			tg.NewBtn("☑️", tg.NewCmd("checklists", []string{})),
 			tg.NewBtn("🦥", tg.NewCmd("postpone", []string{})),
 		),
-		tg.NewBtn("🏠 Today", tg.NewCmd("today", []string{"today"})),
+		tg.NewBtn("⏳", tg.NewCmd("later", nil)),
 	},
 	), tgram.SentKeyboard)
 }
@@ -286,7 +286,7 @@ func TestTodayWithMultilineTasks(t *testing.T) {
 	r.Equal(tg.NewKeyboard([]tg.Row{
 		tg.NewBtn("👀 First task", tg.NewCmd("task", []string{"today", "0824149b387"})),
 		tg.NewBtn("🥈 Second task", tg.NewCmd("comp", []string{"today", "2940ad40402"})),
-		tg.NewBtn("⏳ Later", tg.NewCmd("later", []string{"later"})),
+		tg.NewBtn("⏳", tg.NewCmd("later", nil)),
 	},
 	), tgram.SentKeyboard)
 }

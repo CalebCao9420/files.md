@@ -20,7 +20,7 @@ var DefaultConfig = Config{ // TODO apply default config if some fields are miss
 	raw: raw{
 		Language:               "en",
 		HomeCmd:                "today",
-		MoveToCommands:         []string{constants.CmdTomorrow, constants.CmdLater, "day", "note", "checklist", "doc", "recent", "journal"}, // TODO replace with constants
+		MoveToCommands:         []string{constants.CmdTomorrow, constants.CmdLater, "day", "file", "journal", "checklist", "recent"}, // TODO replace with constants
 		PomodoroDurationMinute: 25,
 		Schedules:              []Schedule{},
 		JournalFilenameFormat:  "January 2006.md",
@@ -118,10 +118,9 @@ func (c *Config) MoveToCmds() []string {
 		"tomorrow":  i18n.StrForTomorrow,
 		"later":     i18n.StrForLater,
 		"day":       i18n.StrForDay,
-		"note":      i18n.StrToNote,
-		"checklist": i18n.StrToChecklist,
-		"doc":       i18n.StrToFile,
+		"file":      i18n.StrToFile,
 		"journal":   i18n.StrToJournal,
+		"checklist": i18n.StrToChecklist,
 	}
 
 	var realCmds []string

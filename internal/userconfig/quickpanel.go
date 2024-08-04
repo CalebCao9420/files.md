@@ -14,6 +14,7 @@ type QuickPanelBtn struct {
 }
 
 var QuickPanelAvailableBtns = []QuickPanelBtn{
+	//NewQuickPanelBtn(constants.CmdLater, tg.CmdTypeCallback, i18n.Emoji("Later"), "Later"),
 	NewQuickPanelBtn(constants.CmdInlineQuerySearchEveryWhere, tg.CmdTypeInlineQueryCurrentChat, i18n.Emoji("Search"), "Search"),
 	NewQuickPanelBtn(constants.CmdShowFiles, tg.CmdTypeCallback, i18n.Emoji("Files"), "Files"),
 	NewQuickPanelBtn(constants.CmdShowChecklists, tg.CmdTypeCallback, i18n.Emoji("Checklists"), "Checklists"),

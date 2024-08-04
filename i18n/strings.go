@@ -1,7 +1,8 @@
 package i18n
 
+// How many refs per every constant? Maybe we can leave literal constants
 const (
-	StrBtnLater       = "⏳ Later"
+	StrBtnLater       = "⏳"
 	StrBtnToday       = "🏠 Today"
 	StrBtnBack        = "⬅️ Back"
 	StrBtnComplete    = "✅ Complete"
@@ -12,13 +13,12 @@ const (
 	StrForDay         = "📆 For a day"
 	StrToNote         = "📌 To Note"
 	StrToChecklist    = "☑️ To Checklist"
-	StrToFile         = "📝 To File"
-	StrToJournal      = "📔 To Journal"
+	StrToFile         = "📄 To File"
+	StrToJournal      = "💚 To Journal"
 	StrBtnGoToToday   = "➡️ Today"
 	StrBtnRepeat      = "🔄️ Repeat the task"
 	StrBtnQuickPanel  = "🎛 Quick Panel"
 
-	// Calendar
 	StrMonday    = "1️⃣ Mn"
 	StrTuesday   = "2️⃣ Tu"
 	StrWednesday = "3️⃣ Wd"

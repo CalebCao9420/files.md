@@ -35,6 +35,7 @@ func Tomorrow() int64 {
 // Next returns next unix time for cron expression
 func Next(crn string) int64 {
 	sched, err := cron.ParseStandard(crn)
+	// TODO release, we should not panic when a user provided bad config
 	if err != nil {
 		// It's a logical error in code, we don't obtain cron expressions from user input
 		panic(fmt.Errorf("invalid cron expression %s: %w", crn, err))

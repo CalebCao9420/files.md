@@ -9,7 +9,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"os"
 	"path"
 	"path/filepath"
 	"regexp"
@@ -348,19 +347,20 @@ func (fs FS) isSafe(path string) (bool, error) {
 		return false, err
 	}
 	if exists {
-		lstater, ok := fs.backend.(afero.Lstater)
-		if !ok {
-			return false, fmt.Errorf("safety can't be checked, fs should support lstater interface: %w", err)
-		}
+		// TODO release uncomment
+		//lstater, ok := fs.backend.(afero.Lstater)
+		//if !ok {
+		//	return false, fmt.Errorf("safety can't be checked, fs should support lstater interface: %w", err)
+		//}
 
-		stat, _, err := lstater.LstatIfPossible(path)
-		if err != nil {
-			return false, fmt.Errorf("safety can't be checked, fs should support lstat: %w", err)
-		}
-		// On MacOS dangling symlinks have drwxr-xr-x stats (i.e. treated as directory)
-		if stat.Mode()&os.ModeSymlink != 0 {
-			return false, nil
-		}
+		//stat, _, err := lstater.LstatIfPossible(path)
+		//if err != nil {
+		//	return false, fmt.Errorf("safety can't be checked, fs should support lstat: %w", err)
+		//}
+		//// On MacOS dangling symlinks have drwxr-xr-x stats (i.e. treated as directory)
+		//if stat.Mode()&os.ModeSymlink != 0 {
+		//	return false, nil
+		//}
 	}
 
 	// Path traversal attack (filepath.Clean only cleans absolute paths from ../)
