@@ -201,6 +201,53 @@ func TestSaveFromPhotoWithCaption(t *testing.T) {
 	r.Equal("![[../img/tg_PHOTO_ID|center|400]]\nCaption", content)
 }
 
+func TestSaveFromPhotoWithLongCaption(t *testing.T) {
+	r := require.New(t)
+
+	userFS, err := fs.NewFS("/", afero.NewMemMapFs())
+	r.NoError(err)
+
+	tgram := fake.NewTG()
+
+	bot := NewBot(-1, tgram, userFS, db.NewFakeDB(), &userconfig.DefaultConfig)
+	upd := fake.NewUpd(-1, "")
+	upd.PhotoID = "PHOTO_ID"
+	upd.PhotoCaption = strings.Repeat("a", 101)
+	err = bot.Answer(upd)
+	r.NoError(err)
+
+	content, err := bot.fs.Read("today", fmt.Sprintf("A%s....md", strings.Repeat("a", 99)))
+	r.NoError(err)
+	r.Equal(fmt.Sprintf("![[../img/tg_PHOTO_ID|center|400]]\nA%s", strings.Repeat("a", 100)), content)
+}
+
+func TestSaveFromPhotoWithSanitizedCaption(t *testing.T) {
+	r := require.New(t)
+
+	userFS, err := fs.NewFS("/", afero.NewMemMapFs())
+	r.NoError(err)
+
+	tgram := fake.NewTG()
+
+	bot := NewBot(-1, tgram, userFS, db.NewFakeDB(), &userconfig.DefaultConfig)
+	upd := fake.NewUpd(-1, "")
+	upd.PhotoID = "PHOTO_ID"
+	upd.PhotoCaption = "Caption/"
+	err = bot.Answer(upd)
+	r.NoError(err)
+
+	files, err := bot.fs.FilesAndDirs("today")
+	r.NoError(err)
+
+	r.Len(files, 1)
+	r.Equal("Caption{|}.md", files[0].Name)
+	r.True(files[0].IsMultiline)
+
+	content, err := bot.fs.Read("today", "Caption{|}.md")
+	r.NoError(err)
+	r.Equal("![[../img/tg_PHOTO_ID|center|400]]\nCaption/", content)
+}
+
 func TestSaveFromPhotoWithoutCaption(t *testing.T) {
 	r := require.New(t)
 
@@ -517,7 +564,61 @@ func TestAddMultipleItemsToChecklist(t *testing.T) {
 	r.ElementsMatch([]string{"Item.md", "Item2.md", "Item3.md"}, []string{files[0].Name, files[1].Name, files[2].Name})
 }
 
-func TestBot_todayLabelIcons(t *testing.T) {
+func TestShowChecklist(t *testing.T) {
+	r := require.New(t)
+
+	userFS, err := fs.NewFS("/", afero.NewMemMapFs())
+	r.NoError(err)
+	err = userFS.MakeDir("-checklist1-")
+	r.NoError(err)
+	err = userFS.Write("-checklist1-", "Item.md", "")
+	r.NoError(err)
+
+	tgram := fake.NewTG()
+	bot := NewBot(-1, tgram, userFS, db.NewFakeDB(), &userconfig.DefaultConfig)
+	err = bot.Answer(fake.NewUpdCmdFake(-1, tg.NewCmd("checklist", []string{"8d2335b5ff3"})))
+	r.NoError(err)
+
+	r.Equal("Checklist1", tgram.LastSentText)
+	r.Equal(tg.NewKeyboard([]tg.Row{
+		tg.NewBtn("Item", tg.NewCmd("comp_checklist", []string{"8d2335b5ff3", "7b72407ca70"})),
+		tg.NewBtn("🏠 Today", tg.NewCmd("today", nil)),
+	},
+	), tgram.SentKeyboard)
+}
+
+func TestCompleteItemInChecklist(t *testing.T) {
+	r := require.New(t)
+
+	userFS, err := fs.NewFS("/", afero.NewMemMapFs())
+	r.NoError(err)
+	err = userFS.MakeDir("-checklist1-")
+	r.NoError(err)
+	err = userFS.Write("-checklist1-", "Item.md", "")
+	r.NoError(err)
+
+	tgram := fake.NewTG()
+	bot := NewBot(-1, tgram, userFS, db.NewFakeDB(), &userconfig.DefaultConfig)
+	err = bot.Answer(fake.NewUpdCmdFake(-1, tg.NewCmd("comp_checklist", []string{"8d2335b5ff3", "7b72407ca70"})))
+	r.NoError(err)
+
+	r.Equal("Checklist1", tgram.LastSentText)
+	r.Equal(tg.NewKeyboard([]tg.Row{
+		tg.NewBtn("🏠 Today", tg.NewCmd("today", nil)),
+	},
+	), tgram.SentKeyboard)
+
+	items, err := bot.fs.FilesAndDirs("-checklist1-")
+	r.NoError(err)
+	r.Empty(items)
+
+	items, err = bot.fs.FilesAndDirs("archive")
+	r.NoError(err)
+	r.Len(items, 1)
+	r.Equal("Item.md", items[0].Name)
+}
+
+func TestBotTodayLabelIcons(t *testing.T) {
 	r := require.New(t)
 	userFS, err := fs.NewFS("/", afero.NewMemMapFs())
 	r.NoError(err)

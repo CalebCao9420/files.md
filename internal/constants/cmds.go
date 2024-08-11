@@ -16,6 +16,7 @@ const (
 	CmdShowMultilineTask  = "task"
 	CmdShowFile           = "file"
 	CmdShowChecklist      = "checklist"
+	CmdCompleteChecklist  = "comp_checklist"
 	CmdShowChooseDay      = "to_day"
 	CmdShowToFile         = "to_file"
 	CmdShowToChecklist    = "to_checklist"

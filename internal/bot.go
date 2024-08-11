@@ -205,6 +205,7 @@ func (b *Bot) handlers() map[string]func([]string) error {
 		constants.CmdShowMultilineTask:  b.showMultilineTask,
 		constants.CmdShowFile:           b.showFile,
 		constants.CmdShowChecklist:      b.showChecklist,
+		constants.CmdCompleteChecklist:  b.completeChecklist,
 		constants.CmdShowChooseDay:      b.showChooseDay,
 		constants.CmdShowToFile:         b.showToFile,
 		constants.CmdShowToChecklist:    b.showToChecklist,
@@ -319,7 +320,7 @@ func (b *Bot) saveFromPhoto(u UpdInterface) error {
 	if u.Caption() != "" {
 		caption := txt.EntitiesToMarkdown(u.Caption(), u.CaptionEntities())
 		caption = strings.TrimSpace(txt.NormNewLines(caption))
-		content = fmt.Sprintf("%s\n%s", content, caption)
+		content = fmt.Sprintf("%s\n%s", content, txt.Ucfirst(caption))
 	}
 
 	// Adding to an existing file
@@ -952,9 +953,9 @@ func (b *Bot) showFile(params []string) error {
 }
 
 func (b *Bot) showChecklist(params []string) error {
-	checklistHash := params[0]
+	dirHash := params[0]
 
-	checklist, err := b.fs.Unhash(fs.DirRoot, checklistHash)
+	checklist, err := b.fs.Unhash(fs.DirRoot, dirHash)
 	if err != nil {
 		return fmt.Errorf("show checklist: %w", err)
 	}
@@ -967,9 +968,9 @@ func (b *Bot) showChecklist(params []string) error {
 
 	kb := tg.NewKeyboard(nil)
 	for _, item := range items {
-		kb.AddRow(tg.NewBtn(item.Title, tg.NewCmd(constants.CmdComplete, []string{})))
+		kb.AddRow(tg.NewBtn(item.Title, tg.NewCmd(constants.CmdCompleteChecklist, []string{dirHash, item.Hash})))
 	}
-	kb.AddRow(tg.NewRow(tg.NewBtn(i18n.StrBtnToday, tg.NewCmd(constants.CmdShowToday, nil))))
+	kb.AddRow(tg.NewBtn(i18n.StrBtnToday, tg.NewCmd(constants.CmdShowToday, nil)))
 
 	err = b.show(fs.Title(checklist), kb, tg.MarkupHTML)
 	if err != nil {
@@ -1206,6 +1207,32 @@ func (b *Bot) complete(params []string) error {
 	}
 
 	return nil
+}
+
+func (b *Bot) completeChecklist(params []string) error {
+	dirHash := params[0]
+	filenameHash := params[1]
+
+	dir, err := b.fs.Unhash(fs.DirRoot, dirHash)
+	if err != nil {
+		return fmt.Errorf("complete: can't unhash dir %s: %w", dir, err)
+	}
+
+	filename, err := b.fs.Unhash(dir, filenameHash)
+	if err != nil {
+		return fmt.Errorf("complete: can't unhash filename %s: %w", filename, err)
+	}
+
+	if err = b.fs.Touch(dir, filename); err != nil {
+		return fmt.Errorf("complete: can't touch %s: %w", filename, err)
+	}
+
+	err = b.fs.Rename(dir, filename, fs.DirArchive, filename)
+	if err != nil {
+		return fmt.Errorf("complete: can't complete %s: %w", filename, err)
+	}
+
+	return b.showChecklist([]string{dirHash})
 }
 
 func (b *Bot) schedule(params []string) error {
