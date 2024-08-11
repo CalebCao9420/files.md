@@ -41,7 +41,7 @@ const (
 	maxInlineResults       = 50
 	maxMsgLength           = 4096 // UTF-8 characters
 	maxMsgsToSendAtOnce    = 5
-	wideSpacer             = "`            ⁠`" // On mobile phones, buttons shrink to msg width
+	wideSpacer             = "<code>            ⁠</code>" // On mobile phones, buttons shrink to msg width
 )
 
 // UpdInterface represents incoming user updates
