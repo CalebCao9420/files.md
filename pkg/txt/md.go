@@ -185,35 +185,31 @@ func MarkdownToHtml(md string) string {
 
 	text := markdown()
 	code := and(openTerm("`"), and(text, closeTerm("`")))
+	onlyBold := or(
+		and(openTerm("**"), and(or(code, text), closeTerm("**"))),
+		and(openTerm("__"), and(or(code, text), closeTerm("__"))),
+	)
 	italicNoCyclic := or(
 		and(openTerm("*"), and(some(or(
-			or(
-				and(openTerm("**"), and(or(code, text), closeTerm("**"))),
-				and(openTerm("__"), and(or(code, text), closeTerm("__"))),
-			),
+			onlyBold,
 			or(code, text))),
 			closeTerm("*"))),
 		and(openTerm("_"), and(some(or(
-			or(
-				and(openTerm("**"), and(or(code, text), closeTerm("**"))),
-				and(openTerm("__"), and(or(code, text), closeTerm("__"))),
-			),
+			onlyBold,
 			or(code, text))),
 			closeTerm("_"))),
 	)
+	onlyItalic := or(
+		and(openTerm("*"), and(or(code, text), closeTerm("*"))),
+		and(openTerm("_"), and(or(code, text), closeTerm("_"))),
+	)
 	boldNoCyclic := or(
 		and(openTerm("**"), and(some(or(
-			or(
-				and(openTerm("*"), and(or(code, text), closeTerm("*"))),
-				and(openTerm("_"), and(or(code, text), closeTerm("_"))),
-			),
+			onlyItalic,
 			or(code, text))),
 			closeTerm("**"))),
 		and(openTerm("__"), and(some(or(
-			or(
-				and(openTerm("*"), and(or(code, text), closeTerm("*"))),
-				and(openTerm("_"), and(or(code, text), closeTerm("_"))),
-			),
+			onlyItalic,
 			or(code, text))),
 			closeTerm("__"))),
 	)
