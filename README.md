@@ -1,6 +1,6 @@
-<img src="https://github.com/zakirullin/stuff-bot/raw/main/docs/go.svg" alt="Stuff Bot logo" title="Stuff Bot" align="right" height="60" />
+<img src="https://github.com/zakirullin/files.md/raw/main/docs/go.svg" alt="Files.md Bot logo" title="Files.md Bot" align="right" height="60" />
 
-# Stuff Bot
+# Files.md
 A telegram bot for your personal stuff. Everything is stored in plain text files.  
 
 [Tasks management bot showcase in Dorofeev's club](https://club.mnogosdelal.ru/post/180/)  

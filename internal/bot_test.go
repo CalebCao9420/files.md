@@ -776,6 +776,7 @@ var (
 	btnReadChecklist  = tg.NewBtn("📚 Read ➕", tg.NewCmd("add_quick", []string{"read"}))
 	btnWatchChecklist = tg.NewBtn("📺 Watch ➕", tg.NewCmd("add_quick", []string{"watch"}))
 	btnShopChecklist  = tg.NewBtn("🛒 Shop ➕", tg.NewCmd("add_quick", []string{"shop"}))
+	btnSchedule       = tg.NewBtn("📆 Schedule ➕", tg.NewCmd("add_quick", []string{"schedule"}))
 	btnHabits         = tg.NewBtn("🌱 Habits ➕", tg.NewCmd("add_quick", []string{"habits"}))
 )
 
@@ -793,6 +794,7 @@ func TestConfigureQP_Empty_Default(t *testing.T) {
 			btnReadChecklist,
 			btnWatchChecklist,
 			btnShopChecklist,
+			btnSchedule,
 			btnHabits,
 			backBtn,
 		},
@@ -813,6 +815,7 @@ func TestConfigureQP_Empty_AddFiles(t *testing.T) {
 			btnReadChecklist,
 			btnWatchChecklist,
 			btnShopChecklist,
+			btnSchedule,
 			btnHabits,
 			backBtn,
 		},
@@ -833,6 +836,7 @@ func TestConfigureQP_Doc_AddCheckList(t *testing.T) {
 			btnReadChecklist,
 			btnWatchChecklist,
 			btnShopChecklist,
+			btnSchedule,
 			btnHabits,
 			backBtn,
 		},
@@ -853,6 +857,7 @@ func TestConfigureQP_DocChecklists_AddPostpone(t *testing.T) {
 			btnReadChecklist,
 			btnWatchChecklist,
 			btnShopChecklist,
+			btnSchedule,
 			btnHabits,
 			backBtn,
 		},
@@ -873,6 +878,7 @@ func TestConfigureQP_DocChecklistsPostpone_Show(t *testing.T) {
 			btnReadChecklist,
 			btnWatchChecklist,
 			btnShopChecklist,
+			btnSchedule,
 			btnHabits,
 			backBtn,
 		},
@@ -893,6 +899,7 @@ func TestConfigureQP_DocChecklistsPostpone_DelChecklists(t *testing.T) {
 			btnReadChecklist,
 			btnWatchChecklist,
 			btnShopChecklist,
+			btnSchedule,
 			btnHabits,
 			backBtn,
 		},
@@ -913,6 +920,7 @@ func TestConfigureQP_DocPostpone_DelDoc(t *testing.T) {
 			btnReadChecklist,
 			btnWatchChecklist,
 			btnShopChecklist,
+			btnSchedule,
 			btnHabits,
 			backBtn,
 		},
@@ -933,6 +941,7 @@ func TestConfigureQP_Postpone_DelPostpone(t *testing.T) {
 			btnReadChecklist,
 			btnWatchChecklist,
 			btnShopChecklist,
+			btnSchedule,
 			btnHabits,
 			backBtn,
 		},

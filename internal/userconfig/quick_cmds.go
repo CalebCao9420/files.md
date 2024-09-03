@@ -16,6 +16,7 @@ var AvailableQuickBtns = []tg.Btn{
 	tg.NewBtn("Read", tg.NewCmd(consts.CmdShowReadChecklist, nil)),
 	tg.NewBtn("Watch", tg.NewCmd(consts.CmdShowWatchChecklist, nil)),
 	tg.NewBtn("Shop", tg.NewCmd(consts.CmdShowShopChecklist, nil)),
+	tg.NewBtn("Schedule", tg.NewCmd(consts.CmdShowSchedule, nil)),
 	tg.NewBtn("Habits", tg.NewCustomCmd(consts.CmdWebAppHabits, nil, tg.CmdTypeWebApp)),
 }
 
