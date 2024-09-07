@@ -9,7 +9,7 @@ An application for your personal stuff:
 - 🌱 Habits  
 - 🍅 Pomodoro  
 
-Everything is stored locally in plain text files.  
+Everything is stored locally in plain `*.md` files.  
 Can be used as a Telegram bot or as a desktop or mobile app.
 
 [Tasks management bot showcase in Dorofeev's club](https://club.mnogosdelal.ru/post/180/)  
@@ -100,7 +100,7 @@ Read 4K randomly from SSD = 150,000 ns
 
 ## Notes about Dropbox
 - Symlink created on server will be synced on client as is (without resolving)
-- To prevent symlinks attack our storage path should be mounted via nosymfollow flag
+- To prevent symlinks attack our storage path should be mounted via `nosymfollow` flag
 
 ## Overarching design principles
 - `Clarity`: The code’s purpose and rationale is clear to the reader.
