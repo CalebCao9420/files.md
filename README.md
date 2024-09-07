@@ -9,7 +9,7 @@ An application for your personal stuff:
 - 🌱 Habits  
 - 🍅 Pomodoro  
 
-All these are plain local `*.md` files.  
+All these are stored as plain local `*.md` files.  
 
 It works like a regular chat, so it's easier to use because there's less resistance. We already know how to send memes to friends, only now we send notes to the bot.   
 
