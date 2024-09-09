@@ -1138,7 +1138,15 @@ func (b *Bot) showChecklist(params []string) error {
 	}
 	kb.AddRow(tg.NewBtn(i18n.StrToday, tg.NewCmd(consts.CmdShowToday, nil)))
 
-	err = b.showHTML(fs.Title(checklist)+wideSpacer, kb)
+	title := fs.Title(checklist)
+	if checklist == fs.DirRead {
+		title = i18n.Tr("Reading List")
+	} else if checklist == fs.DirWatch {
+		title = i18n.Tr("Watchlist")
+	} else if checklist == fs.DirShop {
+		title = i18n.Tr("Shopping List")
+	}
+	err = b.showHTML(title+wideSpacer, kb)
 	if err != nil {
 		return fmt.Errorf("show checklist: %w", err)
 	}

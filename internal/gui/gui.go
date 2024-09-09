@@ -27,9 +27,9 @@ type ChatGUI struct {
 var Chat *ChatGUI
 
 const (
-	width           = 500
+	width           = 530
 	height          = 500
-	maxCharsPerLine = 60
+	maxCharsPerLine = 50
 )
 
 func NewGui(userID int64, updater func(u internal.UpdInterface) error) *ChatGUI {
