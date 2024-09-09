@@ -119,6 +119,11 @@ func EscapeHTML(str string) string {
 	return htmlEscaper.Replace(str)
 }
 
+func StripHTMLTags(str string) string {
+	re := regexp.MustCompile(`<[^>]*>`)
+	return re.ReplaceAllString(str, "")
+}
+
 // TODO add tests
 func ReplaceWithPlaceholders(str, regex, placeholder string) (string, map[string]string) {
 	re := regexp.MustCompile(regex)

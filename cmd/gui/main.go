@@ -20,10 +20,6 @@ import (
 	"zakirullin/stuffbot/pkg/tg"
 )
 
-var (
-	chat *gui.Chat
-)
-
 func main() {
 	opts := &tint.Options{
 		Level: slog.LevelDebug,
@@ -76,7 +72,7 @@ func main() {
 			return err
 		}
 
-		bot := internal.NewBot(userID, chat, userFS, db.NewDB(), userconf)
+		bot := internal.NewBot(userID, gui.Chat, userFS, db.NewDB(), userconf)
 		if err := bot.Answer(u); err != nil {
 			slog.Error("Bot error", "err", err)
 		}
@@ -84,6 +80,6 @@ func main() {
 		return nil
 	}
 
-	chat = gui.NewChat(1, updater)
-	chat.Run(tg.NewCmd(consts.CmdShowToday, nil))
+	gui.Chat = gui.NewGui(1, updater)
+	gui.Chat.Run(tg.NewCmd(consts.CmdShowToday, nil))
 }

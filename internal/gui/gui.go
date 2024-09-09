@@ -2,6 +2,7 @@ package gui
 
 import (
 	"io"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -11,68 +12,67 @@ import (
 
 	"zakirullin/stuffbot/internal"
 	"zakirullin/stuffbot/pkg/tg"
+	"zakirullin/stuffbot/pkg/txt"
 )
 
-type Chat struct {
+type ChatGUI struct {
 	userID   int64
-	input    *widget.Entry
 	messages *fyne.Container
+	scroll   *container.Scroll
+	window   fyne.Window
+	entry    *entry
 	updater  func(updInterface internal.UpdInterface) error
 }
 
-func NewChat(userID int64, updater func(u internal.UpdInterface) error) *Chat {
-	return &Chat{userID: userID, updater: updater, input: widget.NewEntry(), messages: container.NewVBox()}
+var Chat *ChatGUI
+
+func NewGui(userID int64, updater func(u internal.UpdInterface) error) *ChatGUI {
+	return &ChatGUI{userID: userID, messages: container.NewVBox(), entry: newEntry(), updater: updater}
 }
 
-func (c *Chat) Run(startupCMD tg.Cmd) {
+func (c *ChatGUI) Run(startupCMD tg.Cmd) {
 	a := app.New()
-	w := a.NewWindow("Files.md")
+	c.window = a.NewWindow("Files.md")
 
-	c.input.OnSubmitted = func(msg string) {
-		//c.input.MultiLine = true
-		c.Send(c.userID, msg, nil, "")
-		c.updater(tg.NewFakeUpd(1, msg))
-	}
-
-	sendBtn := widget.NewButton("✉️", func() {
-		//c.input.MultiLine = false
-		msg := c.input.Text
-		c.Send(c.userID, msg, nil, "")
-		c.updater(tg.NewFakeUpd(1, msg))
+	sendBtn := newButton("✉️", func() {
+		if c.entry.MultiLine {
+			c.entry.Resize(fyne.NewSize(c.entry.Size().Width, c.entry.Size().Height/2))
+			c.entry.Refresh()
+			c.entry.MultiLine = false
+		}
+		sendMsg()
 	})
 
-	// Make sure the input field takes all available width
-	inputLine := container.New(layout.NewBorderLayout(nil, nil, nil, sendBtn), c.input, sendBtn)
+	// Make sure the entry field takes all available width
+	inputLine := container.New(layout.NewBorderLayout(nil, nil, nil, sendBtn), c.entry, sendBtn)
+	c.scroll = container.NewVScroll(container.NewVBox(layout.NewSpacer(), c.messages))
+	cont := container.New(layout.NewBorderLayout(nil, inputLine, nil, nil), c.scroll, inputLine)
 
-	// Container with message and input line
-	box := container.NewVBox(c.messages, inputLine)
-	cont := container.New(layout.NewBorderLayout(nil, box, nil, nil), box)
-	w.SetContent(cont)
+	c.window.SetContent(cont)
+	c.window.Resize(fyne.NewSize(400, 400))
+	c.window.Show()
+	c.window.Canvas().Focus(c.entry)
 
-	w.Resize(fyne.NewSize(400, 300)) // Set initial window size
-	w.Canvas().Focus(c.input)
-	w.Show()
 	c.updater(tg.NewFakeUpdCmd(1, startupCMD))
 	a.Run()
 }
 
-func (c *Chat) Send(userID int64, text string, kb *tg.Keyboard, markup string) (int, error) {
+func (c *ChatGUI) Send(_ int64, text string, kb *tg.Keyboard, markup string) (int, error) {
 	if len(text) == 0 {
 		return 0, nil
 	}
 
 	msgContainer := container.NewVBox(
-		widget.NewLabel(text),
+		widget.NewLabel(txt.StripHTMLTags(text)),
 	)
 	c.attachKeyboard(kb, msgContainer)
 
-	c.input.SetText("")
 	c.messages.Add(msgContainer)
 
 	return 0, nil
 }
 
-func (c *Chat) Edit(userID int64, msgID int, text string, kb *tg.Keyboard, markup string) error {
+func (c *ChatGUI) Edit(userID int64, _ int, text string, kb *tg.Keyboard, markup string) error {
 	if len(text) == 0 {
 		return nil
 	}
@@ -83,23 +83,23 @@ func (c *Chat) Edit(userID int64, msgID int, text string, kb *tg.Keyboard, marku
 	return nil
 }
 
-func (c *Chat) Del(userID int64, msgID int) error {
+func (c *ChatGUI) Del(_ int64, _ int) error {
 	return nil
 }
 
-func (c *Chat) AnswerCallbackQuery(queryID string, text string) error {
+func (c *ChatGUI) AnswerCallbackQuery(_ string, _ string) error {
 	return nil
 }
 
-func (c *Chat) AnswerInlineQuery(queryID string, results []interface{}, cacheTime int, offset string) error {
+func (c *ChatGUI) AnswerInlineQuery(_ string, _ []interface{}, _ int, _ string) error {
 	return nil
 }
 
-func (c *Chat) DownloadFile(fileID string, outFile io.Writer) (string, error) {
+func (c *ChatGUI) DownloadFile(_ string, _ io.Writer) (string, error) {
 	return "", nil
 }
 
-func (c *Chat) attachKeyboard(kb *tg.Keyboard, msgContainer *fyne.Container) {
+func (c *ChatGUI) attachKeyboard(kb *tg.Keyboard, msgContainer *fyne.Container) {
 	if kb == nil {
 		return
 	}
@@ -107,20 +107,31 @@ func (c *Chat) attachKeyboard(kb *tg.Keyboard, msgContainer *fyne.Container) {
 	btnCallback := func(cmd tg.Cmd) func() {
 		return func() {
 			c.updater(tg.NewFakeUpdCmd(1, cmd))
+			c.scroll.Refresh()
+			c.scroll.ScrollToBottom()
 		}
 	}
 	for _, row := range kb.Btns {
 		switch row.(type) {
 		case tg.Btn:
 			b := row.(tg.Btn)
-			msgContainer.Add(widget.NewButton(b.Name, btnCallback(b.Cmd)))
+			msgContainer.Add(newButton(b.Name, btnCallback(b.Cmd)))
 		case []tg.Btn:
 			btns := row.([]tg.Btn)
 			rowContainer := container.New(layout.NewGridLayoutWithColumns(len(btns)))
 			for _, b := range btns {
-				rowContainer.Add(widget.NewButton(b.Name, btnCallback(b.Cmd)))
+				rowContainer.Add(newButton(b.Name, btnCallback(b.Cmd)))
 			}
 			msgContainer.Add(rowContainer)
 		}
 	}
+}
+
+func sendMsg() {
+	msg := strings.TrimSpace(Chat.entry.Text)
+	if len(msg) > 0 {
+		Chat.messages.RemoveAll()
+		Chat.updater(tg.NewFakeUpd(1, msg))
+	}
+	Chat.entry.SetText("")
 }
