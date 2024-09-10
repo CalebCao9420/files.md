@@ -136,7 +136,7 @@ func (b *Bot) Answer(u UpdInterface) error {
 
 	// Handle inline query file requests
 	if u.IsSentViaBot() {
-		b.answerFileRequest(u.MsgText())
+		return b.answerFileRequest(u.MsgText())
 	}
 
 	// Handle commands
