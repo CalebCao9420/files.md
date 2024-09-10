@@ -3,15 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"os"
+	"log/slog"
 	"path"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
-	"github.com/lmittmann/tint"
 	"github.com/spf13/afero"
-	"golang.org/x/exp/slog"
 
 	"zakirullin/stuffbot/config"
 	"zakirullin/stuffbot/i18n"
@@ -25,12 +23,6 @@ import (
 )
 
 func main() {
-	opts := &tint.Options{
-		Level: slog.LevelDebug,
-	}
-	logger := slog.New(tint.NewHandler(os.Stderr, opts))
-	slog.SetDefault(logger)
-
 	err := godotenv.Load()
 	if err != nil {
 		panic(fmt.Sprintf("Error loading .env file: %s\n", err))
