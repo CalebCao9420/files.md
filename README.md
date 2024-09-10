@@ -18,13 +18,6 @@ Unload your brain - send the bot whatever's on your mind. Then choose how you wa
 [Tasks management via bot](https://club.mnogosdelal.ru/post/180/)  
 [Notes taking via bot](https://vas3k.club/post/18815/)
 
-## Spin the app up 🚀
-1) Install [Go](https://go.dev/doc/install)
-2) Run the app:
-```bash
-$ make gui
-```
-
 ## Spin the Telegram bot up 🤖
 1) Install [Go](https://go.dev/doc/install)
 2) Register new telegram bot via [@BotFather](https://t.me/BotFather)
@@ -40,6 +33,13 @@ $ go run ./cmd
 ```
 
 Bot's artifacts can be seen in `storage/<USER_ID>` folder
+
+## Spin the app up 🚀
+1) Install [Go](https://go.dev/doc/install)
+2) Run the app:
+```bash
+$ make gui
+```
 
 ## How we contribute
 - No long-lived branches except `main`

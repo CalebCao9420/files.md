@@ -1027,7 +1027,7 @@ func TestShowMoveToFile(t *testing.T) {
 
 	r.Equal(tg.NewKeyboard([]tg.Row{
 		tg.NewRow(tg.NewBtn("📄 Note", tg.NewCmd("mf", []string{"345fb", "", "345fb"}))),
-		tg.NewBtn("Or choose a dir:", tg.NewCmd("nothing", nil)),
+		tg.NewBtn("Or choose a dir:", tg.NewCustomCmd("search", nil, "iq")),
 		tg.NewRow(tg.NewBtn("🗂️ dir", tg.NewCmd("mv", []string{"73600", "", "345fbd7ab08"}))),
 	},
 	), tgram.SentKeyboard)

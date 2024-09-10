@@ -121,7 +121,7 @@ func NewBot(userID int64, tg ChatInterface, fs *fs.FS, db DBInterface, cfg *user
 	return &Bot{userID, tg, fs, db, cfg}
 }
 
-// Answer to incoming text message or command (inline queries aren't supported yet)
+// Answer to incoming text message, command or inline query
 func (b *Bot) Answer(u UpdInterface) error {
 	// Handle inline queries
 	if _, ok := u.InlineQueryID(); ok {
@@ -181,6 +181,32 @@ func (b *Bot) Answer(u UpdInterface) error {
 		}
 
 		b.delAllKeyboards()
+
+		c := b.db.InputExpectation(b.userID)
+		if c != nil {
+			b.db.DelInputExpectation(b.userID)
+			newFilenameHash := c.Params[0]
+			newFilename, err := b.fs.Unhash(fs.DirRoot, newFilenameHash)
+			if err != nil {
+				return fmt.Errorf("inline query: can't unhash filename %s: %w", newFilenameHash, err)
+			}
+			content, err := b.fs.Read(fs.DirRoot, newFilename)
+			if err != nil {
+				return fmt.Errorf("inline query: can't read file %s: %w", newFilename, err)
+			}
+			content = strings.TrimSpace(content)
+			if len(content) == 0 {
+				content = fs.Title(filename)
+			}
+
+			err = b.addToFile(filename, content)
+			if err != nil {
+				return fmt.Errorf("inline query: can't add to file %s: %w", filename, err)
+			}
+			_ = b.showHTML(fmt.Sprintf(i18n.Tr("Saved to %s"), fs.Title(filename)), nil)
+
+			return b.ShowToday(nil)
+		}
 
 		return b.showFile([]string{dir, filename})
 	}
@@ -1713,7 +1739,8 @@ func (b *Bot) showMoveToFileOrDir(params []string) error {
 
 	shouldAddSeparator := len(dirBtns) > 0 && len(fileBtns) > 0
 	if shouldAddSeparator {
-		kb.AddRow(tg.NewBtn(i18n.Tr("Or choose a dir:"), tg.NewCmd(consts.CmdDoNothing, nil)))
+		searchCMD := tg.NewCustomCmd(consts.CmdInlineQuerySearchEveryWhere, nil, tg.CmdTypeInlineQueryCurrentChat)
+		kb.AddRow(tg.NewBtn(i18n.Tr("Or choose a dir:"), searchCMD))
 	}
 	dirBtnsByRows := slice.Chunk(dirBtns, btnsPerRow)
 	for _, row := range dirBtnsByRows {
