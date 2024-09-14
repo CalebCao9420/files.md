@@ -33,7 +33,6 @@ func (f *FakeTG) Send(userID int64, text string, kb *Keyboard, markup string) (i
 func (f *FakeTG) Edit(userID int64, msgID int, text string, kb *Keyboard, markup string) error {
 	f.LastEditedText = text
 	f.LastEditedKeyboard = kb
-	f.LastSentText = ""
 	f.LastSentKeyboard = nil
 
 	return nil

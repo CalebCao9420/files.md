@@ -2485,6 +2485,8 @@ func TestSaveToNewDirIntegration(t *testing.T) {
 	err = bot.Answer(tg.NewFakeUpd(-1, "My dir"))
 	r.NoError(err)
 
+	r.Equal("🗂 New dir <b>my dir</b> created and your note is saved!", tgram.LastSentText)
+
 	content, err := userFS.Read("my dir", "Text.md")
 	r.NoError(err)
 	r.Empty(content)
@@ -2493,7 +2495,7 @@ func TestSaveToNewDirIntegration(t *testing.T) {
 	msgID, ok := database.LastKeyboardMsgID(-1)
 	r.True(ok)
 	r.Equal(1, msgID)
-	r.Equal(msgID, tgram.LastSentMessageID)
+	r.Equal(2, tgram.LastSentMessageID)
 }
 
 func TestSaveToNewMultilineFileIntegration(t *testing.T) {
