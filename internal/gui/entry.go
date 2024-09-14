@@ -9,12 +9,14 @@ import (
 // entry with multiline support
 type entry struct {
 	widget.Entry
-	shiftHeld bool
+	shiftHeld   bool
+	rowsVisible int
 }
 
 func newEntry() *entry {
 	i := &entry{}
 	i.ExtendBaseWidget(i)
+	i.rowsVisible = 2
 
 	return i
 }
@@ -22,8 +24,12 @@ func newEntry() *entry {
 func (i *entry) TypedKey(key *fyne.KeyEvent) {
 	if key.Name == fyne.KeyReturn {
 		if i.shiftHeld && !i.MultiLine {
-			i.Resize(fyne.NewSize(i.Size().Width, i.Size().Height*2))
 			i.MultiLine = true
+			i.SetMinRowsVisible(i.rowsVisible)
+			i.rowsVisible++
+		} else if i.shiftHeld {
+			i.rowsVisible++
+			i.SetMinRowsVisible(i.rowsVisible)
 		} else if !i.shiftHeld && i.MultiLine {
 			i.Resize(fyne.NewSize(i.Size().Width, i.Size().Height/2))
 			i.MultiLine = false
