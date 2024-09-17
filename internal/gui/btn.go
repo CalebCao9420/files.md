@@ -1,6 +1,8 @@
 package gui
 
 import (
+	"strings"
+
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/widget"
 
@@ -16,6 +18,7 @@ func newButton(text string, onTapped func()) *button {
 	if len(text) > maxCharsPerLine {
 		text = txt.Substr(text, 0, maxCharsPerLine) + "..."
 	}
+	text = strings.Replace(text, " ", "\t", 1)
 	btn := &button{}
 	btn.ExtendBaseWidget(btn)
 	btn.Text = text

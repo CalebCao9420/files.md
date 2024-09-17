@@ -55,16 +55,16 @@ func (c *ChatGUI) Run(startupCMD tg.Cmd) {
 	}
 
 	items := []*fyne.MenuItem{
-		fyne.NewMenuItem("🏠 Today", handleCmd("today")),
-		fyne.NewMenuItem("📄 Files", handleCmd("files")),
-		fyne.NewMenuItem("☑️ Checklists", handleCmd("checklists")),
-		fyne.NewMenuItem("📆 Schedule", handleCmd("schedule")),
-		fyne.NewMenuItem("📊 Stats", handleCmd("stats")),
-		fyne.NewMenuItem("🦥 Postpone", handleCmd("postpone")),
-		fyne.NewMenuItem("✏️ Rename", handleCmd("rename")),
-		fyne.NewMenuItem("➡️ Move", handleCmd("move")),
-		fyne.NewMenuItem("⚙️ Settings", handleCmd("settings")),
-		fyne.NewMenuItem("📕 Help", handleCmd("help")),
+		fyne.NewMenuItem("🏠\tToday", handleCmd("today")),
+		fyne.NewMenuItem("📄\tFiles", handleCmd("files")),
+		fyne.NewMenuItem("☑️\tChecklists", handleCmd("checklists")),
+		fyne.NewMenuItem("📆\tSchedule", handleCmd("schedule")),
+		fyne.NewMenuItem("📊\tStats", handleCmd("stats")),
+		fyne.NewMenuItem("🦥\tPostpone", handleCmd("postpone")),
+		fyne.NewMenuItem("✏️\tRename", handleCmd("rename")),
+		fyne.NewMenuItem("➡️\tMove", handleCmd("move")),
+		fyne.NewMenuItem("⚙️\tSettings", handleCmd("settings")),
+		fyne.NewMenuItem("📕\tHelp", handleCmd("help")),
 	}
 	c.menu = widget.NewPopUpMenu(fyne.NewMenu("", items...), Chat.window.Canvas())
 
