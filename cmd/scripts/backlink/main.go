@@ -2,6 +2,7 @@
 // You can run it manually on your knowledge base, or you can run it periodically
 // Should be run with working directory set to your root knowledge base
 // WARNING! Cases with "|" in urls aren't handled yet, so duplicate urls possible
+// We don't support relative paths, missing folder means root
 package main
 
 import (
@@ -33,6 +34,8 @@ func main() {
 		return
 	}
 	dirs := fs.OnlyNoteDirs(fs.OnlyDirs(files))
+
+	// Run through files, if our file has link to some note, we add our current note's path to referred note's backlinks
 	for _, dir := range dirs {
 		notes, err := userFS.FilesAndDirs(dir.Name)
 		if err != nil {
@@ -41,17 +44,17 @@ func main() {
 
 		notes = fs.OnlyMDFiles(notes)
 		for _, note := range notes {
-			if filepath.Ext(note.Name) != ".md" {
+			if filepath.Ext(note.Name) != fs.FileExt {
 				continue
 			}
 
 			content, err := userFS.Read(dir.Name, note.Name)
 			if err != nil {
 				fmt.Printf("Can't get content: %s", err)
-				return
+				continue
 			}
 
-			links := regexp.MustCompile(`\[\[(.*?)\]\]`)
+			links := regexp.MustCompile(`\[\[(.+?)\]\]`)
 			matches := links.FindAllStringSubmatch(content, -1)
 			for _, match := range matches {
 				if len(match) < 2 {
@@ -59,31 +62,35 @@ func main() {
 				}
 
 				link := match[1]
-				if strings.Contains(link, "/img/") {
+				if strings.Contains(link, "img/") {
+					continue
+				}
+				// There are issues with "й" letter. Probably it has non-canonical encoding in mac FS
+				link = string(norm.NFC.Bytes([]byte(link)))
+				// We don't support labels
+				link = strings.Split(link, "|")[0]
+
+				// dir/note
+				parts := strings.Split(link, "/")
+
+				isInRootDir := len(parts) == 1
+				if isInRootDir {
+					// TODO implement support for root files
 					continue
 				}
 
-				parts := strings.Split(link, "/")
-				isInAnotherDir := len(parts) > 2
+				refToDir := parts[0]
+				refToNote := parts[1]
 
-				targetDir := dir.Name
-				targetNote := parts[0]
-				link = strings.TrimSuffix(note.Name, ".md")
-				// There are issues with "й" letter. Probably it has non-canonical encoding in mac FS
-				link = string(norm.NFC.Bytes([]byte(link)))
-				if isInAnotherDir {
-					targetDir = parts[1]
-					targetNote = parts[2]
+				filename := note.Name
+				filename = string(norm.NFC.Bytes([]byte(filename)))
+				filename = strings.TrimSuffix(filename, fs.FileExt)
+				link = fmt.Sprintf("%s/%s", dir.Name, filename)
 
-					link = fmt.Sprintf("../%s/%s", dir.Name, link)
+				if _, ok := backlinks[refToDir]; !ok {
+					backlinks[refToDir] = make(map[string][]string)
 				}
-				targetNote = strings.Split(targetNote, "|")[0]
-
-				if _, ok := backlinks[targetDir]; !ok {
-					backlinks[targetDir] = make(map[string][]string)
-				}
-
-				backlinks[targetDir][targetNote] = append(backlinks[targetDir][targetNote], link)
+				backlinks[refToDir][refToNote] = append(backlinks[refToDir][refToNote], link)
 			}
 		}
 	}
@@ -91,19 +98,21 @@ func main() {
 	for dir, notes := range backlinks {
 		for note, links := range notes {
 			for _, link := range links {
-				content, err := userFS.Read(dir, note+".md")
+				content, err := userFS.Read(dir, note+fs.FileExt)
 				if err != nil {
-					fmt.Printf("Can't get target note content: %s, backlinks: %v", err, links)
-					return
+					fmt.Printf("Can't get target note '%s/%s.md':%s, backlinks: %v", dir, note, err, links)
+					continue
 				}
+
+				var existingLinks []string
 				existingLinksRx := regexp.MustCompile(`\[\[(.*)\]\]`)
 				matches := existingLinksRx.FindAllStringSubmatch(content, -1)
-				var existingLinks []string
 				for _, match := range matches {
 					if len(match) < 2 {
 						continue
 					}
-					existingLinks = append(existingLinks, string(match[1]))
+					existingLink := strings.Split(match[1], "|")[0]
+					existingLinks = append(existingLinks, existingLink)
 				}
 
 				if slices.Contains(existingLinks, link) {
@@ -116,7 +125,7 @@ func main() {
 					return
 				}
 
-				fmt.Printf("Appending %s to %s/%s\n", link, dir, note)
+				fmt.Printf("ADD '%s' TO '%s/%s'\n", link, dir, note)
 			}
 		}
 	}
