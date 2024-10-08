@@ -2,6 +2,7 @@ package worker
 
 import (
 	"fmt"
+	"os"
 	"path"
 	"strconv"
 	"time"
@@ -30,6 +31,8 @@ func MoveDueTasks(
 	fsBackend afero.Fs,
 	telegram internal.Chat,
 ) error {
+	infolog := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
 	rootFS, err := fs.NewFS(storagePath, fsBackend)
 	if err != nil {
 		return fmt.Errorf("schedule worker: can't create FS: %s", err)
@@ -74,7 +77,7 @@ func MoveDueTasks(
 				slog.Error("schedule worker: can't move to today", "err", err)
 				continue
 			}
-			slog.Info("scheduled task moved to today", schedule.Filename, "filename")
+			infolog.Info("scheduled task moved to today", schedule.Filename, "filename")
 
 			bot := internal.NewBot(userID, telegram, userFS, db.NewDB(), userconf)
 			_ = bot.ShowToday(nil)
@@ -87,7 +90,7 @@ func MoveDueTasks(
 					slog.Error("schedule worker: can't add to schedule", "err", err)
 					continue
 				}
-				slog.Info("task was rescheduled", "filename", schedule.Filename, "schedule", schedule.Cron, "scheduledAt", nextScheduledAt)
+				infolog.Info("task was rescheduled", "filename", schedule.Filename, "schedule", schedule.Cron, "scheduledAt", nextScheduledAt)
 				continue
 			}
 
