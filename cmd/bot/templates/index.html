@@ -12,7 +12,7 @@
             --color-tx-muted: #6F6E69;
             --color-tx-sel: rgba(187, 220, 206, 0.3);
             --color-bg: #FFFCF0; /* Paper color */
-            --font-normal: calc(1.5rem + 0.25vw);
+            --font-normal: 1.8rem;
             --wrap-wide: 1000px;
             --wrap-normal: 38em;
             --line-height: 1.5;
@@ -60,9 +60,24 @@
             margin-bottom: 0.25em
         }
 
+        h2 {
+            font-weight: 500;
+            font-size: calc(1em + 0.2vw);
+            letter-spacing: -0.015em;
+            line-height: 1.3;
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+        }
+
         p {
             font-size: var(--font-normal);
             line-height: var(--line-height);
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block; /* Optional: to remove bottom whitespace caused by inline display */
         }
 
         ul>li {
@@ -75,6 +90,10 @@
 
         ul>li::marker {
             font-size: 85%
+        }
+
+        .faint {
+            color: var(--color-tx-faint)
         }
 
         .muted {
@@ -109,6 +128,7 @@
                     <li>Emotions</li>
                 </ul>
             </p>
+            <p>And for all that we can use plain text files.</p>
         </content>
     </article>
 </main>

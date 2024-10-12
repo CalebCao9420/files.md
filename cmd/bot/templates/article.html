@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://files.md/favicon.ico" sizes="32x32">
+    <title>Files.md</title>
+    <style>
+        :root { /* Flexoki theme */
+            --color-tx: #100F0F;
+            --color-tx-faint: #B7B5AC;
+            --color-tx-muted: #6F6E69;
+            --color-tx-sel: rgba(187, 220, 206, 0.3);
+            --color-bg: #FFFCF0; /* Paper color */
+            --color-bg-code: #f2f0e5;
+            --color-ui: #E6E4D9;
+            --color-code: #24837B;
+            --font-normal: 1.8rem;
+            --font-smaller: 1.3rem;
+            --font: -apple-system, BlinkMacSystemFont, 'Inter', 'IBM Plex Sans', 'Segoe UI', Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            --font-mono: ui-monospace, SFMono-Regular, "Cascadia Code", "IBM Plex Mono",
+            "Roboto Mono", "DejaVu Sans Mono", "Liberation Mono", Menlo, Monaco,
+            "Consolas", "Source Code Pro", monospace;
+
+            --wrap-wide: 1000px;
+            --wrap-normal: 38em;
+            --line-height: 1.5;
+        }
+
+        @media (max-width: 860px) {
+            :root {
+                --wrap-normal: 88vw;
+                --wrap-wide: 100vw;
+            }
+        }
+
+        html {
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+            font-size: 64%
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--color-bg);
+            color: var(--color-tx);
+            font-size: calc(1.4rem + 0.25vw);
+            font-family: var(--font);
+            text-rendering: optimizeLegibility;
+        }
+
+
+        heading, content {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: var(--wrap-wide);
+            width: var(--wrap-normal);
+        }
+
+        h1 {
+            font-weight: 500;
+            font-size: calc(1.35em + 0.55vw);
+            letter-spacing: -0.02em;
+            line-height: 1.25;
+            margin-top: 1.5em;
+            margin-bottom: 0.25em
+        }
+
+        h2 {
+            font-weight: 500;
+            font-size: calc(1em + 0.2vw);
+            letter-spacing: -0.015em;
+            line-height: 1.3;
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+        }
+
+        p {
+            font-size: var(--font-normal);
+            line-height: var(--line-height);
+        }
+
+        ul>li {
+            padding: 0.30rem 0
+        }
+
+        ul>li::marker {
+            color: var(--color-tx-faint);
+        }
+
+        ul>li::marker {
+            font-size: 85%
+        }
+
+        .faint {
+            color: var(--color-tx-faint)
+        }
+
+        .muted {
+            color: var(--color-tx-muted);
+        }
+
+        ::selection {
+            background: var(--color-tx-sel);
+        }
+
+        ::-moz-selection {
+            background: var(--color-tx-sel);
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        pre, code {
+            color: var(--color-code);
+            background-color: var(--color-bg-code);
+            font-family: var(--font-mono);
+            font-size: var(--font-smaller)
+        }
+
+
+        blockquote {
+            padding-left: 1.5em;
+            margin: 1.5em 0;
+            border-left: 2px solid var(--color-tx);
+        }
+
+        hr {
+            width: 100%;
+            border: 0;
+            height: 1px;
+            margin: 1.5em 0;
+            background: var(--color-ui);
+        }
+
+        l2, l3 {
+            display: none;
+        }
+
+        footer {
+           padding-top: 8rem;
+        }
+
+        .slider-container {
+            position: fixed;
+            padding-right: 14px;
+            right: 0;
+            top: 10px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-direction: column;
+        }
+
+        .slider-container-labels {
+            padding-right: 20px;
+            position: absolute;
+            right: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 35px;
+            color: var(--color-tx-faint);
+            text-align: left;
+        }
+
+        #slider::-webkit-slider-runnable-track {
+        }
+
+        #slider {
+            /*-webkit-appearance: none;*/
+        }
+
+        #slider::-webkit-slider-thumb {
+        }
+
+        #slider {
+            transform: rotate(90deg); /* Rotates the range input to vertical */
+        }
+
+    </style>
+</head>
+<body>
+<main>
+    <article>
+        <heading>
+            <h1>Cognitive load is what matters</h1>
+        </heading>
+        <content>
+            <l3><p class="faint">It is a living document, last update: <em>October 2024</em>. Your contributions are welcome!</p></l3>
+
+            <l2>
+                <h2>Introduction</h2>
+                <hr>
+            </l2>
+            <p>There are so many buzzwords and best practices out there, but let's focus on something more fundamental. What matters is the amount of confusion developers feel when going through the code.</p>
+            <p>Confusion costs time and money. Confusion is caused by high <em>cognitive load</em>. It's not some fancy abstract concept, but rather <strong>a fundamental human constraint</strong>.</p>
+            <l2><p>Since we spend far more time reading and understanding code than writing it, we should constantly ask ourselves whether we are embedding excessive cognitive load into our code.</p></l2>
+
+            <l3>
+                <h2>Cognitive load</h2>
+                <hr>
+            </l3>
+
+            <blockquote><p>Cognitive load is how much a developer needs to think in order to complete a task.</p></blockquote>
+
+            <l2>
+            <p>When reading code, you put things like values of variables, control flow logic and call sequences into your head. The average person can hold roughly four such chunks in working memory. Once the cognitive load reaches this threshold, it becomes much harder to understand things.</p>
+            <p><em></em>Let's say we have been asked to make some fixes to a completely unfamiliar project. We were told that a really smart developer had contributed to it. Lots of cool architectures, fancy libraries and trendy technologies were used. In other words, <strong>the author had created a high cognitive load for us.</strong></em></p>
+            <p><img src="https://github.com/zakirullin/cognitive-load/raw/main/img/cognitiveloadv5.png"></p>
+            <p>We should reduce the cognitive load in our projects as much as possible.</p>
+            </l2>
+
+            <h2>Types of cognitive load</h2>
+            <p><strong>Intrinsic</strong> - caused by the inherent difficulty of a task. It can't be reduced, it's at the very heart of software development.</p>
+
+            <p><strong>Extraneous</strong> - created by the way the information is presented. Caused by factors not directly relevant to the task, such as smart author's quirks. Can be greatly reduced.<l3>We will focus on this type of cognitive load.</l3></p>
+
+            <l3>
+                <figure><img src="https://github.com/zakirullin/cognitive-load/raw/main/img/smartauthorv13paper.png"></figure>
+            </l3>
+
+            <l2>
+            <p></p>Let's jump straight to the concrete practical examples of extraneous cognitive load.</p>
+
+            <p>We will refer to the level cognitive load as follows:<br>
+            <code>🧠</code>: fresh working memory, zero cognitive load<br>
+            <code>🧠++</code>: two facts in our working memory, cognitive load increased<br>
+            <code>🤯</code>: working memory overflow, more than 4 facts<br>
+            </p>
+
+            <blockquote><p>Our brain is much more complex and unexplored, but we can go with this simplistic model.</p></blockquote>
+            </l2>
+
+            <l3>
+            <h2>Complex conditionals</h2>
+            <hr>
+            <p>
+<pre>
+if val > someConstant // 🧠+
+    && (condition2 || condition3)
+    && (condition4 && !condition5) {
+        ...
+    }
+</pre>
+            </p>
+            </l3>
+
+            <l2>
+            <p>Introduce intermediate variables with meaningful names:</p>
+            <p>
+<pre>
+isValid = val > someConstant
+isAllowed = condition2 || condition3
+isSecure = condition4 && !condition5
+// 🧠, we don't need to remember the conditions, there are descriptive variables
+if isValid && isAllowed && isSecure {
+    ...
+}
+</pre>
+            </p>
+            </l2>
+
+
+            <l2>
+            <h2>Nested ifs</h2>
+            <hr>
+<pre>
+if isValid { // 🧠+, okay nested code applies to valid input only
+    if isSecure { // 🧠++, we do stuff for valid and secure input only
+        stuff // 🧠+++
+    }
+}
+</pre>
+
+            <p>Compare it with the early returns:
+<pre>
+if !isValid
+    return
+
+if !isSecure
+    return
+
+// 🧠, we don't really care about earlier returns, if we are here then all good
+stuff // 🧠+
+</pre>
+            </p>
+
+            <p>We can focus on the happy path only, thus freeing our working memory from all sorts of preconditions.</p>
+            </l2>
+
+            <l3>
+            <h2>Inheritance nightmare</h2>
+            <hr>
+            <p>We are asked to change a few things for our admin users: <code>🧠</code></p>
+
+            <p><code>AdminController extends UserController extends GuestController extends BaseController</code><br></p>
+
+            <p>Ohh, part of the functionality is in <code>BaseController</code>, let's have a look: <code>🧠+</code></p>
+            <p>Basic role mechanics got introduced in <code></code>GuestController</code>: <code>🧠++</code></p>
+            <p>Things got partially altered in <code>UserController</code>: <code>🧠+++</code><p>
+            <p>Finally we are here, <code>AdminController</code>, let's code stuff! <code>🧠++++</code></p>
+
+            <p>Oh, wait, there's <code>SuperuserController</code> which extends <code>AdminController</code>. By modifying <code>AdminController</code> we can break things in the inherited class, so let's dive in <code>SuperuserController</code> first: <code>🤯</code></p>
+
+            <p>Prefer composition over inheritance. We won't go into detail - there's plenty of material out there.</p>
+            </l3>
+
+
+            <l3>
+            <h2>Cognitive load in familiar projects</h2>
+            <hr>
+
+            <p>The more mental models there are to learn, the longer it takes for a new developer to deliver value.</p>
+
+            <p>Once you onboard new people on your project, try to measure the amount of confusion they have (pair programming may help). If they're confused for more than ~40 minutes in a row - you've got things to improve in your code.</p>
+            </l3>
+
+            <l2>
+            <h2>Conclusion</h2>
+            <hr>
+            <p>Imagine for a moment that what we inferred in the second chapter isn’t actually true. If that’s the case, then the conclusion we just negated, along with the conclusions in the previous chapter that we had accepted as valid, might not be correct either. <code>🤯</code></p>
+
+            <p>Do you feel it? Not only do you have to jump all over the article to get the meaning (shallow modules!), but the paragraph in general is difficult to understand. We have just created an unnecessary cognitive load in your head. <strong>Do not do this to your colleagues.</strong></p>
+
+            <figure><img src="https://github.com/zakirullin/cognitive-load/raw/main/img/smartauthorv13paper.png"></figure>
+            </l3>
+            </l2>
+
+            <p>We should reduce any cognitive load above and beyond what is intrinsic to the work we do.</p>
+            <hr>
+        </content>
+    </article>
+    <div class="slider-container">
+        <input type="range" id="slider" min="1" max="3" value="1" class="slider">
+        <div class="slider-container-labels">
+            <span>2 min</span>
+            <span>5 min</span>
+            <span>All</span>
+        </div>
+    </div>
+    <script>
+        function updateContentBasedOnHash() {
+            const currentHash = location.hash;
+            const slider = document.getElementById('slider');
+
+            // Set slider and content based on the current hash
+            if (currentHash === '#IDontHaveTime') {
+                slider.value = 1;
+                document.querySelectorAll('l2').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('l3').forEach(el => el.style.display = 'none');
+            } else if (currentHash === '#IHaveSomeTime') {
+                slider.value = 2;
+                document.querySelectorAll('l2').forEach(el => el.style.display = 'inline');
+                document.querySelectorAll('l3').forEach(el => el.style.display = 'none');
+            } else if (currentHash === '#LetMeReadItAll') {
+                slider.value = 3;
+                document.querySelectorAll('l2').forEach(el => el.style.display = 'inline');
+                document.querySelectorAll('l3').forEach(el => el.style.display = 'inline');
+            }
+        }
+
+        window.addEventListener('load', updateContentBasedOnHash);
+        window.addEventListener('hashchange', updateContentBasedOnHash);
+
+        document.getElementById('slider').addEventListener('input', function() {
+            const sliderValue = parseInt(this.value);
+            if (sliderValue === 1) {
+                location.hash = 'IDontHaveTime';
+            } else if (sliderValue === 2) {
+                location.hash = 'IHaveSomeTime';
+            } else if (sliderValue === 3) {
+                location.hash = 'LetMeReadItAll';
+            }
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth' // For smooth scrolling, optional
+            });
+        });
+    </script>
+</main>
+<footer>
+</footer>
+</body>
+</html>

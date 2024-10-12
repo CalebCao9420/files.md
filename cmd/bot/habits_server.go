@@ -28,6 +28,9 @@ import (
 //go:embed templates/index.html
 var html string
 
+//go:embed templates/article.html
+var htmlArticle string
+
 //go:embed templates/favicon.ico
 var favicon string
 
@@ -96,6 +99,14 @@ func setupRouter(router *http.ServeMux, logger *log.Logger) {
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, err := w.Write([]byte(html))
+		if err != nil {
+			logger.Printf("failed to write site response: %v", err)
+		}
+	})
+
+	router.HandleFunc("/article", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, err := w.Write([]byte(htmlArticle))
 		if err != nil {
 			logger.Printf("failed to write site response: %v", err)
 		}
