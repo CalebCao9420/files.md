@@ -2,8 +2,6 @@
 
 # Files.md
 
-[files.md](https://files.md)  
-
 An application for your personal stuff:
 - ✅ Tasks, Checklists
 - 📝 Notes, Files
@@ -11,6 +9,8 @@ An application for your personal stuff:
 - 🍅 Pomodoro
 
 **Everything is stored as plain local `*.md` files.**  
+
+[files.md](https://files.md)  
 
 When we are focused and distracting information comes in, we want to get rid of it as quickly as possible. To do that, just send whatever is distracting you to the bot. Then choose how you want to save it - as a task, a note, or a journal entry. By default, it will be saved as today's task.  
 
