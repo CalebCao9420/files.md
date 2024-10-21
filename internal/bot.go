@@ -335,6 +335,10 @@ func (b *Bot) saveFromRegularMsg(u Update) error {
 	if sanitizedTitle == content {
 		content = ""
 	}
+	// If title is already in the content, remove it
+	if strings.HasPrefix(content, sanitizedTitle) {
+		content = strings.TrimSpace(strings.TrimPrefix(content, sanitizedTitle))
+	}
 
 	filename := fs.Filename(sanitizedTitle)
 	err = b.createOrAdd(fs.DirToday, filename, content)

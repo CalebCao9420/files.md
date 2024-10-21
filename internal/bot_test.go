@@ -127,7 +127,7 @@ func TestAddMultilineTaskToToday(t *testing.T) {
 
 	content, err := bot.fs.Read("today", "New task.md")
 	r.NoError(err)
-	r.Equal("New task\nContent", content)
+	r.Equal("Content", content)
 }
 
 func TestAddTaskWithSpecCharsToToday(t *testing.T) {
@@ -151,7 +151,7 @@ func TestAddTaskWithSpecCharsToToday(t *testing.T) {
 
 	content, err := bot.fs.Read("today", "New task.md")
 	r.NoError(err)
-	r.Equal("New task\nUrl! https://g.com (Also_text] ##header\n-item1\n-item2\n1+1=2", content)
+	r.Equal("Url! https://g.com (Also_text] ##header\n-item1\n-item2\n1+1=2", content)
 }
 
 func TestAddTaskWithOnlyWhitespace(t *testing.T) {
@@ -2575,7 +2575,7 @@ func TestSaveToNewMultilineFileIntegration(t *testing.T) {
 
 	content, err := userFS.Read("", "Text.md")
 	r.NoError(err)
-	r.Equal("Text\nMultiline", content)
+	r.Equal("Multiline", content)
 
 	r.Nil(database.InputExpectation(-1))
 	msgID, ok := database.LastKeyboardMsgID(-1)
