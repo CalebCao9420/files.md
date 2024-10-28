@@ -79,7 +79,7 @@ func (b *Bot) showQuickBtnsSettings(params []string) error {
 		kb.AddRow(tg.NewBtn(name, disabledCmd))
 	}
 
-	kb.AddRow(tg.NewBtn(i18n.StrBack, tg.NewCmd(consts.CmdShowSettings, nil)))
+	kb.AddRow(tg.NewBtn(i18n.StrToday, tg.NewCmd(consts.CmdShowToday, nil)))
 
 	text := fmt.Sprintf("Configure quick buttons (%s = add to quick buttons, %s = to remove from quick buttons):", addBtn, delBtn)
 	err = b.showHTML(text, &kb)
@@ -190,7 +190,7 @@ func (b *Bot) showMoveToBtnsSettings(params []string) error {
 		kb.AddRow(tg.NewBtn(name, disabledCmd))
 	}
 
-	kb.AddRow(tg.NewBtn(i18n.StrBack, tg.NewCmd(consts.CmdShowSettings, nil)))
+	kb.AddRow(tg.NewBtn(i18n.StrToday, tg.NewCmd(consts.CmdShowToday, nil)))
 
 	text := fmt.Sprintf("Configure quick panel (%s = add to panel, %s = to remove):", addBtn, delBtn)
 	err = b.showHTML(text, &kb)

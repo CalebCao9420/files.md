@@ -872,7 +872,7 @@ var (
 
 var (
 	delimiter = tg.NewBtn("-", tg.NewCmd("nothing", nil))
-	backBtn   = tg.NewBtn("⬅️ Back", tg.NewCmd("settings", nil))
+	homeBtn   = tg.NewBtn("🏠 Today", tg.NewCmd("today", nil))
 )
 
 var (
@@ -904,7 +904,7 @@ func TestConfigureQP_Empty_Default(t *testing.T) {
 			btnShopChecklist,
 			btnSchedule,
 			btnHabits,
-			backBtn,
+			homeBtn,
 		},
 	}, t)
 }
@@ -925,7 +925,7 @@ func TestConfigureQP_Empty_AddFiles(t *testing.T) {
 			btnShopChecklist,
 			btnSchedule,
 			btnHabits,
-			backBtn,
+			homeBtn,
 		},
 	}, t)
 }
@@ -946,7 +946,7 @@ func TestConfigureQP_Doc_AddCheckList(t *testing.T) {
 			btnShopChecklist,
 			btnSchedule,
 			btnHabits,
-			backBtn,
+			homeBtn,
 		},
 	}, t)
 }
@@ -967,7 +967,7 @@ func TestConfigureQP_DocChecklists_AddPostpone(t *testing.T) {
 			btnShopChecklist,
 			btnSchedule,
 			btnHabits,
-			backBtn,
+			homeBtn,
 		},
 	}, t)
 }
@@ -988,7 +988,7 @@ func TestConfigureQP_DocChecklistsPostpone_Show(t *testing.T) {
 			btnShopChecklist,
 			btnSchedule,
 			btnHabits,
-			backBtn,
+			homeBtn,
 		},
 	}, t)
 }
@@ -1009,7 +1009,7 @@ func TestConfigureQP_DocChecklistsPostpone_DelChecklists(t *testing.T) {
 			btnShopChecklist,
 			btnSchedule,
 			btnHabits,
-			backBtn,
+			homeBtn,
 		},
 	}, t)
 }
@@ -1030,7 +1030,7 @@ func TestConfigureQP_DocPostpone_DelDoc(t *testing.T) {
 			btnShopChecklist,
 			btnSchedule,
 			btnHabits,
-			backBtn,
+			homeBtn,
 		},
 	}, t)
 }
@@ -1051,7 +1051,7 @@ func TestConfigureQP_Postpone_DelPostpone(t *testing.T) {
 			btnShopChecklist,
 			btnSchedule,
 			btnHabits,
-			backBtn,
+			homeBtn,
 		},
 	}, t)
 }
