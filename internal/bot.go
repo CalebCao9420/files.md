@@ -1414,7 +1414,7 @@ func (b *Bot) moveToExistingFile(params []string) error {
 	}
 	content = strings.TrimSpace(content)
 
-	filenameHasContent := strings.HasPrefix(strings.ToLower(content), strings.ToLower(fs.Title(fromFilename)))
+	filenameHasContent := !strings.HasPrefix(strings.ToLower(content), strings.ToLower(fs.Title(fromFilename)))
 	if len(content) == 0 {
 		content = fs.Title(fromFilename)
 	} else if filenameHasContent {
@@ -1467,7 +1467,7 @@ func (b *Bot) moveToExistingNote(params []string) error {
 		return fmt.Errorf("move to existing note: can't read file %s: %w", fromFilename, err)
 	}
 
-	filenameHasContent := strings.HasPrefix(strings.ToLower(content), strings.ToLower(fs.Title(fromFilename)))
+	filenameHasContent := !strings.HasPrefix(strings.ToLower(content), strings.ToLower(fs.Title(fromFilename)))
 	if len(content) == 0 {
 		content = fs.Title(fromFilename)
 	} else if filenameHasContent {
