@@ -43,7 +43,7 @@ const (
 	maxBtns                = 50
 	maxBtnsInChecklist     = 5 // For _read_ and _watch_ checklists, so we're less likely to be overwhelmed :)
 	maxBtnsInMoveTo        = 6
-	maxInlineResults       = 15
+	maxInlineResults       = 10
 	maxMsgLength           = 4096 // In UTF-8 characters (runes), skin-tone emojis count as 2
 	maxMsgsToSendAtOnce    = 5    // For lengthy messages
 	imgWidth               = 400  // We insert images into *.md files with the specified width
@@ -649,10 +649,12 @@ func (b *Bot) showHTML(validHTML string, kb *tg.Keyboard) error {
 // Read "Markdown to HTML conversion" section in readme's ADRs
 // Chat allows 1-4096 characters AFTER entities parsing,
 // meaning we can have 4096 plain chars + any amount of tags.
-func (b *Bot) showMD(probablyInvalidMD string) error {
+func (b *Bot) showMD(probablyInvalidMD string, kb *tg.Keyboard) error {
 	probablyInvalidMD, _, links := txt.ExtractTextImgsLinks(probablyInvalidMD)
 
-	kb := tg.NewKeyboard(nil)
+	if kb == nil {
+		kb = tg.NewKeyboard(nil)
+	}
 	for label, link := range links {
 		dir := fs.DirRoot
 		link = strings.TrimSpace(link)
@@ -1175,9 +1177,6 @@ func (b *Bot) showMultilineTask(params []string) error {
 	if err != nil {
 		return fmt.Errorf("show task: %w", err)
 	}
-	// TODO Show MD?
-	content = fmt.Sprintf("**%s**\n%s", fs.Title(filename), content)
-	content = txt.MarkdownToHTML(content)
 
 	var moveToLaterBtn tg.Btn
 	btnLabel := i18n.StrMoveToLaterLong
@@ -1201,7 +1200,8 @@ func (b *Bot) showMultilineTask(params []string) error {
 		),
 	})
 
-	err = b.showHTML(content, kb)
+	md := fmt.Sprintf("**%s**\n%s", fs.Title(filename), content)
+	err = b.showMD(md, kb)
 	if err != nil {
 		return fmt.Errorf("show task: %w", err)
 	}
@@ -1235,7 +1235,7 @@ func (b *Bot) showFile(params []string) error {
 	}
 
 	md := fmt.Sprintf("**%s**\n%s", fs.Title(filename), content)
-	err = b.showMD(md)
+	err = b.showMD(md, nil)
 	if err != nil {
 		return fmt.Errorf("show file: %w", err)
 	}

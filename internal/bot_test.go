@@ -1167,7 +1167,7 @@ func TestShowMDLongMessage(t *testing.T) {
 	tgram := tg.NewFakeTG()
 
 	bot := NewBot(-1, tgram, userFS, db.NewFakeDB(), fakeConfig())
-	err = bot.showMD(strings.Repeat("a", 4096) + "b")
+	err = bot.showMD(strings.Repeat("a", 4096)+"b", nil)
 	r.NoError(err)
 
 	r.Len(tgram.SentTexts, 2)
@@ -1186,7 +1186,7 @@ func TestShowMDLongMessageWithColoredEmojis(t *testing.T) {
 	tgram := tg.NewFakeTG()
 
 	bot := NewBot(-1, tgram, userFS, db.NewFakeDB(), fakeConfig())
-	err = bot.showMD(strings.Repeat("a", 4095) + "🟢")
+	err = bot.showMD(strings.Repeat("a", 4095)+"🟢", nil)
 	r.NoError(err)
 
 	r.Len(tgram.SentTexts, 1)
@@ -1201,7 +1201,7 @@ func TestShowMDLongMessageWithColoredEmoji(t *testing.T) {
 	tgram := tg.NewFakeTG()
 
 	bot := NewBot(-1, tgram, userFS, db.NewFakeDB(), fakeConfig())
-	err = bot.showMD(strings.Repeat("a", 4095) + "⚪️")
+	err = bot.showMD(strings.Repeat("a", 4095)+"⚪️", nil)
 	r.NoError(err)
 
 	r.Len(tgram.SentTexts, 2)
@@ -1216,7 +1216,7 @@ func TestShowMDLongMessageSplitByNewLine(t *testing.T) {
 	tgram := tg.NewFakeTG()
 
 	bot := NewBot(-1, tgram, userFS, db.NewFakeDB(), fakeConfig())
-	err = bot.showMD(strings.Repeat("a", 4094) + "\nabc")
+	err = bot.showMD(strings.Repeat("a", 4094)+"\nabc", nil)
 	r.NoError(err)
 
 	r.Len(tgram.SentTexts, 2)
@@ -1232,7 +1232,7 @@ func TestShowMDLongMessageAttachKeyboardToTheLast(t *testing.T) {
 	tgram := tg.NewFakeTG()
 
 	bot := NewBot(-1, tgram, userFS, db.NewFakeDB(), fakeConfig())
-	err = bot.showMD(strings.Repeat("a", 4094) + "\nabc")
+	err = bot.showMD(strings.Repeat("a", 4094)+"\nabc", nil)
 	r.NoError(err)
 
 	r.Len(tgram.SentTexts, 2)
