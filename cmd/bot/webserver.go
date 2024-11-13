@@ -135,6 +135,7 @@ func setupRouter(router *http.ServeMux, logger *log.Logger) {
 			}
 
 			http.FileServer(http.Dir("./editor")).ServeHTTP(w, r)
+			return
 		}
 
 		// Serving the site
