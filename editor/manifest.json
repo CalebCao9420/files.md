@@ -1,7 +1,7 @@
 {
-  "name": "Files.md",
+  "name": "Your local files",
   "short_name": "Files.md",
-  "start_url": "/app",
+  "start_url": "https://app.files.md",
   "display": "standalone",
   "background_color": "#FFFCF0",
   "theme_color": "#F2F0E6",
