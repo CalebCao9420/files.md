@@ -41,7 +41,7 @@ var img string
 func habitsServer(habitsHost, certDir, logFilename string) {
 	autocertManager := autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
-		HostPolicy: autocert.HostWhitelist(habitsHost),
+		HostPolicy: autocert.HostWhitelist(habitsHost, "app.files.md"),
 		Cache:      autocert.DirCache(certDir),
 	}
 
@@ -102,6 +102,11 @@ func setupRouter(router *http.ServeMux, logger *log.Logger) {
 	})
 
 	router.HandleFunc("/app/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/app/" {
+			http.ServeFile(w, r, "./editor/editor.html")
+			return
+		}
+
 		http.StripPrefix("/app/", http.FileServer(http.Dir("./editor"))).ServeHTTP(w, r)
 	})
 
