@@ -112,11 +112,6 @@
                 this.debounce = 0;
             }
 
-            var identStart = this.startPos;
-            if(this.data) {
-                identStart = this.data.from;
-            }
-
             var pos = this.cm.getCursor(), line = this.cm.getLine(pos.line);
             if (pos.line != this.startPos.line || line.length - pos.ch != this.startLen - this.startPos.ch ||
                 this.cm.somethingSelected() ||
@@ -125,7 +120,9 @@
             } else {
                 var self = this;
                 this.debounce = requestAnimationFrame(function() {self.update();});
-                if (this.widget) this.widget.disable();
+                if (this.widget) {
+                    this.widget.disable();
+                }
             }
         },
 
@@ -133,7 +130,9 @@
             if (this.tick == null) return
             var self = this, myTick = ++this.tick
             fetchHints(this.options.hint, this.cm, this.options, function(data) {
-                if (self.tick == myTick) self.finishUpdate(data, first)
+                if (self.tick == myTick) {
+                    self.finishUpdate(data, first);
+                }
             })
         },
 
@@ -488,24 +487,25 @@
         resolve: resolveAutoHints
     });
 
-    CodeMirror.registerHelper("hint", "fromList", function(cm, options) {
-        var cur = cm.getCursor(), token = cm.getTokenAt(cur)
-        var term, from = CodeMirror.Pos(cur.line, token.start), to = cur
-        if (token.start < cur.ch && /\w/.test(token.string.charAt(cur.ch - token.start - 1))) {
-            term = token.string.substr(0, cur.ch - token.start)
-        } else {
-            term = ""
-            from = cur
-        }
-        var found = [];
-        for (var i = 0; i < options.words.length; i++) {
-            var word = options.words[i];
-            if (word.slice(0, term.length) == term)
-                found.push(word);
-        }
-
-        if (found.length) return {list: found, from: from, to: to};
-    });
+    // NOT USED?
+    // CodeMirror.registerHelper("hint", "fromList", function(cm, options) {
+    //     var cur = cm.getCursor(), token = cm.getTokenAt(cur)
+    //     var term, from = CodeMirror.Pos(cur.line, token.start), to = cur
+    //     if (token.start < cur.ch && /\w/.test(token.string.charAt(cur.ch - token.start - 1))) {
+    //         term = token.string.substr(0, cur.ch - token.start)
+    //     } else {
+    //         term = ""
+    //         from = cur
+    //     }
+    //     var found = [];
+    //     for (var i = 0; i < options.words.length; i++) {
+    //         var word = options.words[i];
+    //         if (word.slice(0, term.length) == term)
+    //             found.push(word);
+    //     }
+    //
+    //     if (found.length) return {list: found, from: from, to: to};
+    // });
 
     CodeMirror.commands.autocomplete = CodeMirror.showHint;
 
@@ -513,7 +513,7 @@
         hint: CodeMirror.hint.auto,
         completeSingle: true,
         alignWithWord: true,
-        closeCharacters: /[\s()\[\]{};:>,]/,
+        closeCharacters: /[()\[\]{};:>,]/,
         closeOnPick: true,
         closeOnUnfocus: true,
         updateOnCursorActivity: true,

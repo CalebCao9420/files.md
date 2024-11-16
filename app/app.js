@@ -14,7 +14,9 @@ function initHyperMD(el) {
         hintOptions: {
             hint: CompleteEmoji.createHintFunc(),
             closeCharacters: /$^/,
-            closeOnUnfocus: false
+            closeOnUnfocus: false,
+            completeSingle: false,
+            alignWithWord: false
         },
         hmdFoldEmoji: {
             myEmoji: createAutocompleteDict
@@ -69,7 +71,6 @@ function initHyperMD(el) {
         // Save on user input only
         if (changeObj.origin && changeObj.origin !== "setValue") {
             await saveFile();
-            console.log(`Auto-saved ${editor.currentFile}`);
         }
     });
     editor.setOption("viewportMargin", Infinity);
