@@ -32,6 +32,9 @@ var index string
 //go:embed templates/notes.html
 var notes string
 
+//go:embed templates/tasks.html
+var tasks string
+
 //go:embed templates/favicon.ico
 var favicon string
 
@@ -130,6 +133,14 @@ func setupRouter(router *http.ServeMux, logger *log.Logger) {
 	router.HandleFunc("/notes", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, err := w.Write([]byte(notes))
+		if err != nil {
+			logger.Printf("failed to write site response: %v", err)
+		}
+	})
+
+	router.HandleFunc("/tasks", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, err := w.Write([]byte(tasks))
 		if err != nil {
 			logger.Printf("failed to write site response: %v", err)
 		}
