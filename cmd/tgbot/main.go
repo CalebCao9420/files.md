@@ -109,9 +109,15 @@ func main() {
 		}
 	}(telegram)
 
+	// TODO apphost?
 	// Launch habits server if needed
 	if config.BotCfg.HabitsHost != "" {
-		go webserver.Serve(config.BotCfg.HabitsHost, config.BotCfg.ServerCertDir, config.BotCfg.ServerLogFile)
+		go webserver.Serve(
+			config.BotCfg.HabitsHost,
+			config.BotCfg.AppHost,
+			config.BotCfg.ServerCertDir,
+			config.BotCfg.ServerLogFile,
+		)
 	}
 
 	infolog := slog.New(slog.NewTextHandler(os.Stdout, nil))

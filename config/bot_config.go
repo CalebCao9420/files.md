@@ -11,6 +11,7 @@ type BotConfig struct {
 	BotAPIToken    string `required:"true" envconfig:"BOT_API_TOKEN"`
 	ConfigFilename string `default:"config.json"`
 	HabitsHost     string `default:"" envconfig:"HABITS_HOST"`
+	AppHost        string `default:"" envconfig:"APP_HOST"`
 	ServerCertDir  string `default:"/tmp" envconfig:"SERVER_CERT_DIR"`
 	ServerLogFile  string `default:"/tmp/server.log" envconfig:"SERVER_LOG_FILE"`
 }

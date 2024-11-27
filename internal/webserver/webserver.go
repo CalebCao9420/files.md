@@ -26,32 +26,11 @@ import (
 	"zakirullin/stuffbot/pkg/txt"
 )
 
-//go:embed templates/index.html
-var index string
-
-//go:embed templates/notes.html
-var notes string
-
-//go:embed templates/tasks.html
-var tasks string
-
-//go:embed templates/favicon.ico
-var favicon string
-
-//go:embed templates/styles.css
-var styles string
-
-//go:embed templates/chat.css
-var chatStyles string
-
-//go:embed templates/tomassanchez.webp
-var img string
-
 // TODO release graceful shutdown etc
-func Serve(habitsHost, certDir, logFilename string) {
+func Serve(habitsHost, appHost, certDir, logFilename string) {
 	autocertManager := autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
-		HostPolicy: autocert.HostWhitelist(habitsHost, "www.files.md", "app.files.md"),
+		HostPolicy: autocert.HostWhitelist(habitsHost, appHost),
 		Cache:      autocert.DirCache(certDir),
 	}
 
@@ -110,7 +89,7 @@ func setupRouter(router *http.ServeMux, logger *log.Logger) {
 	// TODO add hashing or secrets
 	// TODO before release habits_v2 => habits
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		// Serving editor app
+		// Serving the PWA app
 		host := r.Host
 		if strings.HasPrefix(host, "app.") {
 			if r.URL.Path == "" || r.URL.Path == "/" {
@@ -122,58 +101,7 @@ func setupRouter(router *http.ServeMux, logger *log.Logger) {
 			return
 		}
 
-		// Serving the site
-		w.WriteHeader(http.StatusOK)
-		_, err := w.Write([]byte(index))
-		if err != nil {
-			logger.Printf("failed to write site response: %v", err)
-		}
-	})
-
-	router.HandleFunc("/notes", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		_, err := w.Write([]byte(notes))
-		if err != nil {
-			logger.Printf("failed to write site response: %v", err)
-		}
-	})
-
-	router.HandleFunc("/tasks", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		_, err := w.Write([]byte(tasks))
-		if err != nil {
-			logger.Printf("failed to write site response: %v", err)
-		}
-	})
-
-	router.HandleFunc("/article", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "https://minds.md/zakirullin/cognitive", http.StatusFound)
-	})
-
-	router.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "image/x-icon")
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(favicon))
-	})
-
-	router.HandleFunc("/tomassanchez.webp", func(w http.ResponseWriter, r *http.Request) {
-		oneMonth := 30 * 24 * time.Hour
-		w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d", int(oneMonth.Seconds())))
-		w.Header().Set("Content-Type", "image/webp")
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(img))
-	})
-
-	router.HandleFunc("/styles.css", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/css")
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(styles))
-	})
-
-	router.HandleFunc("/chat.css", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/css")
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(chatStyles))
+		http.NotFound(w, r)
 	})
 
 	router.HandleFunc("GET /habits_v2/{userID}", func(w http.ResponseWriter, r *http.Request) {
