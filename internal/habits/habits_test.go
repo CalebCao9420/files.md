@@ -110,8 +110,8 @@ func TestLastWeekHabitsWhenWeekFallsIntoTwoMonths(t *testing.T) {
 	err = userFS.CreateDirsIfNotExist()
 	r.NoError(err)
 	_ = userFS.Write(fs.DirInsights, "1970 Habits.md", twoMonthsMD)
-	_ = userFS.Write(fs.DirHabits, "Habit", "")
-	_ = userFS.Write(fs.DirHabits, "Mood", "")
+	_ = userFS.Write(fs.DirHabits, "Habit.md", "")
+	_ = userFS.Write(fs.DirHabits, "Mood.md", "")
 
 	savedNow := now
 	defer func() {
@@ -136,8 +136,8 @@ func TestLastWeekHabitsWhenWeekFallsIntoTwoMonthsOnlyFirstDay(t *testing.T) {
 	err = userFS.CreateDirsIfNotExist()
 	r.NoError(err)
 	_ = userFS.Write(fs.DirInsights, "2024 Habits.md", twoMonthsOnlyFirstDayMD)
-	_ = userFS.Write(fs.DirHabits, "2 minute morning workout", "")
-	_ = userFS.Write(fs.DirHabits, "Ate consciously", "")
+	_ = userFS.Write(fs.DirHabits, "2 minute morning workout.md", "")
+	_ = userFS.Write(fs.DirHabits, "Ate consciously.md", "")
 
 	savedNow := now
 	defer func() {
