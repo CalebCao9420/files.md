@@ -26,7 +26,7 @@ function initHyperMD(el) {
 
     editor.addKeyMap({
         'Cmd-Y': function (cm) {
-            cm.replaceSelection('✅');
+            cm.replaceSelection('✅ ');
             cm.focus();
         }
     });
@@ -389,6 +389,7 @@ async function getSavedDirectoryHandle() {
 }
 
 async function init(el) {
+    document.title = 'files.md';
     initHyperMD(el);
     buildSidebar();
     const savedDirectoryHandle = await getSavedDirectoryHandle();
