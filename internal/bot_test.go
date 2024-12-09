@@ -3340,6 +3340,14 @@ func TestExtractTitleAndContent_TitleNeedsSanitization(t *testing.T) {
 func TestMoveToExistingNote_Success(t *testing.T) {
 	r := require.New(t)
 
+	savedNow := now
+	defer func() {
+		now = savedNow
+	}()
+	now = func() time.Time {
+		return time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC)
+	}
+
 	userFS, err := fs.NewFS("/", afero.NewMemMapFs())
 	r.NoError(err)
 
@@ -3365,7 +3373,7 @@ func TestMoveToExistingNote_Success(t *testing.T) {
 
 	content, err := userFS.Read("notes", "ExistingNote.md")
 	r.NoError(err)
-	r.Equal("#### 5 December, Thursday\nTask content\nExisting content", content)
+	r.Equal("#### 1 January, Thursday\nTask content\nExisting content", content)
 
 	_, err = userFS.Read("today", "Task.md")
 	r.Error(err)
