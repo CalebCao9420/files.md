@@ -3418,3 +3418,73 @@ func TestMoveToExistingNote_InvalidHash(t *testing.T) {
 	r.Error(err)
 	r.Contains(err.Error(), "move to exsiting note")
 }
+
+func FuzzSaveFromTextMsg(f *testing.F) {
+	seedInputs := []string{
+		"Normal task",             // Typical input
+		"Special char /\\:*?|<>",  // Special characters in filename
+		"Emoji 😃🚀",                // Unicode input
+		strings.Repeat("a", 5000), // Very long input
+	}
+	for _, input := range seedInputs {
+		f.Add(input)
+	}
+	f.Add(".")
+	f.Add("..")
+	f.Add("/today/..md")
+	f.Add("/valid/path")
+
+	f.Fuzz(func(t *testing.T, input string) {
+		if len(strings.TrimSpace(input)) == 0 {
+			return
+		}
+
+		r := require.New(t)
+
+		userFS, err := fs.NewFS("/", afero.NewMemMapFs())
+		_ = userFS.CreateDirsIfNotExist()
+		r.NoError(err)
+
+		tgram := tg.NewFakeTG()
+
+		bot := NewBot(-1, tgram, userFS, db.NewFakeDB(), fakeConfig())
+		err = bot.Answer(tg.NewUpd(-1, input))
+		if err != nil {
+			if strings.Contains(err.Error(), "unsafe path") &&
+				(input == "." || strings.HasPrefix(input, "..")) {
+				t.Logf("Expected error for unsafe path %q: %v", input, err)
+				return
+			}
+
+			t.Errorf("Unexpected error for input %q: %v", input, err)
+			return
+		}
+
+		tasks, err := bot.fs.FilesAndDirs("today")
+		r.NoError(err)
+
+		if input == "" {
+			r.Len(tasks, 0)
+			return
+		}
+		r.Len(tasks, 1)
+		if len(input) > 100 {
+			input = txt.Substr(input, 0, 100) + "..."
+		}
+		sanitizedFilename := fs.Filename(fs.SanitizeFilename(input))
+		r.Equal(sanitizedFilename, tasks[0].Name)
+
+		_, err = bot.fs.Read("today", sanitizedFilename)
+		if err != nil {
+			if strings.Contains(err.Error(), "unsafe path") &&
+				(input == "." || strings.HasPrefix(input, "..")) {
+				t.Logf("Expected error for unsafe path %q: %v", input, err)
+				return
+			}
+
+			t.Errorf("Unexpected error for input %q: %v", input, err)
+			return
+		}
+		//r.Equal(input, content)
+	})
+}
