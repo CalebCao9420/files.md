@@ -2308,14 +2308,14 @@ func (b *Bot) addToFile(dir, filename, content string) error {
 func (b *Bot) showHelp(_ []string) error {
 	kb := tg.NewKeyboard([]tg.Row{tg.NewBtn(i18n.StrToday, tg.NewCmd(consts.CmdShowToday, nil))})
 
-	return b.showHTML("Not yet implemented 🏗! Wanna contribute some code?\n\nhttps://github.com/zakirullin/files.md", kb)
+	return b.showHTML("Not yet implemented 🏗!", kb)
 }
 
 // TODO
 func (b *Bot) download(_ []string) error {
 	kb := tg.NewKeyboard([]tg.Row{tg.NewBtn(i18n.StrToday, tg.NewCmd(consts.CmdShowToday, nil))})
 
-	return b.showHTML("Not yet implemented 🏗! Wanna contribute some code?\n\nhttps://github.com/zakirullin/files.md", kb)
+	return b.showHTML("Not yet implemented 🏗!", kb)
 }
 
 func (b *Bot) tasksOnlyMode(_ []string) error {
