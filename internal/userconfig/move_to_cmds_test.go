@@ -18,8 +18,9 @@ const defaultTestCfgWithNewMoveCmd = `{
     "pomodoroDurationInMinutes": 50,
     "schedules": [],
     "quickCommands": [],
-    "allowTwoEmojisInButton": false,
-    "mode": "tasks"
+    "twoEmojisEnabled": false,
+    "mode": "tasks",
+    "quickHabitsEnabled": false
 }`
 
 func TestAddAndDelMoveCmd(t *testing.T) {

@@ -16,8 +16,9 @@ const defaultTestCfg = `{
     "pomodoroDurationInMinutes": 50,
     "schedules": [],
     "quickCommands": [],
-    "allowTwoEmojisInButton": false,
-    "mode": "tasks"
+    "twoEmojisEnabled": false,
+    "mode": "tasks",
+    "quickHabitsEnabled": false
 }`
 
 const timezoneTestCfg = `{
