@@ -263,10 +263,6 @@ a:hover {
     padding-left: 0 !important;
 }
 
-.cm-s-hypermd-light pre.HyperMD-list-line span.cm-formatting-list {
-    margin-left: 35px !important;
-}
-
 #welcome {
     position: absolute;
     bottom: 0;

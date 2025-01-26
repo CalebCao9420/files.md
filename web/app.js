@@ -53,29 +53,21 @@ async function init(el) {
 
     files = await loadFiles(savedDirectoryHandle);
     changesPollingInterval = setInterval(async function() {
-        // console.time("loadFiles Execution Time");
-        let newFiles = await loadFiles(savedDirectoryHandle);
-        // console.timeEnd("loadFiles Execution Time");
-
         // Check if current file has been modified
         let dir = editor.currentDir;
         let file = editor.currentFile;
         // TODO handle removed file cases etc
-        const updatedFile = await newFiles[dir]?.[file].handle.getFile();
+        const updatedFile = await files[dir]?.[file].handle.getFile();
         let newContent = await updatedFile.text();
         // TODO dirty hack, we replace links on the fly
         let currentContent = getCurrentContent();
         if (saveQueue.length === 0) {
             newContent = newContent.replace(/\[\[(.+?)\|.*?\]\]/g, '[[$1]]');
             if (norm(currentContent) !== norm(newContent)) {
-                console.log(stringToUnicodePoints(currentContent));
-                console.log(stringToUnicodePoints(newContent));
                 console.log("'" + currentContent + "',", "'" + newContent + "'", "File was modified, reloading...");
                 await showFile(dir, file, false);
             }
         }
-
-        files = newFiles;
     }, 3000)
     buildSidebar();
     await showRandomFile();
@@ -702,4 +694,11 @@ document.addEventListener('mousedown', (event) => {
         !goToFile.contains(event.target)) {
         closeSearchModal();
     }
+});
+
+// Reload files once the app gains focus
+window.addEventListener("focus", async () => {
+    const savedDirectoryHandle = await getSavedDirectoryHandle();
+    files = await loadFiles(savedDirectoryHandle);
+    console.log("files loaded");
 });
