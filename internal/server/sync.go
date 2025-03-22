@@ -18,30 +18,31 @@ const (
 	AuthToken  = "your-really-secret-token" // Replace with your actual token or get from environment
 )
 
-// FileInfo represents metadata about a file
+// FileInfo represents metadata about a file with Unix timestamp
 type FileInfo struct {
-	Path         string    `json:"path"`
-	LastModified time.Time `json:"last_modified"`
-	IsDirectory  bool      `json:"is_directory"`
-	Content      string    `json:"content,omitempty"` // Only filled for sync requests
+	Path         string `json:"path"`
+	LastModified int64  `json:"last_modified"` // Unix timestamp
+	IsDirectory  bool   `json:"is_directory"`
+	Content      string `json:"content,omitempty"` // Only filled for sync requests
 }
 
-// SyncRequest represents the client's current state
+// SyncRequest represents the client's current state with Unix timestamps
 type SyncRequest struct {
-	Timestamps map[string]time.Time `json:"timestamps"` // Map of paths to last modified times
+	Timestamps map[string]int64 `json:"timestamps"` // Map of paths to last modified times in Unix format
 }
 
-// SyncResponse is the structure returned when syncing
+// SyncResponse is the structure returned when syncing with Unix timestamps
 type SyncResponse struct {
-	Files      []FileInfo           `json:"files"`      // Files with content that need syncing
-	Timestamps map[string]time.Time `json:"timestamps"` // Current server timestamps
-	ServerTime time.Time            `json:"server_time"`
+	Files      []FileInfo       `json:"files"`       // Files with content that need syncing
+	Timestamps map[string]int64 `json:"timestamps"`  // Current server timestamps in Unix format
+	ServerTime int64            `json:"server_time"` // Current server time in Unix format
 }
 
 // getDirectoryTimestamps recursively scans a directory and returns the latest modification time
-// for each directory and file
-func getDirectoryTimestamps(rootPath string) (map[string]time.Time, error) {
-	timestamps := make(map[string]time.Time)
+// for directories only (including root directory) as Unix timestamps
+func getDirectoryTimestamps(rootPath string) (map[string]int64, error) {
+	timestamps := make(map[string]int64)
+	timeObjects := make(map[string]time.Time) // Used for comparing times
 
 	// Resolve the symlink if it exists
 	realPath, err := filepath.EvalSymlinks(rootPath)
@@ -58,11 +59,6 @@ func getDirectoryTimestamps(rootPath string) (map[string]time.Time, error) {
 			return nil // Skip files with errors
 		}
 
-		// Skip non-markdown files unless they're directories
-		if !info.IsDir() && !strings.HasSuffix(strings.ToLower(path), ".md") {
-			return nil
-		}
-
 		// Get the relative path
 		relPath, err := filepath.Rel(realPath, path)
 		if err != nil {
@@ -74,22 +70,29 @@ func getDirectoryTimestamps(rootPath string) (map[string]time.Time, error) {
 			relPath = ""
 		}
 
-		// Add this file/directory's timestamp
-		timestamps[relPath] = info.ModTime()
-
-		// If it's a directory, we'll also track it for later updates based on content
+		// For directories, track their timestamp
 		if info.IsDir() {
+			modTime := info.ModTime()
+			timeObjects[relPath] = modTime
+			timestamps[relPath] = modTime.Unix()
 			return nil
 		}
 
-		// For files, update the parent directory's timestamp if needed
+		// Skip non-markdown files for file processing
+		if !strings.HasSuffix(strings.ToLower(path), ".md") {
+			return nil
+		}
+
+		// For files, only update the parent directory's timestamp if needed
 		dirPath := filepath.Dir(relPath)
 		if dirPath == "." {
 			dirPath = ""
 		}
 
-		if dirTime, exists := timestamps[dirPath]; !exists || info.ModTime().After(dirTime) {
-			timestamps[dirPath] = info.ModTime()
+		modTime := info.ModTime()
+		if dirTime, exists := timeObjects[dirPath]; !exists || modTime.After(dirTime) {
+			timeObjects[dirPath] = modTime
+			timestamps[dirPath] = modTime.Unix()
 		}
 
 		return nil
@@ -125,7 +128,7 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// HandleGetTimestamps handles the endpoint for getting current timestamps
+// Timestamps handles the endpoint for getting current timestamps
 func Timestamps(w http.ResponseWriter, r *http.Request) {
 	// Auth check is now handled by middleware
 	// Get the latest timestamps for all directories and files
@@ -138,11 +141,11 @@ func Timestamps(w http.ResponseWriter, r *http.Request) {
 
 	// Return the timestamps
 	response := struct {
-		Timestamps map[string]time.Time `json:"timestamps"`
-		ServerTime time.Time            `json:"server_time"`
+		Timestamps map[string]int64 `json:"timestamps"`
+		ServerTime int64            `json:"server_time"`
 	}{
 		Timestamps: timestamps,
-		ServerTime: time.Now(),
+		ServerTime: time.Now().Unix(),
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -151,7 +154,7 @@ func Timestamps(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// HandleSync processes a bulk sync request
+// Sync processes a bulk sync request
 func Sync(w http.ResponseWriter, r *http.Request) {
 	// Auth check is now handled by middleware
 
@@ -190,12 +193,49 @@ func Sync(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get current server timestamps
-	serverTimestamps, err := getDirectoryTimestamps(StorageDir)
+	serverTimestampsUnix, err := getDirectoryTimestamps(StorageDir)
 	if err != nil {
 		log.Printf("Error getting server timestamps: %v", err)
 		http.Error(w, fmt.Sprintf("Failed to get timestamps: %v", err), http.StatusInternalServerError)
 		return
 	}
+
+	// Convert Unix timestamps back to time.Time for internal processing
+	serverTimestampsTime := make(map[string]time.Time)
+
+	// Only directory timestamps are in the map, but we need to check file timestamps
+	// when processing uploads, so we'll build a more complete map by scanning
+	dirTimestamps := make(map[string]time.Time)
+
+	// First convert the directory timestamps we have
+	for path, unixTime := range serverTimestampsUnix {
+		timeObj := time.Unix(unixTime, 0)
+		serverTimestampsTime[path] = timeObj
+		dirTimestamps[path] = timeObj
+	}
+
+	// Now scan for individual files to get their timestamps
+	realStorageDir, _ := filepath.EvalSymlinks(StorageDir)
+	filepath.Walk(realStorageDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil || info.IsDir() {
+			return nil
+		}
+
+		// Only process markdown files
+		if !strings.HasSuffix(strings.ToLower(path), ".md") {
+			return nil
+		}
+
+		relPath, err := filepath.Rel(realStorageDir, path)
+		if err != nil {
+			return nil
+		}
+
+		// Store the file's timestamp for conflict detection
+		serverTimestampsTime[relPath] = info.ModTime()
+
+		return nil
+	})
 
 	// Process any uploaded files if this is a multipart form
 	if r.MultipartForm != nil {
@@ -226,8 +266,8 @@ func Sync(w http.ResponseWriter, r *http.Request) {
 
 			// Get the client's base timestamp for this file
 			clientTimestamp := time.Time{}
-			if clientTime, exists := request.Timestamps[fileName]; exists {
-				clientTimestamp = clientTime
+			if clientUnixTime, exists := request.Timestamps[fileName]; exists {
+				clientTimestamp = time.Unix(clientUnixTime, 0)
 			}
 
 			// Check if we need to handle a conflict
@@ -242,7 +282,7 @@ func Sync(w http.ResponseWriter, r *http.Request) {
 
 			// Check if the file exists on the server and has been modified
 			localPath := filepath.Join(realStorageDir, fileName)
-			if serverTime, exists := serverTimestamps[fileName]; exists {
+			if serverTime, exists := serverTimestampsTime[fileName]; exists {
 				if !clientTimestamp.IsZero() && serverTime.After(clientTimestamp) {
 					// File exists and has been modified since the client's version
 					needsMerge = true
@@ -277,16 +317,17 @@ func Sync(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 
-			// Update the server timestamps for this file
+			// Update the file timestamp in our internal map
 			now := time.Now()
-			serverTimestamps[fileName] = now
+			serverTimestampsTime[fileName] = now
 
-			// Also update parent directory timestamps
+			// Only update the directory timestamp in the response map
 			dirPath := filepath.Dir(fileName)
 			if dirPath == "." {
 				dirPath = ""
 			}
-			serverTimestamps[dirPath] = now
+			serverTimestampsTime[dirPath] = now
+			serverTimestampsUnix[dirPath] = now.Unix()
 		}
 	}
 
@@ -318,7 +359,12 @@ func Sync(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Check if the client needs this file
-		clientTime, clientHasFile := request.Timestamps[relPath]
+		clientUnixTime, clientHasFile := request.Timestamps[relPath]
+		clientTime := time.Time{}
+		if clientHasFile {
+			clientTime = time.Unix(clientUnixTime, 0)
+		}
+
 		if !clientHasFile || info.ModTime().After(clientTime) {
 			// Client doesn't have the file or has an older version
 			// Read the file content
@@ -331,7 +377,7 @@ func Sync(w http.ResponseWriter, r *http.Request) {
 			// Add the file to the response
 			filesToSync = append(filesToSync, FileInfo{
 				Path:         relPath,
-				LastModified: info.ModTime(),
+				LastModified: info.ModTime().Unix(),
 				IsDirectory:  false,
 				Content:      string(content),
 			})
@@ -349,8 +395,8 @@ func Sync(w http.ResponseWriter, r *http.Request) {
 	// Build and send the response
 	response := SyncResponse{
 		Files:      filesToSync,
-		Timestamps: serverTimestamps,
-		ServerTime: time.Now(),
+		Timestamps: serverTimestampsUnix,
+		ServerTime: time.Now().Unix(),
 	}
 
 	w.Header().Set("Content-Type", "application/json")
