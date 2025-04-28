@@ -2,18 +2,26 @@ package server
 
 import "strings"
 
-func Merge(original, modified string) string {
-	// If one string is a prefix of the other, just return the longer one
-	if strings.HasPrefix(modified, original) {
-		return modified
+func Merge(s1, s2 string) string {
+	// If one string is a prefix of the other, return the longer one
+	if strings.HasPrefix(s2, s1) {
+		return s2
 	}
-	if strings.HasPrefix(original, modified) {
-		return original
+	if strings.HasPrefix(s1, s2) {
+		return s1
+	}
+
+	// If one string is a suffix of the other, return the longer one
+	if strings.HasSuffix(s2, s1) {
+		return s2
+	}
+	if strings.HasSuffix(s1, s2) {
+		return s1
 	}
 
 	// Otherwise, perform a line-by-line merge
-	originalLines := strings.Split(original, "\n")
-	modifiedLines := strings.Split(modified, "\n")
+	originalLines := strings.Split(s1, "\n")
+	modifiedLines := strings.Split(s2, "\n")
 
 	// Find the common prefix of lines
 	var commonPrefixLength int
