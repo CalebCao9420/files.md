@@ -71,7 +71,6 @@ async function syncWithServer() {
 
         const server = await response.json();
         for (const fileInfo of server.files) {
-            console.log(`Syncing file: ${fileInfo.path}`);
             const { path, content, lastModified} = fileInfo;
 
             // What about more than 2 levels nested?
@@ -112,12 +111,26 @@ async function syncWithServer() {
                 }
             }
 
-            // console.log("Syncing " +filename);
-            // const fileHandle = await currentDirHandle.getFileHandle(filename, { create: true });
-            // console.log(fileHandle);
-            // const writable = await fileHandle.createWritable();
-            // await writable.write(content);
-            // await writable.close();
+            // todo create dirs if not exist
+            console.log("Syncing " +filename);
+            let fileHandle;
+            try {
+                fileHandle = await currentDirHandle.getFileHandle(filename, { create: true });
+            } catch (error) {
+                console.error(`Error getting file handle for '${dir}/${filename}':`, error);
+                continue;
+            }
+            let file = await fileHandle.getFile()
+            let clientHash = hash(await file.text());
+            let serverHash = hash(content);
+            if (clientHash !== serverHash) {
+                console.log("Hashes do not match, writing file...");
+                // const writable = await fileHandle.createWritable();
+                // await writable.write(content);
+                // await writable.close();
+            } else {
+                console.log("Hashes match, no need to write file.");
+            }
             if (!filesMetadata['files'][dir]) filesMetadata['files'][dir] = {};
             filesMetadata['files'][dir][filename] = {
                 hash: hash(content),
@@ -126,45 +139,6 @@ async function syncWithServer() {
             };
         }
         filesMetadata['timestamps'] = server.timestamps;
-
-        // Process files to upload
-        // for (const fileInfo of syncResult.filesToUpload) {
-        //     const { dir, filename } = fileInfo;
-        //
-        //     try {
-        //         let content = "";
-        //         if (files[dir][filename].handle) {
-        //             const file = await files[dir][filename].handle.getFile();
-        //             content = await file.text();
-        //         } else {
-        //             content = files[dir][filename].content;
-        //         }
-        //
-        //         // Upload file to server
-        //         const uploadResponse = await fetch(`/sync/upload`, {
-        //             method: 'POST',
-        //             headers: { 'Content-Type': 'application/json' },
-        //             body: JSON.stringify({
-        //                 dir,
-        //                 filename,
-        //                 content
-        //             })
-        //         });
-        //
-        //         if (uploadResponse.ok) {
-        //             const result = await uploadResponse.json();
-        //
-        //             // Update server file state
-        //             if (!filesMetadata[dir]) filesMetadata[dir] = {};
-        //             filesMetadata[dir][filename] = {
-        //                 hash: result.hash,
-        //                 lastModified: Date.now()
-        //             };
-        //         }
-        //     } catch (error) {
-        //         console.error(`Error uploading ${dir}/${filename}:`, error);
-        //     }
-        // }
         saveFilesMetadata();
         console.log("Sync completed successfully");
 
