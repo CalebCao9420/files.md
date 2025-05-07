@@ -34,7 +34,7 @@ async function init(el) {
     files = await loadLocalFiles(savedDirectoryHandle);
     const endTime = performance.now();
     console.log(`Files loaded in ${endTime - startTime} ms`);
-    // await syncWithServer();
+    await syncWithServer();
 
     changesPollingInterval = setInterval(async function() {
         // Check if current file has been modified

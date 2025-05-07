@@ -15,7 +15,7 @@
 //     ...
 //   ]
 // }
-let files= [];
+let files = [];
 const supportedFileTypes = ['md', 'txt', 'png', 'jpg', 'jpeg', 'webp', 'gif',];
 const systemDirs = ["img", "archive", "_read_", "_watch_", "_shop_", "today", "later", "journal", "habits", "triggers", "places"];
 
@@ -52,7 +52,7 @@ async function loadLocalFiles(dirHandle) {
 
                 const dir = `${path}${filename}/`;
                 newFiles[filename] = {};
-                dirPromises.push({ handle: entry, dir, depth: depth + 1 });
+                dirPromises.push({handle: entry, dir, depth: depth + 1});
             } else if (entry.kind === 'file' && supportedFileTypes.includes(filename.split('.').pop())) {
                 const dir = path.replace(/\/+$/, '');
                 if (!newFiles[dir]) newFiles[dir] = {};
@@ -76,10 +76,11 @@ async function loadLocalFiles(dirHandle) {
             }
         }
 
-        await Promise.all(dirPromises.map(({ handle, dir, depth }) =>
+        await Promise.all(dirPromises.map(({handle, dir, depth}) =>
             loadDir(handle, dir, depth)
         ));
     }
+
     await loadDir(dirHandle);
 
     // Remove empty dirs
@@ -98,72 +99,26 @@ async function loadLocalFiles(dirHandle) {
     return newFiles;
 }
 
-async function saveFile()  {
-    const dir = editor.currentDir;
-    const filename = editor.currentFile;
-    const fileData = files[dir][filename];
-    if (fileData && fileData.handle) {
-        let content = getCurrentContent();
-        const writable = await fileData.handle.createWritable();
-        await writable.write(content);
-        await writable.close(); // Buffer is flushed on disk at this moment, it could be interrupted by the event pool, so maintain a flag
-    } else {
-        if (fileData.handle) {
-            alert(`Cannot save ${filename}. No file handle found.`);
-        }
-    }
-}
-
-function hash(str) {
-    let hash = 0;
-    for (let i = 0, len = str.length; i < len; i++) {
-        let chr = str.charCodeAt(i);
-        hash = (hash << 5) - hash + chr;
-        hash |= 0;
-    }
-    return hash;
-}
-
 async function syncWithServer() {
     console.log("Starting sync with server...");
 
+    // Track time it took
+    const startTime = performance.now();
     let filesToSend = [];
-    for (const dir in files) {
-        for (const filename in files[dir]) {
-            try {
-                if (dir === 'img') continue;
+    filesToSend = await collectModifiedFiles();
 
-                let content = "";
-                const file = await files[dir][filename].handle.getFile();
-                content = await file.text();
+    const endTime = performance.now();
+    const timeTaken = endTime - startTime;
+    console.log(`Sync took ${timeTaken} milliseconds`);
 
-                let path = filesMetadata?.files?.[dir]?.[filename]?.path;
-                if (!path) {
-                    console.log(`File ${dir}/${filename} not found on server, skipping...`);
-                }
-                let serverHash = filesMetadata?.files?.[dir]?.[filename]?.hash;
-                let serverTime = filesMetadata?.files?.[dir]?.[filename]?.lastModified;
-                let fileWasModifiedLocally = serverHash !== hash(content)
-                if (fileWasModifiedLocally) {
-                    filesToSend.push({
-                        content: content,
-                        path: path,
-                        lastModified: serverTime,
-                    });
-                }
-            } catch (error) {
-                console.error(`Error processing ${dir}/${filename}:`, error);
-            }
-        }
-    }
 
     try {
         const response = await fetch('https://habits.files.md/sync', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': localStorage.getItem('token')},
+            headers: {'Content-Type': 'application/json', 'Authorization': localStorage.getItem('token')},
             body: JSON.stringify({
-                files: filesToSend,
-                timestamps: filesMetadata['timestamps'] || [],
+                files: filesToSend, // files that I have
+                timestamps: filesMetadata['timestamps'] || [], // last seen server dir timestamps
             })
         });
 
@@ -173,7 +128,7 @@ async function syncWithServer() {
 
         const server = await response.json();
         for (const fileInfo of server.files) {
-            const { path, content, lastModified} = fileInfo;
+            const {path, content, lastModified} = fileInfo;
 
             // What about more than 2 levels nested?
             let dir, filename;
@@ -186,22 +141,21 @@ async function syncWithServer() {
                 filename = path;
             }
 
-            // TODO for first sync, when we have all the files - we should not rewrite them
             // TODO if file was modified locally, we need to re-read it before writing.
             const dirs = path.split('/');
             dirs.pop() // remove filename
             let currentDirHandle = await getSavedDirectoryHandle();
             for (const dirName of dirs) {
                 if (dirName) {
-                    currentDirHandle = await currentDirHandle.getDirectoryHandle(dirName, { create: true });
+                    currentDirHandle = await currentDirHandle.getDirectoryHandle(dirName, {create: true});
                 }
             }
 
             // TODO create dirs if not exist
-            console.log("Syncing " +filename);
+            console.log("Syncing " + filename);
             let fileHandle;
             try {
-                fileHandle = await currentDirHandle.getFileHandle(filename, { create: true });
+                fileHandle = await currentDirHandle.getFileHandle(filename, {create: true});
             } catch (error) {
                 console.error(`Error getting file handle for '${dir}/${filename}':`, error);
                 continue;
@@ -230,4 +184,83 @@ async function syncWithServer() {
     } catch (error) {
         console.error("Sync failed:", error);
     }
+}
+
+async function collectModifiedFiles() {
+    const filesToSend = [];
+    const fileProcessingPromises = [];
+
+    for (const dir in files) {
+        if (dir === 'img') continue; // Skip image directory
+
+        for (const filename in files[dir]) {
+            const processPromise = collectFile(dir, filename)
+                .then(result => {
+                    if (result) filesToSend.push(result);
+                });
+
+            fileProcessingPromises.push(processPromise);
+        }
+    }
+
+    await Promise.all(fileProcessingPromises);
+    return filesToSend;
+}
+
+async function collectFile(dir, filename) {
+    try {
+        const fileData = files[dir][filename];
+        if (!fileData?.handle) return null;
+
+        const file = await fileData.handle.getFile();
+        const content = await file.text();
+
+        const path = filesMetadata?.files?.[dir]?.[filename]?.path;
+        if (!path) {
+            console.log(`File ${dir}/${filename} not found on server, skipping...`);
+            return null;
+        }
+
+        const serverHash = filesMetadata?.files?.[dir]?.[filename]?.hash;
+        const serverTime = filesMetadata?.files?.[dir]?.[filename]?.lastModified;
+
+        if (serverHash !== hash(content)) {
+            return {
+                content,
+                path,
+                lastModified: serverTime,
+            };
+        }
+
+        return null;
+    } catch (error) {
+        console.error(`Error processing ${dir}/${filename}:`, error);
+        return null;
+    }
+}
+
+async function saveFile() {
+    const dir = editor.currentDir;
+    const filename = editor.currentFile;
+    const fileData = files[dir][filename];
+    if (fileData && fileData.handle) {
+        let content = getCurrentContent();
+        const writable = await fileData.handle.createWritable();
+        await writable.write(content);
+        await writable.close(); // Buffer is flushed on disk at this moment, it could be interrupted by the event pool, so maintain a flag
+    } else {
+        if (fileData.handle) {
+            alert(`Cannot save ${filename}. No file handle found.`);
+        }
+    }
+}
+
+function hash(str) {
+    let hash = 0;
+    for (let i = 0, len = str.length; i < len; i++) {
+        let chr = str.charCodeAt(i);
+        hash = (hash << 5) - hash + chr;
+        hash |= 0;
+    }
+    return hash;
 }
