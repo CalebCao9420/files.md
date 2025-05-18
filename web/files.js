@@ -179,12 +179,12 @@ async function syncFileWithServer(dir, filename) {
             console.log(`Server responded with ${response.status}`);
             return;
         }
-        if (response.status === 304) {
-            console.log("File not modified on server");
-            return;
+        let json = await response.json();
+        if (["not_modified", "updated_on_server"].includes(json.status)) {
+            console.log(json.status);
+           return;
         }
-
-        serverFile = await response.json();
+        serverFile = json
     } catch (error) {
         console.error("Network error occurred:", error.message);
         return;

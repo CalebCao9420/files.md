@@ -18,7 +18,10 @@ import (
 )
 
 const (
-	StorageDir = "/app/mystorage"
+	StorageDir            = "/app/mystorage"
+	StatusOK              = "ok"
+	StatusNotModified     = "not_modified"
+	StatusUpdatedOnServer = "updated_on_server"
 )
 
 var (
@@ -31,6 +34,7 @@ var FS = func(userID int) *fs.FS {
 }
 
 type File struct {
+	Status       string `json:"status"`
 	Path         string `json:"path"`
 	LastModified int64  `json:"lastModified"`
 	Content      string `json:"content"`
@@ -42,6 +46,7 @@ type syncRequest struct {
 }
 
 type syncResponse struct {
+	Status     string           `json:"status"`     // Status
 	Files      []File           `json:"files"`      // Files with content that need syncing
 	Timestamps map[string]int64 `json:"timestamps"` // Current server timestamps in Unix format
 }
@@ -150,6 +155,7 @@ func Sync(w http.ResponseWriter, r *http.Request) {
 			logSync(fmt.Sprintf("Sending file: '%s'", path))
 
 			files = append(files, File{
+				Status:       StatusOK,
 				Path:         path,
 				LastModified: serverFileTime,
 				Content:      string(content),
@@ -168,6 +174,7 @@ func Sync(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := syncResponse{
+		Status:     StatusOK,
 		Files:      files,
 		Timestamps: dirTimestamps,
 	}
@@ -214,10 +221,15 @@ func SyncFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO when file does not exist the content is empty, which is implicit
-	// Return already up-todate status
+	// Return already up-to-date status
 	if string(serverContent) == file.Content {
 		logSync(fmt.Sprintf("File '%s' is already up to date", file.Path))
-		w.WriteHeader(http.StatusNotModified)
+		response := map[string]interface{}{
+			"status":    StatusNotModified,
+			"timestamp": serverModTime,
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
 		return
 	}
 
@@ -257,8 +269,13 @@ func SyncFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !fileWasModifiedOnServer {
-		logSync(fmt.Sprintf("File '%s' was written to server, 304 to client", file.Path))
-		w.WriteHeader(http.StatusNotModified)
+		logSync(fmt.Sprintf("File '%s' is already up to date", file.Path))
+		response := map[string]interface{}{
+			"status":    StatusUpdatedOnServer,
+			"timestamp": serverModTime,
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
 		return
 	}
 
@@ -272,6 +289,7 @@ func SyncFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := File{
+		Status:       StatusOK,
 		Content:      content,
 		Path:         file.Path,
 		LastModified: info.ModTime().Unix(),
