@@ -201,7 +201,6 @@ func SyncText(w http.ResponseWriter, r *http.Request) {
 	// 2) In case of conflict (server has a newer modification), merge the clientFile and include them in the response
 
 	// Save client-modified clientFile to the server
-	logSync(fmt.Sprintf("Got one client clientFile: '%s'", clientFile.Path))
 	fullPath := filepath.Join(StorageDir, clientFile.Path)
 
 	serverModTime := int64(0)
@@ -210,7 +209,6 @@ func SyncText(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		serverModTime = info.ModTime().Unix()
 	}
-	log.Printf("Server timestamp for '%s': %d", fullPath, serverModTime)
 
 	// TODO if no clientFile, severContent = ""
 	serverContent, err := ioutil.ReadFile(fullPath)
@@ -269,6 +267,7 @@ func SyncText(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		serverModTime = info.ModTime().Unix()
 	}
+	log.Printf("Server timestamp for '%s': %d", fullPath, serverModTime)
 
 	if !fileWasModifiedOnServer {
 		logSync(fmt.Sprintf("clientFile '%s' is already up to date", clientFile.Path))
