@@ -116,11 +116,10 @@ func mergeEmojisInJournalHeaders(lines []string) []string {
 
 func groupConsecutiveHeaders(lines []string) [][]string {
 	var groups [][]string
-	for i := 0; i < len(lines); i++ {
+	i := 0
+	for i < len(lines) {
 		if strings.HasPrefix(lines[i], "####") {
-			group := []string{lines[i]}
-			i++
-			// Collect all consecutive headers
+			var group []string
 			for i < len(lines) && strings.HasPrefix(lines[i], "####") {
 				group = append(group, lines[i])
 				i++
@@ -128,6 +127,7 @@ func groupConsecutiveHeaders(lines []string) [][]string {
 			groups = append(groups, group)
 		} else {
 			groups = append(groups, []string{lines[i]})
+			i++
 		}
 	}
 

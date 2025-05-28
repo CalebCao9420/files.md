@@ -1,6 +1,8 @@
 package server
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -130,4 +132,248 @@ func TestMergeHeadersNoEmoji(t *testing.T) {
 	headers = []string{"#### 23 May, Saturday", "#### 23 May, Saturday"}
 	merged = mergeEmojisInJournalHeaders(headers)
 	r.Equal([]string{"#### 23 May, Saturday"}, merged)
+}
+
+// AI-gen tests
+
+func TestMergeCompletelyDifferent(t *testing.T) {
+	r := require.New(t)
+
+	original := "apple\nbanana\ncherry"
+	modified := "dog\nelephant\nfox"
+	merged := Merge(original, modified)
+	r.Equal("apple\nbanana\ncherry\ndog\nelephant\nfox", merged)
+}
+
+func TestMergeRepeatedLines(t *testing.T) {
+	r := require.New(t)
+
+	original := "repeat\nrepeat\nunique1"
+	modified := "repeat\nrepeat\nunique2"
+	merged := Merge(original, modified)
+	r.Equal("repeat\nrepeat\nunique1\nunique2", merged)
+}
+
+func TestMergeWithBlankLines(t *testing.T) {
+	r := require.New(t)
+
+	original := "line1\n\nline3"
+	modified := "line1\nline2\n\nline3"
+	merged := Merge(original, modified)
+	r.Equal("line1\nline2\n\nline3", merged)
+}
+
+func TestMergeMultipleBlankLines(t *testing.T) {
+	r := require.New(t)
+
+	original := "start\n\n\nend"
+	modified := "start\nmiddle\n\n\nend"
+	merged := Merge(original, modified)
+	r.Equal("start\nmiddle\n\n\nend", merged)
+}
+
+func TestMergeOnlyBlankLines(t *testing.T) {
+	r := require.New(t)
+
+	original := "\n\n"
+	modified := "\n\n\n"
+	merged := Merge(original, modified)
+	r.Equal("\n\n\n", merged)
+}
+
+func TestMergeSingleLineStrings(t *testing.T) {
+	r := require.New(t)
+
+	r.Equal("hello", Merge("hello", "hello"))
+	r.Equal("hello\nworld", Merge("hello", "world"))
+	r.Equal("world\nhello", Merge("world", "hello"))
+}
+
+func TestMergeVeryLongCommonPrefix(t *testing.T) {
+	r := require.New(t)
+
+	commonLines := make([]string, 100)
+	for i := 0; i < 100; i++ {
+		commonLines[i] = fmt.Sprintf("common line %d", i)
+	}
+	commonPrefix := strings.Join(commonLines, "\n")
+
+	original := commonPrefix + "\noriginal ending"
+	modified := commonPrefix + "\nmodified ending"
+	merged := Merge(original, modified)
+	expected := commonPrefix + "\noriginal ending\nmodified ending"
+	r.Equal(expected, merged)
+}
+
+func TestMergeVeryLongCommonSuffix(t *testing.T) {
+	r := require.New(t)
+
+	commonLines := make([]string, 100)
+	for i := 0; i < 100; i++ {
+		commonLines[i] = fmt.Sprintf("common line %d", i)
+	}
+	commonSuffix := strings.Join(commonLines, "\n")
+
+	original := "original start\n" + commonSuffix
+	modified := "modified start\n" + commonSuffix
+	merged := Merge(original, modified)
+	expected := "original start\nmodified start\n" + commonSuffix
+	r.Equal(expected, merged)
+}
+
+func TestMergeNestedCommonSubsequences(t *testing.T) {
+	r := require.New(t)
+
+	// Complex case with multiple common subsequences
+	original := "A\nB\nC\nX\nD\nE\nY\nF"
+	modified := "A\nB\nZ\nC\nD\nE\nW\nF"
+	merged := Merge(original, modified)
+	// Should preserve the LCS while adding unique content
+	r.Contains(merged, "A")
+	r.Contains(merged, "B")
+	r.Contains(merged, "C")
+	r.Contains(merged, "D")
+	r.Contains(merged, "E")
+	r.Contains(merged, "F")
+	r.Contains(merged, "X")
+	r.Contains(merged, "Y")
+	r.Contains(merged, "Z")
+	r.Contains(merged, "W")
+}
+
+func TestMergeWithSpecialCharacters(t *testing.T) {
+	r := require.New(t)
+
+	original := "line with\ttabs\nline with spaces"
+	modified := "line with\ttabs\nline with   multiple   spaces"
+	merged := Merge(original, modified)
+	r.Equal("line with\ttabs\nline with spaces\nline with   multiple   spaces", merged)
+}
+
+func TestMergeUnicodeContent(t *testing.T) {
+	r := require.New(t)
+
+	original := "Hello 世界\n🌍 Earth"
+	modified := "Hello 世界\n🌍 Earth\n🚀 Space"
+	merged := Merge(original, modified)
+	r.Equal("Hello 世界\n🌍 Earth\n🚀 Space", merged)
+}
+
+func TestMergeVeryLongLines(t *testing.T) {
+	r := require.New(t)
+
+	longLine := strings.Repeat("a", 10000)
+	original := longLine + "\nshort"
+	modified := longLine + "\ndifferent"
+	merged := Merge(original, modified)
+	r.Equal(longLine+"\nshort\ndifferent", merged)
+}
+
+func TestMergeIdenticalContent(t *testing.T) {
+	r := require.New(t)
+
+	content := "line1\nline2\nline3\nline4\nline5"
+	r.Equal(content, Merge(content, content))
+}
+
+func TestMergeOneIsSubsetOfOther(t *testing.T) {
+	r := require.New(t)
+
+	subset := "line2\nline4"
+	superset := "line1\nline2\nline3\nline4\nline5"
+
+	// Test both directions
+	r.Equal(superset, Merge(subset, superset))
+	r.Equal(superset, Merge(superset, subset))
+}
+
+func TestMergeAlternatingPattern(t *testing.T) {
+	r := require.New(t)
+
+	// Alternating common and unique lines
+	original := "common1\nunique1\ncommon2\nunique2\ncommon3"
+	modified := "common1\ndifferent1\ncommon2\ndifferent2\ncommon3"
+	merged := Merge(original, modified)
+
+	r.Contains(merged, "common1")
+	r.Contains(merged, "common2")
+	r.Contains(merged, "common3")
+	r.Contains(merged, "unique1")
+	r.Contains(merged, "unique2")
+	r.Contains(merged, "different1")
+	r.Contains(merged, "different2")
+}
+
+func TestMergeRealWorldScenario(t *testing.T) {
+	r := require.New(t)
+
+	// Simulating a config file merge
+	original := `# Configuration file
+version: 1.0
+database:
+  host: localhost
+  port: 5432
+logging:
+  level: info`
+
+	modified := `# Configuration file
+version: 1.0
+database:
+  host: localhost
+  port: 5432
+  timeout: 30
+logging:
+  level: debug
+  file: app.log`
+
+	merged := Merge(original, modified)
+
+	// Should contain all unique lines from both
+	r.Contains(merged, "# Configuration file")
+	r.Contains(merged, "version: 1.0")
+	r.Contains(merged, "database:")
+	r.Contains(merged, "  host: localhost")
+	r.Contains(merged, "  port: 5432")
+	r.Contains(merged, "  timeout: 30")
+	r.Contains(merged, "logging:")
+	r.Contains(merged, "  level: info")
+	r.Contains(merged, "  level: debug")
+	r.Contains(merged, "  file: app.log")
+}
+
+func TestMergeJournalWithTasks(t *testing.T) {
+	r := require.New(t)
+
+	// More complex journal scenario
+	original := `#### 24 May, Sunday
+Morning routine
+- Coffee ☕
+- Exercise 💪
+Evening reflection
+- Good day overall`
+
+	modified := `#### 24 May, Sunday
+Morning routine
+- Coffee ☕
+- Read news 📰
+- Exercise 💪
+Afternoon work
+- Team meeting
+Evening reflection
+- Good day overall
+- Grateful for sunshine`
+
+	merged := Merge(original, modified)
+
+	// Should preserve the structure while adding new content
+	r.Contains(merged, "#### 24 May, Sunday")
+	r.Contains(merged, "Morning routine")
+	r.Contains(merged, "- Coffee ☕")
+	r.Contains(merged, "- Exercise 💪")
+	r.Contains(merged, "- Read news 📰")
+	r.Contains(merged, "Afternoon work")
+	r.Contains(merged, "- Team meeting")
+	r.Contains(merged, "Evening reflection")
+	r.Contains(merged, "- Good day overall")
+	r.Contains(merged, "- Grateful for sunshine")
 }
