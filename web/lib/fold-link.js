@@ -100,7 +100,6 @@
     /********************************************************************************** */
     //#region initialize compact emoji dict
     (function (dest) {
-        /** source https://gist.github.com/rxaviers/7360908 */
         var parts = [];
         var matRE = /([-\w]+:)([^;]+);/g;
         var t;
