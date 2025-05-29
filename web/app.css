@@ -1,9 +1,9 @@
 :root { /* Flexoki theme https://github.com/kepano/flexoki */
-    --color-outline: #73777f;
-
     --color-tx: #100F0F;
     --color-tx-hover: #24837b;
     --color-tx-muted: #6F6E69;
+    --color-inline-code: var(--color-tx-muted);
+    --color-inline-code-bg: var(--color-bg-alt);
     --color-tx-faint: #B7B5AC;
     --color-tx-sel: rgba(187, 220, 206, 0.3);
     --color-bg: #FFFCF0; /* Paper color */
@@ -196,7 +196,7 @@ a:hover {
 
 .cm-inline-code {
     background: var(--color-bg-alt) !important;
-    color: var(--color-tx-muted) !important;
+    color: var(--color-inline-code) !important;
     font-family: var(--font-mono) !important;
     font-size: var(--font-smaller) !important;
 }

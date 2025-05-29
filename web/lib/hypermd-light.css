@@ -1,5 +1,9 @@
 :root {
     --font: Inter,Arial,Helvetica,sans-serif;
+    --font-mono: "JetBrains Mono", Menlo, Monaco, "Courier New", Courier, monospace;
+    --color-inline-code: #ba1a1a;
+    --color-inline-code-bg: #d8dae0;
+
     --color-bg-alt: #fff;
 }
 
@@ -46,4 +50,14 @@
 .cm-s-hypermd-light .cm-header, .cm-s-hypermd-light .cm-strong {
     font-family: Rubik,Cambria,"Times New Roman",Times,serif !important;
     font-weight: 400;
+}
+
+.cm-s-hypermd-light span.cm-inline-code:not(.cm-formatting):not(.cm-hmd-indented-code) {
+    background: color-mix(in srgb, var(--color-inline-code-bg), transparent 40%) !important;
+    border: none !important;
+    border-radius: 4px;
+    vertical-align: baseline;
+    padding: 0 2px !important;
+    font-size: 87.5% !important;
+    line-height: 1.4286 !important;
 }
