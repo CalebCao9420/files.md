@@ -527,11 +527,6 @@ function saveMetadata() {
 // 2) Sync it with the server
 // TODO add hash of last read file comparison, merge on conflict (in which scenarious in can happen tho?)
 async function syncCurrentFile() {
-    if (isSyncingCurrent) {
-        return;
-    }
-    isSyncingCurrent = true;
-
     if (debug) {
         return;
     }
@@ -539,16 +534,28 @@ async function syncCurrentFile() {
     // Wait until not saving
     // TODO what if lots of saving calls are stuck?
     // I decided to go from loop to insta return
-    // if (isSaving) {
-    //     return;
-    // }
-
-    while (isSaving) {
-        await new Promise(r => setTimeout(r, 50));
+    if (isSaving) {
+        return;
     }
 
-    const path = `${editor.currentDir}/${editor.currentFile}`;
-    const contentWasModifiedLocally = !await isContentEqual(path, getCurrentContent());
+    // while (isSaving) {
+    //     await new Promise(r => setTimeout(r, 50));
+    // }
+
+    if (isSyncingCurrent) {
+        return;
+    }
+    isSyncingCurrent = true;
+
+
+    try {
+        const path = `${editor.currentDir}/${editor.currentFile}`;
+        const contentWasModifiedLocally = !await isContentEqual(path, getCurrentContent());
+    } catch (error) {
+        console.error("Error checking content equality:", error);
+        isSyncingCurrent = false;
+        return;
+    }
 
     // TODO better way would be this:
     // Read file from fs with it's timestamp
@@ -594,14 +601,18 @@ async function syncCurrentFile() {
             isSaving = false;
             // Revert doc back to dirty state
             editor.replaceRange(' ', editor.getCursor());
+            isSyncingCurrent = false;
             editor.undo();
             return;
         }
         isSaving = false;
     }
 
-    // TODO add exceptions?
-    await syncFileWithServer(editor.currentDir, editor.currentFile);
+    try {
+        await syncFileWithServer(editor.currentDir, editor.currentFile);
+    } catch (error) {
+        console.error("Error during sync with server:", error);
+    }
     isSyncingCurrent = false;
 }
 
