@@ -140,7 +140,7 @@
                     if (!ev.ctrlKey && className.indexOf(ctrlClass) >= 0) {
                         newClassName = className.replace(ctrlClass, "");
                     }
-                    // CHANGED add meta key 
+                    // CHANGED add meta key
                     if (!ev.altKey && !ev.ctrlKey && !ev.metaKey) {
                         _this._KeyDetectorActive = false;
                         el.removeEventListener('mousemove', _this._mouseMove_keyDetect, false);
@@ -282,14 +282,25 @@
                 this.lineDiv = cm.display.lineDiv;
                 var el = this.el = cm.getWrapperElement();
                 new core_1.FlipFlop(
+                    // CHANGED, added global event listener, so that even if our cm is not focused - pointer would appear on links
                     /* ON  */ function () {
                         _this.lineDiv.addEventListener("mousedown", _this._mouseDown, false);
-                        el.addEventListener("keydown", _this._keyDown, false);
+                        document.addEventListener("keydown", _this._keyDown, false);  // Changed to document
+                        document.addEventListener("keyup", _this._keyUp, false);      // Add keyup
                     },
                     /* OFF */ function () {
                         _this.lineDiv.removeEventListener("mousedown", _this._mouseDown, false);
-                        el.removeEventListener("keydown", _this._keyDown, false);
+                        document.removeEventListener("keydown", _this._keyDown, false);  // Changed to document
+                        document.removeEventListener("keyup", _this._keyUp, false);      // Remove keyup
                     }).bind(this, "enabled", true);
+                    // /* ON  */ function () {
+                    //     _this.lineDiv.addEventListener("mousedown", _this._mouseDown, false);
+                    //     el.addEventListener("keydown", _this._keyDown, false);
+                    // },
+                    // /* OFF */ function () {
+                    //     _this.lineDiv.removeEventListener("mousedown", _this._mouseDown, false);
+                    //     el.removeEventListener("keydown", _this._keyDown, false);
+                    // }).bind(this, "enabled", true);
             }
             return Click;
         }());
