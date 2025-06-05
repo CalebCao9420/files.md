@@ -41,10 +41,13 @@
         // everything is OK! make the widget
         var text = cm.getRange(hrefFrom, hrefTo);
         var _a = splitLink(text.substr(1, text.length - 2)), url = _a.url, title = _a.title;
+
+        // CHANGED, we don't need img with link
+        // var imgElem = document.createElement("span");
+        // imgElem.setAttribute("class", "hmd-link-icon");
+        // imgElem.setAttribute("title", url + "\n" + title);
+        // imgElem.setAttribute("data-url", url);
         var imgElem = document.createElement("span");
-        imgElem.setAttribute("class", "hmd-link-icon");
-        imgElem.setAttribute("title", url + "\n" + title);
-        imgElem.setAttribute("data-url", url);
         var marker = cm.markText(hrefFrom, hrefTo, {
             collapsed: true,
             replacedWith: imgElem,
