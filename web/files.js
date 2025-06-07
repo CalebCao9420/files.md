@@ -25,7 +25,7 @@ let isSyncingCurrent = false;
 // }
 let files = [];
 let filesMetadata = {files: {}, timestamps: {}, mediaTimestamp: 0};
-const FILES_STORAGE_KEY = 'files';
+const FILES_METADATA_STORAGE_KEY = 'files';
 const supportedFileTypes = ['md', 'txt', 'png', 'jpg', 'jpeg', 'webp', 'gif',];
 const systemDirs = ["img", "archive", "_read_", "_watch_", "_shop_", "today", "later", "journal", "habits", "triggers", "places"];
 
@@ -111,7 +111,7 @@ async function loadLocalFiles(rootDirHandle) {
     }
 
     // Load metadata
-    const savedMetadata = localStorage.getItem(FILES_STORAGE_KEY);
+    const savedMetadata = localStorage.getItem(FILES_METADATA_STORAGE_KEY);
     if (savedMetadata) {
         filesMetadata = JSON.parse(savedMetadata);
     }
@@ -119,7 +119,7 @@ async function loadLocalFiles(rootDirHandle) {
     return newFiles;
 }
 
-async function syncAllWithServer() {
+async function syncTextsWithServer() {
     if (debug) {
         return;
     }
@@ -155,7 +155,6 @@ async function syncAllWithServer() {
         return;
     }
 
-    // TODO more fine-grained try-catch?
     try {
         // Write files received from the server
         for (const fileInfo of server.files) {
@@ -168,18 +167,20 @@ async function syncAllWithServer() {
                 continue;
             }
 
-            // todo try-catch?
-
-            await saveTextFile(path, content)
-            setMetadata(path, content, lastModified);
-            // Unfortunately rename is not working, so we have to delete the old file
-            const shouldRemoveOldFile = path in server.renames;
-            if (shouldRemoveOldFile) {
-                const oldPath = server.renames[path];
-                await removeFile(oldPath);
-                removeMetadata(oldPath);
+            try {
+                await saveTextFile(path, content)
+                setMetadata(path, content, lastModified);
+                // Unfortunately rename is not working, so we have to delete the old file
+                const shouldRemoveOldFile = path in server.renames;
+                if (shouldRemoveOldFile) {
+                    const oldPath = server.renames[path];
+                    await removeFile(oldPath);
+                    removeMetadata(oldPath);
+                }
+                saveMetadata();
+            } catch (error) {
+                console.error(`Error saving file ${path}:`, error);
             }
-            saveMetadata();
         }
         filesMetadata['timestamps'] = server.timestamps;
         saveMetadata();
@@ -518,7 +519,7 @@ async function saveTextFile(path, content) {
     if (fileHandle === null) {
         // TODO fix once Chromium fixes the bug
         console.log("Malformed name, skipping file...");
-        return;
+        throw new Error("Invalid file name");
     }
 
     if (!await isContentEqual(path, content)) {
@@ -580,7 +581,7 @@ function removeMetadata(path) {
 }
 
 function saveMetadata() {
-    localStorage.setItem(FILES_STORAGE_KEY, JSON.stringify(filesMetadata));
+    localStorage.setItem(FILES_METADATA_STORAGE_KEY, JSON.stringify(filesMetadata));
 }
 
 function getUserId() {
@@ -699,7 +700,7 @@ async function initFiles() {
     const startTime = performance.now();
     files = await loadLocalFiles(rootDirHandle);
     console.log(`Files loaded in ${performance.now() - startTime}ms`);
-    await syncAllWithServer();
+    await syncTextsWithServer();
     await syncMediaFilesFromServer();
 }
 

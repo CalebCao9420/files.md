@@ -631,6 +631,6 @@ window.addEventListener("focus", async () => {
     files = await loadLocalFiles(savedDirectoryHandle);
     const end = performance.now();
     console.log(`Files loaded in: ${(end - start).toFixed(3)} milliseconds`);
-    await syncAllWithServer()
+    await syncTextsWithServer()
     console.log("Sync completed");
 });
