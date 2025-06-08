@@ -300,7 +300,7 @@ async function openFile(dir, filename, saveToHistory = true) {
     }
     editor.clearHistory();
     editor.markClean();
-    // editor.focus();
+    editor.focus();
 
     if (cursorPos !== null) {
         console.log('cursor not null');
