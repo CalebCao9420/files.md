@@ -26,7 +26,7 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
      * - `$` Maybe a LaTeX
      * - `|` Maybe a Table Col Separator
      */
-    // CHANGED
+    // PATCHED
     // var tokenBreakRE = /[^\\][$|]/;
     var tokenBreakRE = /[^\\][$]/;
     var listRE = /^(?:[*\-+]|^[0-9]+([.)]))\s+/;

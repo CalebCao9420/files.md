@@ -3251,11 +3251,11 @@
     var docLTR = doc.direction == "ltr";
 
     function drawSelectionRect(left, top, width, bottom) {
-      // CHANGED, sometimes when we select "`code` text" hide/show tokens causes left to be negative.
+      // PATCHED, sometimes when we select "`code` text" hide/show tokens causes left to be negative.
       // That all causes blinking, so we just ignore negative lefts.
       if (left < 0) { return; }
 
-      // CHANGED, added minimum width
+      // PATCHED, added minimum width
       if (width <= 0) {
         width = cm.defaultCharWidth();
       }
@@ -3301,7 +3301,7 @@
           var topLeft, topRight, botLeft, botRight;
           if (ltr) {
             topLeft = docLTR && openStart && first ? leftSide : fromPos.left;
-            // CHANGED
+            // PATCHED
             // topRight = docLTR ? rightSide : wrapX(from, dir, "before");
             // botLeft = docLTR ? leftSide : wrapX(to, dir, "after");
             // botRight = docLTR && openEnd && last ? rightSide : toPos.right;
@@ -3318,7 +3318,7 @@
           let firstLineRight = wrapXObj(cm, lineObj, firstVisualLine.startChar, dir, "before");
           drawSelectionRect(fromPos.left, fromPos.top, (firstLineRight - fromPos.left), fromPos.bottom);
 
-          // CHANGED
+          // PATCHED
           // Draw in-between visual lines
           // TODO we can just get all visual lines and draw them all at once?
           let areThereInBetweenLines = fromPos.bottom < toPos.top
@@ -3592,7 +3592,7 @@
   // it actually became visible (as line heights are accurately
   // measured, the position of something may 'drift' during drawing).
   function scrollPosIntoView(cm, pos, end, margin) {
-    // CHANGED If we are in selection mode - return, because we have autoscroll
+    // PATCHED If we are in selection mode - return, because we have autoscroll
     if (cm.state.selectingText) { return {} }
 
     if (margin == null) { margin = 0; }
@@ -6306,7 +6306,7 @@
       makeChange(this, {from: top, to: Pos(last, getLine(this, last).text.length),
                         text: this.splitLines(code), origin: "setValue", full: true}, true);
       if (this.cm) { scrollToCoords(this.cm, 0, 0); }
-      // CHANGED we don't set cursor to avoid cursor blinking at the top of the page.
+      // PATCHED we don't set cursor to avoid cursor blinking at the top of the page.
       // After this method we place cursor at the end.
       // setSelection(this, simpleSelection(top), sel_dontScroll);
     }),
@@ -7122,9 +7122,9 @@
     return null
   }
 
-  // CHANGED added regexps from keymap/hypermd.js
+  // PATCHED added regexps from keymap/hypermd.js
   var LoQRE = /^(\s*)(>[> ]*|[*+-] \[[x ]\]\s|[*+-]\s|(\d+)([.)]))(\s*)/, emptyLoQRE = /^(\s*)(>[> ]*|[*+-] \[[x ]\]|[*+-]|(\d+)[.)])(\s*)$/, unorderedListRE = /[*+-]\s/;
-  // CHANGED added this function from keymap/hypermd.js
+  // PATCHED added this function from keymap/hypermd.js
   // Auto-updating Markdown list numbers when a new item is added to the
   // middle of a list
   function incrementRemainingMarkdownListNumbers(cm, pos) {
@@ -7303,7 +7303,7 @@
     }); },
     openLine: function (cm) { return cm.replaceSelection("\n", "start"); },
     toggleOverwrite: function (cm) { return cm.toggleOverwrite(); },
-    // CHANGED, added this function from keymap/hypermd.js
+    // PATCHED, added this function from keymap/hypermd.js
     newlineAndContinue: function(cm) {
       if (cm.getOption("disableInput"))
         return CodeMirror.Pass;
@@ -7350,7 +7350,7 @@
             else {
               // insert a row below
               var columns = eolState.hmdTableColumns;
-              // CHANGED from core_1
+              // PATCHED from core_1
               var newline_1 = "  |  ".repeat(Math.max(columns.length - 1, 0));
               var leading = "\n";
               if (table === 2 /* NORMAL */) {
@@ -7869,14 +7869,14 @@
     //     }), 50); }
     //   }
     // }
-    // CHANGED added pixel distance threshold to extend, with hide token updateImmediately and 1 pixel distance
+    // PATCHED added pixel distance threshold to extend, with hide token updateImmediately and 1 pixel distance
     // ### headers sometimes get selected as if mouse was moved.
     function extend(e) {
       var curCount = ++counter;
       var cur = posFromMouse(cm, e, true, behavior.unit == "rectangle");
       if (!cur) { return }
       if (cmp(cur, lastPos) != 0) {
-        // CHANGED: Only extend selection if mouse moved enough pixels
+        // PATCHED: Only extend selection if mouse moved enough pixels
         var pixelDistance = Math.abs(e.clientX - event.clientX) + Math.abs(e.clientY - event.clientY);
         if (pixelDistance > 3) {
           cm.curOp.focus = activeElt();

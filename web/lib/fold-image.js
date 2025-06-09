@@ -67,7 +67,7 @@
                 var marker = cm.markText(from, to, {
                     clearOnEnter: false,
                     collapsed: true,
-                    // CHANGED, was img
+                    // PATCHED, was img
                     replacedWith: img,
                 });
                 img.addEventListener('click', function (e) {

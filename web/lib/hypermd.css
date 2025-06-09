@@ -231,7 +231,7 @@
 }
 .cm-s-hypermd-light pre.HyperMD-header {
     line-height: 1.5 !important;
-    /*CHANGED*/
+    /*PATCHED*/
     /*font-family: inherit !important;*/
     padding-left: 5px !important;
     margin-left: 0 !important;
@@ -242,7 +242,7 @@
     margin-left: 0 !important;
 }
 .cm-s-hypermd-light pre.HyperMD-header.HyperMD-header-1 {
-    /*CHANGED*/
+    /*PATCHED*/
     /*font-weight: 600;*/
     font-size: 24pt;
 }
@@ -506,9 +506,9 @@
     background-repeat: no-repeat;
     background-position: center 0;
     cursor: pointer;
-    /*CHANGED*/
+    /*PATCHED*/
     color: rgba(0, 0, 0, 0.0);
-    /*CHANGED*/
+    /*PATCHED*/
     margin-top: -2px;
     background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAwCAMAAAA8VkqRAAAAclBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACa4vOeAAAAJXRSTlMADcjpDswcLZOzsvOYBvWdbtvTX0D69+ORa1dRJCDtuaF7ZDkoQyuUXgAAAMhJREFUOMvt0reywjAUhOFjKxmcrgMZboL//V8Rm6GwkNUx0LClvhkVZ1fEZoqHqMwO7wuUSb0YxcJKxtLpxIt2SzJRykkQp5RgdAjaIKRJCEn6gWdA9OzRoqLVRscQnc9bdtXX/eyurOF7N3erLVDPwCGHxoVwamH1LwGUBfBbhrCvoLlMitL9DY8trLtJg7qoCj18VAN1OYE/YJBuDe1RJtBVo5wbqPb+GL5yWG1GLX0YZYw5iQ93yQ/yAHfZzu5qt/mxr97VFS15JGSVM0C6AAAAAElFTkSuQmCC");
     background-size: 1em;
@@ -575,7 +575,7 @@
 .cm-s-hypermd-light.HyperMD-with-alt span.cm-hashtag, .cm-s-hypermd-light.HyperMD-with-ctrl span.cm-url,
 .cm-s-hypermd-light.HyperMD-with-ctrl span.cm-link,
 .cm-s-hypermd-light.HyperMD-with-ctrl .cm-link + .CodeMirror-widget,
-.cm-s-hypermd-light span.cm-link, /* CHANGED */
+.cm-s-hypermd-light span.cm-link, /* PATCHED */
 .cm-s-hypermd-light.HyperMD-with-ctrl span.cm-hashtag {
     cursor: pointer;
 }
@@ -599,14 +599,14 @@
     width: auto;
     height: auto;
 
-    /*CHANGED*/
+    /*PATCHED*/
     max-width: 400px;
     display: inline-block;
 
     margin-left: 25%;
 }
 
-/*CHANGED, if z-index is 2, then our section block is below the image*/
+/*PATCHED, if z-index is 2, then our section block is below the image*/
 .CodeMirror pre.CodeMirror-line,
 .CodeMirror pre.CodeMirror-line-like {
     z-index: 0;
@@ -618,7 +618,7 @@
     background: #eeeeee url(hypermd-image-spin.gif) no-repeat center center;
 }
 .cm-s-hypermd-light img.hmd-image.hmd-image-error {
-    /*CHANGED*/
+    /*PATCHED*/
     background: none;
     /*background-image: url(hypermd-image-error.png);*/
 }
@@ -877,7 +877,7 @@
     border-right: 0;
 }
 
-/*CHANGED*/
+/*PATCHED*/
 .cm-s-hypermd-light pre.HyperMD-header-line:after, .cm-s-hypermd-light pre.HyperMD-header.HyperMD-header-1:after, .cm-s-hypermd-light pre.HyperMD-header.HyperMD-header-2:after {
     display: none;
     content: " ";
@@ -894,7 +894,7 @@
     padding-bottom: 0.25em;
 }
 
-/*CHANGED*/
+/*PATCHED*/
 /*.cm-s-hypermd-light pre.HyperMD-header:not(:first-child) {*/
 /*    padding-top: 1em !important; !* Applies padding only to elements except the first *!*/
 /*}*/

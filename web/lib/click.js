@@ -27,7 +27,7 @@
                     text = text.slice(0, -2); // remove [] of [foot][]
                 type = "footref";
             }
-            // CHANGED add meta key
+            // PATCHED add meta key
             else if ((info.ctrlKey || info.altKey || info.metaKey) && url) {
                 // just open URL
                 window.open(url, "_blank");
@@ -39,7 +39,7 @@
             text_1 = (text_1 === '[ ]') ? '[x]' : '[ ]';
             cm.replaceRange(text_1, from, to);
         }
-        // CHANGED add meta key
+        // PATCHED add meta key
         if (type === 'footref' && (info.ctrlKey || info.altKey || info.metaKey)) {
             // Jump to FootNote
             var footnote_name = text.slice(1, -1);
@@ -133,14 +133,14 @@
                     var className = el.className, newClassName = className;
                     var altClass = "HyperMD-with-alt";
                     var ctrlClass = "HyperMD-with-ctrl";
-                    // CHANGED meta key support
+                    // PATCHED meta key support
                     if ((!ev.altKey && !ev.metaKey) && className.indexOf(altClass) >= 0) {
                         newClassName = className.replace(altClass, "");
                     }
                     if (!ev.ctrlKey && className.indexOf(ctrlClass) >= 0) {
                         newClassName = className.replace(ctrlClass, "");
                     }
-                    // CHANGED add meta key
+                    // PATCHED add meta key
                     if (!ev.altKey && !ev.ctrlKey && !ev.metaKey) {
                         _this._KeyDetectorActive = false;
                         el.removeEventListener('mousemove', _this._mouseMove_keyDetect, false);
@@ -156,7 +156,7 @@
                         className = "HyperMD-with-ctrl";
                     if (kc == 18)
                         className = "HyperMD-with-alt";
-                    // CHANGED meta-key support (cmd on mac)
+                    // PATCHED meta-key support (cmd on mac)
                     if (kc == 91 || kc == 93) className = "HyperMD-with-meta"; // Meta key (Cmd)
                         className = "HyperMD-with-alt";
                     var el = _this.el;
@@ -184,7 +184,7 @@
                  * Try to construct ClickInfo and bind _mouseUp
                  */
                 this._mouseDown = function (ev) {
-                    // CHANGED add metakey
+                    // PATCHED add metakey
                     var button = ev.button, clientX = ev.clientX, clientY = ev.clientY, ctrlKey = ev.ctrlKey, altKey = ev.altKey, shiftKey = ev.shiftKey, metaKey = ev.metaKey;
                     var cm = _this.cm;
                     if (ev.target.tagName === "PRE")
@@ -281,7 +281,7 @@
                 this.lineDiv = cm.display.lineDiv;
                 var el = this.el = cm.getWrapperElement();
                 new core_1.FlipFlop(
-                    // CHANGED, added global event listener, so that even if our cm is not focused - pointer would appear on links
+                    // PATCHED, added global event listener, so that even if our cm is not focused - pointer would appear on links
                     /* ON  */ function () {
                         _this.lineDiv.addEventListener("mousedown", _this._mouseDown, false);
                         document.addEventListener("keydown", _this._keyDown, false);  // Changed to document

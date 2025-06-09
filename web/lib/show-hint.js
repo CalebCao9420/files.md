@@ -353,7 +353,7 @@
             }
         });
 
-        // CHANGED, change active element on hover
+        // PATCHED, change active element on hover
         CodeMirror.on(hints, "mousemove", function(e) {
             var t = getHintElement(hints, e.target || e.srcElement);
             if (t && t.hintId != null) {

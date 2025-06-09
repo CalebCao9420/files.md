@@ -74,10 +74,10 @@
                     console.log("renderLine return " + changed);
             };
             this.cursorActivityHandler = function (doc) {
-                // CHANGED, if we don't do this, autoscroll is not working.
+                // PATCHED, if we don't do this, autoscroll is not working.
                 if (cm.somethingSelected()) return;
 
-                // CHANGED, prevent blinking
+                // PATCHED, prevent blinking
                 _this.updateImmediately();
                 // _this.update();
             };
@@ -152,12 +152,12 @@
                             var domParent = domNode.parentElement;
                             if (domNode.textContent === "(") {
                                 if (shallHideTokens ? addClass(domNode.parentElement.nextSibling, hideClassName) : rmClass(domNode.parentElement.nextSibling, hideClassName)) {
-                                    // if (DEBUG) console.log("HEAD DOM CHANGED")
+                                    // if (DEBUG) console.log("HEAD DOM PATCHED")
                                     changed = true;
                                 }
                             }
                             if (shallHideTokens ? addClass(domParent, hideClassName) : rmClass(domParent, hideClassName)) {
-                                // if (DEBUG) console.log("HEAD DOM CHANGED")
+                                // if (DEBUG) console.log("HEAD DOM PATCHED")
                                 changed = true;
                             }
                         }
@@ -168,7 +168,7 @@
                                 var begin_1 = map[j * 3], end_1 = map[j * 3 + 1];
                                 var domNode_1 = map[j * 3 + 2];
                                 if (begin_1 == span.tail.start) {
-                                    // if (DEBUG) console.log("TAIL DOM CHANGED", domNode)
+                                    // if (DEBUG) console.log("TAIL DOM PATCHED", domNode)
                                     if (domNode_1.nodeType === Node.TEXT_NODE) {
                                         // good. this token can be changed
                                         var domParent = domNode_1.parentElement;
