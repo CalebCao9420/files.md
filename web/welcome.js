@@ -56,16 +56,6 @@ let defaultFiles = {
                 "#### Inline Code\n" +
                 "Use `console.log()` for debugging.\n" +
                 "\n" +
-                "#### Tables\n" +
-                "| Title | Main Character |\n" +
-                "| ------- | --------------- |\n" +
-                "| Twenty Thousand Leagues Under the Sea | Captain Nemo |\n" +
-                "| Around the World in Eighty Days | Phileas Fogg |\n" +
-                "| Journey to the Center of the Earth | Professor Lidenbrock |\n" +
-                "| From the Earth to the Moon | Impey Barbicane |\n" +
-                "| The Mysterious Island | Cyrus Harding |\n" +
-                "| Five Weeks in a Balloon | Dr. Samuel Fergusson | \n" +
-                "\n" +
                 "#### Links\n" +
                 "You can insert your own links by typing `[`.\n\n" +
                 "[Welcome](/Welcome.md)\n" +
