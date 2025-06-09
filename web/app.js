@@ -1,8 +1,8 @@
 // HyperMD/Codemirror editor
 let editor;
 let focusedItemIndex = -1;
-let debug = false;
-// let debug = {dir: "", file: "Sim.md", loaded: false};
+// let debug = false;
+let debug = {dir: "", file: "Sim.md", loaded: false};
 
 async function init(el) {
     initEditor(el);
@@ -353,7 +353,7 @@ function focusLastLine() {
     // Eat all empty lines before first links.
     while (lastLine >= 0) {
         const lineContent = editor.getLine(lastLine).trim();
-        if (lineContent === "" || lineContent.startsWith("[") || lineContent.endsWith("]") || lineContent.endsWith(")")) {
+        if (lineContent === "") {
             lastLine--;
             continue;
         }
