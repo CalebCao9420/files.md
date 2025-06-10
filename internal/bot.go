@@ -464,12 +464,12 @@ func (b *Bot) saveImage(u Update) (string, error) {
 	}
 
 	imgFilename := fmt.Sprintf("tg_%s%s", imageID, extension)
-	err = b.fs.Write(fs.DirImg, imgFilename, buf.String())
+	err = b.fs.Write(fs.DirMedia, imgFilename, buf.String())
 	if err != nil {
 		return "", fmt.Errorf("can't save image: %w", err)
 	}
 
-	imgPath := fmt.Sprintf("%s/%s", fs.DirImg, imgFilename)
+	imgPath := fmt.Sprintf("%s/%s", fs.DirMedia, imgFilename)
 	content := fmt.Sprintf("![center|%d](%s)", savedImgWidth, imgPath)
 	// If there's caption, place it under the image
 	if u.Caption() != "" {

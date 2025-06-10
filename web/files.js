@@ -27,7 +27,7 @@ let files = [];
 let serverFiles = {files: {}, timestamps: {}, mediaTimestamp: 0};
 const SERVER_FILES_STORAGE_KEY = 'files';
 const supportedFileTypes = ['md', 'txt', 'png', 'jpg', 'jpeg', 'webp', 'gif',];
-const systemDirs = ["img", "archive", "_read_", "_watch_", "_shop_", "today", "later", "journal", "habits", "triggers", "places"];
+const systemDirs = ["media", "img", "archive", "_read_", "_watch_", "_shop_", "today", "later", "journal", "habits", "triggers", "places"];
 
 // Returns files in flattened structure:
 // {
@@ -80,7 +80,7 @@ async function loadLocalFiles(rootDirHandle) {
                     newFiles[dir][filename].lastModified = file.lastModified;
                 });
 
-                if (dir === 'img') {
+                if (dir === 'media') {
                     getImageUrl(entry).then(imageUrl => {
                         newFiles[dir][filename].imageUrl = imageUrl;
                     });
@@ -273,7 +273,7 @@ async function syncMediaFilesFromServer() {
             },
             body: JSON.stringify({
                 userId: getUserId(),
-                folder: 'img',
+                folder: 'media',
                 timestamp: mediaTimestamp
             })
         });
@@ -311,7 +311,7 @@ async function syncMediaFilesFromServer() {
 
                 const blob = await response.blob();
                 console.log(path, blob);
-                await saveMediaFile(`img/${path}`, blob, lastModified);
+                await saveMediaFile(`media/${path}`, blob, lastModified);
                 filesProcessed++;
             } catch (error) {
                 console.error(`Error processing media file ${path}:`, error);
@@ -362,12 +362,12 @@ async function saveMediaFile(path, blob, lastModified) {
         // TODO split path by dir, filename? Not to have this logic
         const parts = path.split('/');
         let filename = parts.pop();
-        files['img'][filename] = {handle: fileHandle};
+        files['media'][filename] = {handle: fileHandle};
         fileHandle.getFile().then(file => {
-            files['img'][filename].lastModified = file.lastModified;
+            files['media'][filename].lastModified = file.lastModified;
         });
         getImageUrl(fileHandle).then(imageUrl => {
-            files['img'][filename].imageUrl = imageUrl;
+            files['media'][filename].imageUrl = imageUrl;
         });
     } catch (error) {
         console.error(`Error writing media file ${path}:`, error);
@@ -380,7 +380,7 @@ async function collectModifiedAndDeletedFiles() {
     const existingFiles = {};
     const promises = [];
     for (const dir in files) {
-        if (dir === 'img') continue; // Skip image directory
+        if (dir === 'media') continue; // Skip image directory
 
         for (const filename in files[dir]) {
             if (dir === editor.currentDir && filename === editor.currentFile) {

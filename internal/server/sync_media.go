@@ -35,7 +35,7 @@ func SyncAllMedia(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO ../.. Attacks
-	mediaFolder := filepath.Join(StorageDir, fs.DirImg)
+	mediaFolder := filepath.Join(StorageDir, fs.DirMedia)
 	logSync(fmt.Sprintf("Media sync syncMediasRequest for folder: '%s', last sync: %d", syncMediasRequest.Dir, syncMediasRequest.Timestamp))
 
 	if _, err := os.Stat(mediaFolder); os.IsNotExist(err) {
@@ -122,7 +122,7 @@ func SyncMedia(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO ../.. attacks
-	filePath := filepath.Join(StorageDir, fs.DirImg, serverMedia.Path)
+	filePath := filepath.Join(StorageDir, fs.DirMedia, serverMedia.Path)
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		http.Error(w, "file not found", http.StatusNotFound)
 		return

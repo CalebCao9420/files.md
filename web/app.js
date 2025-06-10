@@ -73,10 +73,10 @@ function initEditor(el) {
             return path;
         }
 
-        const match = path.match(/^img\/(.+\.(png|jpg|jpeg|gif|webp))$/i);
+        const match = path.match(/^media\/(.+\.(png|jpg|jpeg|gif|webp))$/i);
 
-        if (match && files['img'] && files['img'][match[1]]) {
-            return files['img'][match[1]].imageUrl;
+        if (match && files['media'] && files['media'][match[1]]) {
+            return files['media'][match[1]].imageUrl;
         }
 
         return path;
@@ -121,7 +121,7 @@ function initEditor(el) {
                 const fileName = `${new Date().toISOString().replace(/[:.]/g, '-')}.png`;
                 // await saveImageToDirectory(file, fileName);
 
-                const markdownImageSyntax = `![](img/${fileName})`;
+                const markdownImageSyntax = `![](media/${fileName})`;
                 editor.replaceSelection(markdownImageSyntax);
                 // if (fileHandle) {
                 //     // Insert the Markdown image syntax into the editor
@@ -221,7 +221,7 @@ function createAutocompleteDict() {
 function buildSidebar() {
     let root = new TreeNode("files");
     for (const dir in files) {
-        if (dir === '' || dir === 'img') {
+        if (dir === '' || dir === 'media') {
             continue;
         }
 
@@ -525,7 +525,7 @@ function loadRecentFiles() {
 function getMoveDestinations() {
     let dirs = ["/"];
     for (const dir of Object.keys(files)) {
-        if (dir === '' || dir === 'img') {
+        if (dir === '' || dir === 'media') {
             continue;
         }
         dirs.push(dir);
