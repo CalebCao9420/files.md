@@ -70,7 +70,7 @@ body {
 }
 
 #sidebar li {
-    margin: 3px 0;
+    line-height: 1.3;
 }
 
 #content, CodeMirror-wrap {
