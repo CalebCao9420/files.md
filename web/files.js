@@ -152,6 +152,10 @@ async function syncTextsWithServer() {
             return;
         }
 
+        for (const path in deleted) {
+            removeInfoAboutServerFile(path);
+        }
+
         server = await response.json();
     } catch (error) {
         console.error("Network error occurred:", error.message);
@@ -565,6 +569,7 @@ async function saveTextFile(path, content) {
     }
 }
 
+// TODO del from memory?
 async function removeFile(path) {
     let fileHandle = await getFileHandle(path);
     if (fileHandle === null) {
@@ -585,6 +590,7 @@ async function moveCurrentFile(toDir) {
     let content = getCurrentContent();
     await saveTextFile(newPath, content);
     // TODO move to saveTextFile?
+    delete files[editor.currentDir][editor.currentFile];
     files[toDir][editor.currentFile] = {
         content: content,
         lastModified: 0,
@@ -624,7 +630,9 @@ function setMetadata(path, content, lastModified) {
     };
 }
 
-function removeMetadataAndMemoryMapping(path) {
+
+function removeInfoAboutServerFile(path) {
+    console.log('removing info about server file', path);
     const parts = path.split('/');
     const filename = parts.pop();
     const dir = parts.join('/');
@@ -632,7 +640,6 @@ function removeMetadataAndMemoryMapping(path) {
     if (serverFiles.files?.[dir]?.[filename]) {
         delete serverFiles.files[dir][filename];
     }
-    delete files[dir][filename];
 }
 
 function saveMetadata() {
