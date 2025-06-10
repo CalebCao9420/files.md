@@ -698,6 +698,7 @@ async function syncCurrentFile() {
             console.log(firstLine, toHeader(editor.currentFile));
             const newFilename = fromHeader(firstLine);
             await removeFile(`${editor.currentDir}/${editor.currentFile}`);
+            delete files[editor.currentDir][editor.currentFile];
             console.log('Removed', `${editor.currentDir}/${editor.currentFile}`);
             // TODO Way to verbose, to we want to mess with it like this?
             files[editor.currentDir][newFilename] = {
