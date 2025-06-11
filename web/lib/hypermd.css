@@ -121,11 +121,6 @@
 .cm-s-hypermd-light .cm-header, .cm-s-hypermd-light .cm-strong {
     font-weight: 600;
 }
-.cm-s-hypermd-light span.cm-quote {
-    /*PATCHED*/
-    /*color: #666;*/
-    color: var(--color-tx-alt);
-}
 .cm-s-hypermd-light span.cm-meta {
     color: #FF1717;
 }
@@ -279,9 +274,17 @@
     background-size: 20px 1px;
 }
 
+.cm-s-hypermd-light span.cm-quote {
+    /*PATCHED*/
+    /*color: #666;*/
+    color: var(--color-tx-alt);
+    padding-left: 4px;
+    text-indent: 0;
+    /*margin-left: 4px;*/
+}
 /*PATCHED*/
 .cm-s-hypermd-light pre.HyperMD-quote-1 {
-    padding-left: 10px;
+    padding-left: 24px;
 }
 .cm-s-hypermd-light pre.HyperMD-quote-1:before {
     width: 2px;
@@ -294,9 +297,10 @@
     display: inline-block;
     width: 4px;
 }
+/*PATCHED*/
 .cm-s-hypermd-light pre.HyperMD-quote-1 span.cm-formatting-quote:first-child {
-    /*PATCHED*/
-    margin-left: 1px;
+    margin-left: -12px;
+    margin-right: 2px;
 }
 .cm-s-hypermd-light pre.HyperMD-quote-2 {
     padding-left: 47px;
