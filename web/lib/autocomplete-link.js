@@ -54,7 +54,7 @@
       // while (end < line.length && /[-\w:]/.test(line.charAt(end)))++end
 
       // PATCHED (removed \s, allowed us too see links dialog always)
-      const unicodeWordRegex = /[\p{L}\p{N}_:-]/u; // \p{L} matches any letter, \p{N} matches any number
+      const unicodeWordRegex = /[\p{L}\p{N}_\s:-]/u; // \p{L} matches any letter, \p{N} matches any number
 
       while (start && unicodeWordRegex.test(line.charAt(start - 1))) --start;
       while (end < line.length && unicodeWordRegex.test(line.charAt(end))) ++end;
