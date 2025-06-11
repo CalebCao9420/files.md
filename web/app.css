@@ -1,5 +1,4 @@
 :root {
-    --color-tx: #100F0F;
     --color-tx-hover: #24837b;
     --color-tx-muted: #6F6E69;
     --color-inline-code: var(--color-tx-muted);
@@ -78,10 +77,11 @@ body {
     overflow: auto;
     height: 100%;
     background: var(--color-bg-alt);
-    color: #878787;
+    /*color: #878787;*/
+    color: var(--color-tx);
     font-size: calc(1.5rem);
     padding-left: 5px;
-    border-right: 1px solid #e0e0e0;
+    border-right: 1px solid var(--color-border);
 }
 
 #sidebar > ul {
@@ -443,4 +443,9 @@ body.dragging * {
 
 .CodeMirror-gutters {
     visibility: hidden;
+}
+
+.CodeMirror-cursor {
+    background: red !important;
+    color: green;
 }

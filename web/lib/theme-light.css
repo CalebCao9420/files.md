@@ -1,15 +1,18 @@
-:root {
-    --font: Rubik,Cambria,"Times New Roman",Times,serif;
-    --color-bg: #FFF;
-    --color-bg-alt: #F9F9F9;
-    --color-inline-code: #657b83;
-    --color-inline-code-bg: #d8dae0;
-    --color-link: #2964aa;
-    --color-link-hover: #749ac8;
-    --color-url: #706f6b;
-    --color-tx-sel: rgba(101, 123, 131, 0.2);
-    --color-bg-active: #EFEFEF;
-    --color-border: #e0e0e0;
+@media (prefers-color-scheme: light) {
+    :root {
+        --font: Rubik, Cambria, "Times New Roman", Times, serif;
+        --color-tx: #100F0F;
+        --color-bg: #FFF;
+        --color-bg-alt: #F9F9F9;
+        --color-inline-code: #657b83;
+        --color-inline-code-bg: #d8dae0;
+        --color-link: #2964aa;
+        --color-link-hover: #749ac8;
+        --color-url: #706f6b;
+        --color-tx-sel: rgba(101, 123, 131, 0.2);
+        --color-bg-active: #EFEFEF;
+        --color-border: #e0e0e0;
+    }
 }
 
 .cm-s-hypermd-light .cm-header.cm-header-1 {

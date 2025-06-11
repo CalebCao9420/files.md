@@ -13,8 +13,8 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
 };
 
 (function (mod){ //[HyperMD] UMD patched!
-    /*commonjs*/  ("object"==typeof exports&&"undefined"!=typeof module) ? mod(null, exports, require("codemirror"), require("codemirror/mode/markdown/markdown"), require("./hypermd-flexoki.css")) :
-        /*amd*/       ("function"==typeof define&&define.amd) ? define(["require","exports","codemirror","codemirror/mode/markdown/markdown","./hypermd-flexoki.css"], mod) :
+    /*commonjs*/  ("object"==typeof exports&&"undefined"!=typeof module) ? mod(null, exports, require("codemirror"), require("codemirror/mode/markdown/markdown"), require("./theme-flexoki.css")) :
+        /*amd*/       ("function"==typeof define&&define.amd) ? define(["require","exports","codemirror","codemirror/mode/markdown/markdown","./theme-flexoki.css"], mod) :
             /*plain env*/ mod(null, (this.HyperMD.Mode = this.HyperMD.Mode || {}), CodeMirror);
 })(function (require, exports, CodeMirror) {
     "use strict";
