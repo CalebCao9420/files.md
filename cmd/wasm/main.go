@@ -23,21 +23,12 @@ import (
 )
 
 var (
-	reply func(u internal.Update) error
+	reply func(u internal.Update)
 	chat  *tg.FakeTG
 )
 
-type Update struct {
-	Message string
-	Command *tg.Cmd
-}
-
-type Response struct {
-	Messages []tg.Message
-}
-
-func callAsync(funcName string, callback func(js.Value, error)) {
-	promise := js.Global().Call(funcName)
+func callAsync(funcName string, callback func(js.Value, error), args ...any) {
+	promise := js.Global().Call(funcName, args)
 
 	var successFunc, errorFunc js.Func
 
@@ -49,7 +40,7 @@ func callAsync(funcName string, callback func(js.Value, error)) {
 	})
 
 	errorFunc = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		defer successFunc.Release() // Clean up both
+		defer successFunc.Release()
 		defer errorFunc.Release()
 		callback(js.Undefined(), fmt.Errorf("error: %v", args[0]))
 		return nil
@@ -58,20 +49,44 @@ func callAsync(funcName string, callback func(js.Value, error)) {
 	promise.Call("then", successFunc).Call("catch", errorFunc)
 }
 
-func Reply(_ js.Value, args []js.Value) interface{} {
-	callAsync("hi", func(result js.Value, err error) {
+func read(path string) (string, error) {
+	resultChan := make(chan string, 1)
+	errorChan := make(chan error, 1)
+
+	callAsync("read", func(result js.Value, err error) {
 		if err != nil {
-			sendResponse("Error: %v\n", err)
+			errorChan <- err
 			return
 		}
-		sendResponse(result.String())
-	})
+		resultChan <- result.String()
+	}, path)
+
+	select {
+	case result := <-resultChan:
+		sendToJS(result)
+		return result, nil
+	case err := <-errorChan:
+		return "", err
+	}
+}
+
+func Reply(_ js.Value, args []js.Value) interface{} {
+	//callAsync("hi", func(result js.Value, err error) {
+	//	if err != nil {
+	//		sendToJS(fmt.Sprintf("Error: %v\n", err))
+	//		return
+	//	}
+	//	sendToJS(result.String())
+	//})
+	//upd := tg.NewUpd(-1, args[0].String())
+	//go reply(upd)
+	go read("")
 
 	return nil
 }
 
-func sendResponse(vals ...any) {
-	js.Global().Call("receiveResponse", vals...)
+func sendToJS(vals ...any) {
+	js.Global().Call("receive", vals...)
 }
 
 func main() {
@@ -103,7 +118,7 @@ func initBot() {
 		panic(fmt.Sprintf("Error loading i18n: %s\n", err))
 	}
 
-	reply = func(u internal.Update) error {
+	reply = func(u internal.Update) {
 		defer func() {
 			err := recover()
 			if err != nil {
@@ -118,17 +133,17 @@ func initBot() {
 		userPath, err = filepath.Abs(userPath)
 		if err != nil {
 			slog.Error("Bot error: can't get absolute path for curent dir", "err", err)
-			return err
+			//return err
 		}
 		userFS, err := fs.NewFS(userPath, afero.NewOsFs())
 		if err != nil {
 			slog.Error("Bot error: can't create fs", "err", err)
-			return err
+			//return err
 		}
 		err = userFS.CreateDirsIfNotExist()
 		if err != nil {
 			slog.Error("Bot error: can't create user dirs", "err", err)
-			return err
+			//return err
 		}
 
 		confFilename := config.GUICfg.ConfigFilename
@@ -136,7 +151,7 @@ func initBot() {
 		err = userconf.CreateDefaultIfNotExists()
 		if err != nil {
 			slog.Error("Bot error: can't create default user config", "err", err)
-			return err
+			//return err
 		}
 
 		if chat == nil {
@@ -147,36 +162,25 @@ func initBot() {
 			slog.Error("Bot error", "err", err)
 		}
 
-		return nil
+		//return nil
 	}
 }
 
-func send(update Update) Response {
-	if update.Command != nil {
-		_ = reply(tg.NewUpdCmd(1, *update.Command))
-	} else {
-		_ = reply(tg.NewUpd(1, update.Message))
-	}
-
-	var r Response
-	r.Messages = chat.Messages
-	if chat.EditedMessages != nil {
-		r.Messages = append(r.Messages, chat.EditedMessages...)
-	}
-
-	chat.Messages = nil
-	chat.EditedMessages = nil
-
-	return r
-}
-
-func newUpdate(message string, cmd *tg.Cmd) Update {
-	return Update{
-		Message: message,
-		Command: cmd,
-	}
-}
-
-func newCmd(name string, params []string) tg.Cmd {
-	return tg.NewCmd(name, params)
-}
+//func send(update Update) Response {
+//	if update.Command != nil {
+//		_ = reply(tg.NewUpdCmd(1, *update.Command))
+//	} else {
+//		_ = reply(tg.NewUpd(1, update.Message))
+//	}
+//
+//	var r Response
+//	r.Messages = chat.Messages
+//	if chat.EditedMessages != nil {
+//		r.Messages = append(r.Messages, chat.EditedMessages...)
+//	}
+//
+//	chat.Messages = nil
+//	chat.EditedMessages = nil
+//
+//	return r
+//}
