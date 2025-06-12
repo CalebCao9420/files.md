@@ -52,7 +52,12 @@
         return await file.text();
     }
 
-    async function exists(path) {
+    async function exists(args) {
+        let path = args[0]
+        if (path === "") {
+            return true
+        }
+
         try {
             const root = await getRootDirHandle();
             if (root === undefined) {

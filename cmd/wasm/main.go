@@ -38,12 +38,21 @@ func Reply(_ js.Value, args []js.Value) interface{} {
 	//	}
 	//	sendToJS(result.String())
 	//})
-	//upd := tg.NewUpd(-1, args[0].String())
-	//go reply(upd)
-	//sendToJS(args)
-	go readFile("file.md")
+	upd := tg.NewUpd(-1, args[0].String())
+	go reply(upd)
+	//go readFile("file.md")
 
 	return nil
+}
+
+func main() {
+	fs.Exists = exists
+	fs.ReadFile = readFile
+	initBot()
+	js.Global().Set("reply", js.FuncOf(Reply))
+
+	select {}
+
 }
 
 func callAsync(funcName string, callback func(js.Value, error), args ...any) {
@@ -85,14 +94,6 @@ func sendToJS(vals ...any) {
 	js.Global().Call("receive", vals...)
 }
 
-func main() {
-	//initBot()
-	js.Global().Set("reply", js.FuncOf(Reply))
-
-	select {}
-
-}
-
 func initBot() {
 	//opts := &tint.Options{
 	//	Level: slog.LevelDebug,
@@ -129,6 +130,7 @@ func initBot() {
 		if err != nil {
 			sendToJS(fmt.Sprintf("Bot error: can't create fs: %v", err))
 		}
+		return
 		err = userFS.CreateDirsIfNotExist()
 		if err != nil {
 			sendToJS("Bot error: can't create user dirs", "err")
