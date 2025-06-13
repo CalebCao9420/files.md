@@ -721,6 +721,9 @@ document.addEventListener('keydown', function (event) {
 
         window.location.href = '/chat';
         window.resizeTo(500, 500);
+        const left = (screen.availWidth - 500) / 2;
+        const top = (screen.availHeight - 500) / 2;
+        window.moveTo(left, top);
         // const sidebar = document.getElementById('sidebar');
         // if (sidebar.style.display === 'none') {
         //     sidebar.style.display = 'block';
