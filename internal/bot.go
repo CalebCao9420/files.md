@@ -1799,7 +1799,7 @@ func (b *Bot) moveToJournal(params []string) error {
 	}
 
 	b.delAllKeyboards()
-	msg := txt.Emoji(i18n.Emoji("journal"), fmt.Sprintf(i18n.Tr("Saved to <b>journal</b>")))
+	msg := txt.Emoji(i18n.Emoji("journal"), i18n.Tr("Saved to <b>journal</b>"))
 	_, _ = b.tg.Send(b.userID, msg, nil, tg.MarkupHTML)
 
 	if b.cfg.JournalOnlyMode() {
