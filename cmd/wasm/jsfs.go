@@ -219,7 +219,7 @@ func readDir(backend afero.Fs, path string) ([]os.FileInfo, error) {
 
 func jsArrayToFileInfo(jsArray js.Value) []os.FileInfo {
 	var fileInfos []os.FileInfo
-
+	
 	// Get array length
 	length := jsArray.Get("length").Int()
 

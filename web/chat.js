@@ -390,14 +390,12 @@ async function readDir(args) {
 
     for await (const [name, handle] of currentDirHandle.entries()) {
         if (handle.kind === 'directory') {
-// For directories
             entries.push({
                 name: name,
                 isDir: true,
-                modTime: null // File System Access API doesn't provide modTime for directories
+                modTime: 0 // File System Access API doesn't provide modTime for directories
             });
         } else if (handle.kind === 'file') {
-// For files
             const file = await handle.getFile();
             entries.push({
                 name: name,
