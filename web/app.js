@@ -708,7 +708,7 @@ function showSearchResults(results) {
         listItem.setAttribute('data-path', `${dir}/${filename}`);
         listItem.setAttribute('data-index', index);
         listItem.onclick = async () => {
-            openEditor();
+            openEditor(!isChat);
             await openFile(dir, filename);
             closeSearchModal();
         };
@@ -767,12 +767,14 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
-function openEditor() {
+function openEditor(withSidebar = true) {
     if (!isChat) {
         return true;
     }
 
-    sidebarContainer.style.display = 'block';
+    if (withSidebar) {
+        sidebarContainer.style.display = 'block';
+    }
     content.style.display = 'block';
     chatContainer.style.display = 'none';
     isChat = false;
@@ -835,6 +837,7 @@ document.getElementById('search').addEventListener('keydown', (event) => {
         event.preventDefault();
         if (resultsList[focusedSearchItemIndex]) {
             const [dir, filename] = resultsList[focusedSearchItemIndex].getAttribute('data-path').split('/');
+            openEditor(!isChat);
             openFile(dir, filename);
             closeSearchModal();
         }
