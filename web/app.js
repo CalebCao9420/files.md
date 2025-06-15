@@ -774,12 +774,12 @@ function openEditor(withSidebar = true) {
 
     if (withSidebar) {
         sidebarContainer.style.display = 'block';
+        window.resizeTo(screen.availWidth, screen.availHeight);
+        window.moveTo(0, 0);
     }
     content.style.display = 'block';
     chatContainer.style.display = 'none';
     isChat = false;
-    window.resizeTo(screen.availWidth, screen.availHeight);
-    window.moveTo(0, 0);
     editor.focus();
 }
 
