@@ -319,11 +319,15 @@ async function syncMedia() {
                 if (!response.ok) {
                     console.error(`Failed to sync media file ${mediaFilename}:`, response.statusText, response.text(), mediaFilename, base64String);
                 } else {
-                    let json = await response.json();
-                    serverFiles['media'][mediaFilename] = {
-                        lastModified: json.lastModified,
-                    };
-                    saveMetadata();
+                    const contentType = response.headers.get('Content-Type');
+                    // On new file json is returned, binary otherwise (prob we should always return base64?)
+                    if (contentType && contentType.includes('application/json')) {
+                        let json = await response.json();
+                        serverFiles['media'][mediaFilename] = {
+                            lastModified: json.lastModified,
+                        };
+                        saveMetadata();
+                    }
                     console.log(`Successfully synced media file: ${mediaFilename}`);
                 }
             } catch (error) {
