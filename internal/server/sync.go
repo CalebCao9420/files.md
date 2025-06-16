@@ -104,6 +104,7 @@ func SyncTexts(w http.ResponseWriter, r *http.Request) {
 		renames = ReadLog(request.UserID, lastSync)
 	}
 
+	// If a file was renamed and changed, on client we would rename then change?
 	// Save client-modified files to the server
 	for _, clientFile := range request.Modified {
 		path := clientFile.Path
@@ -268,7 +269,6 @@ func SyncText(w http.ResponseWriter, r *http.Request) {
 			"lastModified": ctime,
 		}
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotModified)
 		json.NewEncoder(w).Encode(response)
 		return
 	}
