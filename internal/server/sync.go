@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"zakirullin/stuffbot/config"
 	"zakirullin/stuffbot/internal/fs"
 )
 
@@ -152,6 +153,12 @@ func SyncTexts(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Failed to get timestamps: %v", err), http.StatusInternalServerError)
 		return
 	}
+
+	configCtime, err := userFS.Ctime("", config.BotCfg.ConfigFilename)
+	if err != nil {
+		log.Printf("Error getting timestamp for config file: %v", err)
+	}
+	serverTimestamps[config.BotCfg.ConfigFilename] = configCtime
 
 	// Prepare the list of files to send to the client
 	// TODO optimize don't send files known to client.

@@ -3,6 +3,7 @@ const chatContainer = document.getElementById('chat-container');
 const sendButton = document.getElementById('send-button');
 const messagesContainer = document.getElementById('messages');
 const commandPopup = document.getElementById('command-popup');
+let focusedCommandIndex = 0;
 
 function sendMessage() {
     const msg = toMarkdown();
@@ -117,59 +118,6 @@ const commands = [
     {command: '/settings', display: '⚙️ Settings'},
     {command: '/help', display: '📕 Help'}
 ];
-
-function showCommandPopup() {
-    const inputText = toMarkdown();
-
-    const filteredCommands = commands.filter(cmd => cmd.command.startsWith(inputText));
-
-    commandPopup.innerHTML = '';
-    filteredCommands.forEach((cmd, index) => {
-        const cmdItem = document.createElement('div');
-        cmdItem.classList.add('command-item');
-        cmdItem.textContent = cmd.display;
-        cmdItem.setAttribute('data-index', index);
-
-        cmdItem.onclick = () => {
-            replyCmd(JSON.stringify({n: cmd.command.substring(1), t: "cmd"}))
-            clearInput();
-            hideCommandPopup();
-        };
-
-        commandPopup.appendChild(cmdItem);
-    });
-
-    if (filteredCommands.length === 0) {
-        hideCommandPopup();
-        return;
-    }
-
-    const firstCommandItem = commandPopup.querySelector('.command-item');
-    if (firstCommandItem) {
-        firstCommandItem.classList.add('focused');
-    }
-
-    commandPopup.classList.remove('hidden');
-
-}
-
-function insertFocusedCommand() {
-    const focusedCommand = commandPopup.querySelector('.command-item.focused');
-    if (focusedCommand) {
-        const commandText = focusedCommand.textContent.trim();
-        const selectedCommand = commands.find(cmd => cmd.display === commandText);
-        if (selectedCommand) {
-            input.value = selectedCommand.command;
-            input.focus();
-            hideCommandPopup();
-        }
-    }
-}
-
-function hideCommandPopup() {
-    commandPopup.classList.add('hidden');
-    commandPopup.innerHTML = ''; // Clear the popup content
-}
 
 document.addEventListener('scroll', () => {
     input.focus();
@@ -604,8 +552,6 @@ input.addEventListener('keydown', (e) => {
         }
     }
 });
-
-let focusedCommandIndex = 0;
 
 function showCommandPopup() {
     const inputText = toMarkdown();

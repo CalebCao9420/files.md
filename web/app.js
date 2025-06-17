@@ -260,7 +260,7 @@ async function initChat() {
 function createAutocompleteDict() {
     const dict = {};
 
-    Object.keys(excludeDirs(systemDirs)).forEach(dir => {
+    Object.keys(excludeDirs(SYSTEM_DIRS)).forEach(dir => {
         Object.keys(files[dir]).forEach(filename => {
             const key = `${filename.replace(/\.md$/, "")}`;
             const filePath = `${filename.replace(/\.md$/, "")}](${dir}/${filename})`;
@@ -280,6 +280,10 @@ function buildSidebar() {
 
         let dirNode = new TreeNode(dir, {expanded: false});
         for (let file in files[dir]) {
+            if (file === CONFIG_FILENAME) {
+                return;
+            }
+
             let fileNode = new TreeNode(file.replace(/\.md$/, ''), {expanded: false});
             fileNode.on('click', async function (n, node) {
                 await openFile(node.parent.toString(), node.toString() + ".md");
@@ -312,7 +316,7 @@ async function showRandomFile() {
     }
 
     const allFiles = [];
-    for (let dir in excludeDirs(systemDirs)) {
+    for (let dir in excludeDirs(SYSTEM_DIRS)) {
         for (let file in files[dir]) {
             allFiles.push({dir, file});
         }
@@ -566,7 +570,7 @@ function closeMoveModal() {
 
 function loadRecentFiles() {
     let results = [];
-    for (const dir of Object.keys(excludeDirs(systemDirs))) {
+    for (const dir of Object.keys(excludeDirs(SYSTEM_DIRS))) {
         for (const filename of Object.keys(files[dir])) {
             results.push({
                 dir, filename, lastModified: files[dir][filename].lastModified,
@@ -635,7 +639,7 @@ function search() {
     const lowPriorityDirs = ["archive", "_read_", "_watch_", "_shop_", "habits", "triggers", "today", "later"];
 
     // Levenshtein distance
-    for (const dir in excludeDirs(systemDirs)) {
+    for (const dir in excludeDirs(SYSTEM_DIRS)) {
         for (const filename in files[dir]) {
             const potentialMatch = filename.replace(/\.md$/, "");
             let similarityScore = similarity(search, potentialMatch);

@@ -26,9 +26,10 @@ let isSyncingCurrent = false;
 // }
 let files = [];
 let serverFiles = {files: {}, media: {}, timestamps: {}, mediaTimestamp: 0};
-const SERVER_FILES_STORAGE_KEY = 'files';
-const supportedFileTypes = ['md', 'txt', 'png', 'jpg', 'jpeg', 'webp', 'gif',];
-const systemDirs = ["media", "img", "archive", "_read_", "_watch_", "_shop_", "today", "later", "journal", "habits", "triggers", "places"];
+const SERVER_STORAGE_KEY = 'files';
+const SUPPORTED_EXTENSIONS = ['md', 'txt', 'png', 'jpg', 'jpeg', 'webp', 'gif',];
+const SYSTEM_DIRS = ["media", "img", "archive", "_read_", "_watch_", "_shop_", "today", "later", "journal", "habits", "triggers", "places"];
+const CONFIG_FILENAME = 'config.json';
 
 // Returns files in flattened structure:
 // {
@@ -60,13 +61,16 @@ async function loadLocalFiles(rootDirHandle) {
         for (const entry of entries) {
             const filename = entry.name.normalize("NFC");
 
+            let isSupportedExtension = SUPPORTED_EXTENSIONS.includes(filename.split('.').pop());
+            let isConfig = filename === CONFIG_FILENAME;
             if (entry.kind === 'directory') {
                 if (filename.startsWith('.') || depth >= 5) continue;
 
                 const dir = `${path}${filename}/`;
                 newFiles[filename] = {};
                 dirPromises.push({handle: entry, dir, depth: depth + 1});
-            } else if (entry.kind === 'file' && supportedFileTypes.includes(filename.split('.').pop())) {
+
+            } else if (entry.kind === 'file' && (isSupportedExtension || isConfig)) {
                 const dir = path.replace(/\/+$/, '');
                 if (!newFiles[dir]) newFiles[dir] = {};
 
@@ -112,7 +116,7 @@ async function loadLocalFiles(rootDirHandle) {
     }
 
     // Load metadata
-    const savedMetadata = localStorage.getItem(SERVER_FILES_STORAGE_KEY);
+    const savedMetadata = localStorage.getItem(SERVER_STORAGE_KEY);
     if (savedMetadata) {
         serverFiles = JSON.parse(savedMetadata);
     }
@@ -778,7 +782,7 @@ function removeInfoAboutServerFile(path) {
 }
 
 function saveServerFiles() {
-    localStorage.setItem(SERVER_FILES_STORAGE_KEY, JSON.stringify(serverFiles));
+    localStorage.setItem(SERVER_STORAGE_KEY, JSON.stringify(serverFiles));
 }
 
 function getUserId() {
