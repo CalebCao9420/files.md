@@ -977,7 +977,7 @@ async function openDir() {
 function getCurrentContent() {
     let content = editor.getValue();
     const header = toHeader(editor.currentFile);
-    if (content.startsWith(`${header}`)) {
+    if (content.toLowerCase().startsWith(`${header}`.toLowerCase())) {
         content = content.slice(`${header}\n`.length);
     }
 

@@ -838,10 +838,9 @@ async function syncCurrentFile() {
     try {
         // TODO track if no first line?
         const firstLine = editor.getValue().split('\n')[0];
-        const hasFilenameChanged = firstLine !== toHeader(editor.currentFile);
+        const hasFilenameChanged = firstLine.toLowerCase() !== toHeader(editor.currentFile).toLowerCase();
         if (hasFilenameChanged) {
-            console.log(firstLine, toHeader(editor.currentFile));
-            const newFilename = fromHeader(firstLine);
+            const newFilename = ucfirst(fromHeader(firstLine));
             await removeFile(`${editor.currentDir}/${editor.currentFile}`);
             delete files[editor.currentDir][editor.currentFile];
             console.log('Removed', `${editor.currentDir}/${editor.currentFile}`);
