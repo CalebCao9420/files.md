@@ -54,7 +54,7 @@ deploy: # deploy as systemd service
 	TIMESTAMP=$$(date +%s); \
 	printf "$${YELLOW}Building...$${RESET}\n" && \
 	printf "$${YELLOW}Versioning current files with: $${TIMESTAMP}$${RESET}\n" && \
-	find . -name "*.html" -exec grep -l "?v=" {} \; | xargs sed -i '' 's/?v=/?v='"$(date +%s)"'/g' && \
+	find . -name "*.html" -exec grep -l "?v=" {} \; | xargs sed -i '' 's/?v=/?v='"$(TIMESTAMP)"'/g' && \
 	make check && \
 	GOOS=linux GOARCH=amd64 go build -o /tmp/bot ./cmd/tgbot && \
 	printf "$${GREEN}Build Completed$${RESET}\n" && \
