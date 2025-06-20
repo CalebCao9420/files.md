@@ -93,7 +93,7 @@
 .tj_drop_indicator {
 	position: absolute;
 	height: 2px;
-	background-color: var(--color-tx-alt);
+	background-color: var(--color-link);
 	opacity: 0;
 	transition: opacity 0.2s ease;
 	pointer-events: none;
@@ -104,8 +104,8 @@
 }
 
 .tj_drop_target {
-	background-color: var(--color-tx-alt) !important;
-	color: var(--color-tx);
+	background-color: var(--color-bg-active);
+	color: var(--color-link);
 	/*border: 2px solid var(--color-border) !important;*/
 	border-radius: 5px;
 }
