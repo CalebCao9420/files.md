@@ -288,6 +288,10 @@ function createAutocompleteDict() {
     return dict;
 }
 function updateSidebar(focusDir = '') {
+    if (files === undefined) {
+        return
+    }
+
     let expandedDirs = new Set();
     let selectedDirs = new Set();
 
@@ -301,8 +305,6 @@ function updateSidebar(focusDir = '') {
             }
         });
     }
-
-    console.log(expandedDirs, selectedDirs);
 
     root = new TreeNode('');
     for (const dir in files) {
@@ -329,7 +331,7 @@ function updateSidebar(focusDir = '') {
         }
     }
 
-    if (files['']) {
+    if (files && files['']) {
         for (let file in files['']) {
             if (file === CONFIG_FILENAME) {
                 continue;

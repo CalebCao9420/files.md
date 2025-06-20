@@ -225,7 +225,7 @@ async function syncTextsWithServer() {
                     try {
                         await removeFile(oldPath);
                     } catch(err) {
-                        console.log('RENAME: cant remove file: ', err);
+                        console.log('RENAME: cant remove file: ', err, path);
                     }
                 }
                 saveServerFiles();
