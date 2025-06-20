@@ -37,7 +37,7 @@ var (
 )
 
 const (
-	DirRoot     = ""
+	DirRoot     = "/"
 	DirArchive  = "archive"
 	DirToday    = "today"
 	DirLater    = "later"

@@ -77,7 +77,7 @@ func SyncTexts(w http.ResponseWriter, r *http.Request) {
 
 	// Delete files
 	for _, path := range request.Deleted {
-		err = userFS.Del("", path)
+		err = userFS.Del(fs.DirRoot, path)
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {
 				continue
@@ -110,7 +110,7 @@ func SyncTexts(w http.ResponseWriter, r *http.Request) {
 	for _, clientFile := range request.Modified {
 		path := clientFile.Path
 
-		serverModifiedTime, err := userFS.Ctime("", path)
+		serverModifiedTime, err := userFS.Ctime(fs.DirRoot, path)
 		var clientContent string
 		if err != nil && !errors.Is(err, os.ErrNotExist) {
 			log.Printf("Error reading file '%s': %v", path, err)
@@ -124,7 +124,7 @@ func SyncTexts(w http.ResponseWriter, r *http.Request) {
 			// file locks?
 			fileWasModifiedOnServer := serverModifiedTime > clientFile.LastModified
 			if fileWasModifiedOnServer {
-				serverContent, err := userFS.Read("", path)
+				serverContent, err := userFS.Read(fs.DirRoot, path)
 				if err != nil {
 					log.Printf("Error reading file '%s': %v", path, err)
 					continue
@@ -139,7 +139,7 @@ func SyncTexts(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Write the clientContent to the server at path
-		err = userFS.Write("", path, clientContent)
+		err = userFS.Write(fs.DirRoot, path, clientContent)
 		if err != nil {
 			log.Printf("Error writing file '%s': %v", path, err)
 			logSync(fmt.Sprintf("Error writing file '%s': %v", path, err))
@@ -154,7 +154,7 @@ func SyncTexts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	configCtime, err := userFS.Ctime("", config.BotCfg.ConfigFilename)
+	configCtime, err := userFS.Ctime(fs.DirRoot, config.BotCfg.ConfigFilename)
 	if err != nil {
 		log.Printf("Error getting timestamp for config file: %v", err)
 	} else {
@@ -178,7 +178,7 @@ func SyncTexts(w http.ResponseWriter, r *http.Request) {
 		requestDirTime, exists := request.Timestamps[dir]
 		if !exists || serverFileTime > requestDirTime {
 			// Client needs this file - read its content
-			content, err := userFS.Read("", path)
+			content, err := userFS.Read(fs.DirRoot, path)
 			if err != nil {
 				log.Printf("Error reading file %s: %v", path, err)
 				logSync(fmt.Sprintf("Error reading file %s: %v", path, err))
@@ -254,14 +254,14 @@ func SyncText(w http.ResponseWriter, r *http.Request) {
 	// 2) In case of conflict (server has a newer modification), merge the clientFile and include them in the response
 
 	// TODO if no clientFile, severContent = ""
-	serverContent, err := userFS.Read("", path)
+	serverContent, err := userFS.Read(fs.DirRoot, path)
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		log.Printf("Error reading one clientFile '%s': %v", path, err)
 		http.Error(w, "Error reading server clientFile", http.StatusBadRequest)
 		return
 	}
 
-	ctime, err := userFS.Ctime("", path)
+	ctime, err := userFS.Ctime(fs.DirRoot, path)
 	if err != nil {
 		if !errors.Is(err, os.ErrNotExist) {
 			log.Printf("Error getting ctime for clientFile '%s': %v", path, err)
@@ -303,7 +303,7 @@ func SyncText(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Write the content to the server at path
-	err = userFS.Write("", path, content)
+	err = userFS.Write(fs.DirRoot, path, content)
 	if err != nil {
 		log.Printf("Error writing clientFile '%s': %v", path, err)
 		logSync(fmt.Sprintf("Error writing clientFile '%s': %v", path, err))
@@ -311,7 +311,7 @@ func SyncText(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctime, err = userFS.Ctime("", path)
+	ctime, err = userFS.Ctime(fs.DirRoot, path)
 	// TODO what if 0?
 	logSync(fmt.Sprintf("Server timestamp for '%s': %d", path, ctime))
 

@@ -1115,7 +1115,7 @@ func TestShowToFileNoDirs(t *testing.T) {
 	r.NoError(err)
 
 	r.Equal(tg.NewKeyboard([]tg.Row{
-		tg.NewRow(tg.NewBtn("Note", tg.NewCmd("mf", []string{"345fb", "", "345fb"}))),
+		tg.NewRow(tg.NewBtn("Note", tg.NewCmd("mf", []string{"345fb", "/", "345fb"}))),
 		tg.NewBtn("Search", tg.NewCustomCmd("search", nil, "iq")),
 		tg.NewRow(tg.NewBtn("🗂 New Dir", tg.NewCmd("new_dir", []string{"345fbd7ab08"}))),
 	},
@@ -1139,10 +1139,10 @@ func TestShowMoveToFile(t *testing.T) {
 	r.NoError(err)
 
 	r.Equal(tg.NewKeyboard([]tg.Row{
-		tg.NewRow(tg.NewBtn("Note", tg.NewCmd("mf", []string{"345fb", "", "345fb"}))),
+		tg.NewRow(tg.NewBtn("Note", tg.NewCmd("mf", []string{"345fb", "/", "345fb"}))),
 		tg.NewBtn("Search", tg.NewCustomCmd("search", nil, "iq")),
 		tg.NewRow(
-			tg.NewBtn("🗂️ Dir", tg.NewCmd("mv", []string{"73600", "", "345fbd7ab08"})),
+			tg.NewBtn("🗂️ Dir", tg.NewCmd("mv", []string{"73600", "/", "345fbd7ab08"})),
 			tg.NewBtn("🗂 New Dir", tg.NewCmd("new_dir", []string{"345fbd7ab08"})),
 		),
 	}), tgram.LastSentKeyboard)
@@ -1285,7 +1285,7 @@ func TestMoveToExistingFile(t *testing.T) {
 
 	tgram := tg.NewFakeTG()
 	bot := NewBot(-1, tgram, userFS, db.NewFakeDB(), fakeConfig())
-	upd := tg.NewUpdCmd(-1, tg.NewCmd("mf", []string{"1c8f819d075", "", "501ef2410e2"}))
+	upd := tg.NewUpdCmd(-1, tg.NewCmd("mf", []string{"1c8f819d075", "/", "501ef2410e2"}))
 	err = bot.Reply(upd)
 	r.NoError(err)
 
@@ -1316,7 +1316,7 @@ func TestMoveToExistingFileExistingRecord(t *testing.T) {
 
 	tgram := tg.NewFakeTG()
 	bot := NewBot(-1, tgram, userFS, db.NewFakeDB(), fakeConfig())
-	upd := tg.NewUpdCmd(-1, tg.NewCmd("mf", []string{"1c8f819d075", "", "501ef2410e2"}))
+	upd := tg.NewUpdCmd(-1, tg.NewCmd("mf", []string{"1c8f819d075", "/", "501ef2410e2"}))
 	err = bot.Reply(upd)
 	r.NoError(err)
 
@@ -2083,7 +2083,7 @@ func TestInlineRequestFileListRootDirsWithoutSlash(t *testing.T) {
 
 	err = bot.Reply(upd)
 	r.Error(err)
-	r.EqualError(err, "show file: can't find file: can't unhash '..' in '': cannot unhash, maybe the file is missing")
+	r.EqualError(err, "show file: can't find file: can't unhash '..' in '/': cannot unhash, maybe the file is missing")
 }
 
 func TestAnswerSearch(t *testing.T) {
@@ -2210,7 +2210,7 @@ func TestShowFileEscapesHTML(t *testing.T) {
 
 	bot := NewBot(-1, tgram, userFS, db.NewFakeDB(), fakeConfig())
 
-	err = bot.showFile([]string{"", "File.md"})
+	err = bot.showFile([]string{"/", "File.md"})
 	r.NoError(err)
 	r.Equal("<b>File</b>\n\n&lt;b&gt;bold<i>italic</i>", tgram.LastSentText)
 }
@@ -2328,18 +2328,18 @@ func TestSaveToExistingFileIntegration(t *testing.T) {
 
 	selectFileKB := tg.NewKeyboard([]tg.Row{
 		tg.NewRow(
-			tg.NewBtn("Text", tg.NewCmd("mf", []string{"23200", "", "23200"})),
-			tg.NewBtn("File", tg.NewCmd("mf", []string{"7595e", "", "23200"})),
+			tg.NewBtn("Text", tg.NewCmd("mf", []string{"23200", "/", "23200"})),
+			tg.NewBtn("File", tg.NewCmd("mf", []string{"7595e", "/", "23200"})),
 		),
 		tg.NewBtn("Search", tg.NewCustomCmd("search", nil, "iq")),
 		tg.NewRow(
-			tg.NewBtn("🗂️ Habits", tg.NewCmd("mv", []string{"51fc0", "", "232004794e5"})),
+			tg.NewBtn("🗂️ Habits", tg.NewCmd("mv", []string{"51fc0", "/", "232004794e5"})),
 			tg.NewBtn("🗂 New Dir", tg.NewCmd("new_dir", []string{"232004794e5"})),
 		),
 	})
 	r.Equal(selectFileKB, tgram.LastEditedKeyboard)
 
-	err = bot.Reply(tg.NewUpdCmd(-1, tg.NewCmd("mf", []string{"7595e", "", "23200"})))
+	err = bot.Reply(tg.NewUpdCmd(-1, tg.NewCmd("mf", []string{"7595e", "/", "23200"})))
 	r.NoError(err)
 
 	r.Nil(tgram.LastEditedKeyboard)
@@ -2406,11 +2406,11 @@ func TestSaveToNewFileIntegration(t *testing.T) {
 
 	selectFileKB := tg.NewKeyboard([]tg.Row{
 		tg.NewRow(
-			tg.NewBtn("Text", tg.NewCmd("mf", []string{"23200", "", "23200"})),
+			tg.NewBtn("Text", tg.NewCmd("mf", []string{"23200", "/", "23200"})),
 		),
 		tg.NewBtn("Search", tg.NewCustomCmd("search", nil, "iq")),
 		tg.NewRow(
-			tg.NewBtn("🗂️ Habits", tg.NewCmd("mv", []string{"51fc0", "", "232004794e5"})),
+			tg.NewBtn("🗂️ Habits", tg.NewCmd("mv", []string{"51fc0", "/", "232004794e5"})),
 			tg.NewBtn("🗂 New Dir", tg.NewCmd("new_dir", []string{"232004794e5"})),
 		),
 	})
@@ -2483,11 +2483,11 @@ func TestSaveToNewDirIntegration(t *testing.T) {
 
 	selectFileKB := tg.NewKeyboard([]tg.Row{
 		tg.NewRow(
-			tg.NewBtn("Text", tg.NewCmd("mf", []string{"23200", "", "23200"})),
+			tg.NewBtn("Text", tg.NewCmd("mf", []string{"23200", "/", "23200"})),
 		),
 		tg.NewBtn("Search", tg.NewCustomCmd("search", nil, "iq")),
 		tg.NewRow(
-			tg.NewBtn("🗂️ Habits", tg.NewCmd("mv", []string{"51fc0", "", "232004794e5"})),
+			tg.NewBtn("🗂️ Habits", tg.NewCmd("mv", []string{"51fc0", "/", "232004794e5"})),
 			tg.NewBtn("🗂 New Dir", tg.NewCmd("new_dir", []string{"232004794e5"})),
 		),
 	})
@@ -2567,11 +2567,11 @@ func TestSaveToNewMultilineFileIntegration(t *testing.T) {
 
 	selectFileKB := tg.NewKeyboard([]tg.Row{
 		tg.NewRow(
-			tg.NewBtn("Text", tg.NewCmd("mf", []string{"23200", "", "23200"})),
+			tg.NewBtn("Text", tg.NewCmd("mf", []string{"23200", "/", "23200"})),
 		),
 		tg.NewBtn("Search", tg.NewCustomCmd("search", nil, "iq")),
 		tg.NewRow(
-			tg.NewBtn("🗂️ Habits", tg.NewCmd("mv", []string{"51fc0", "", "232004794e5"})),
+			tg.NewBtn("🗂️ Habits", tg.NewCmd("mv", []string{"51fc0", "/", "232004794e5"})),
 			tg.NewBtn("🗂 New Dir", tg.NewCmd("new_dir", []string{"232004794e5"})),
 		),
 	})
@@ -2644,11 +2644,11 @@ func TestSaveToNewCustomFileIntegration(t *testing.T) {
 
 	selectFileKB := tg.NewKeyboard([]tg.Row{
 		tg.NewRow(
-			tg.NewBtn("Text", tg.NewCmd("mf", []string{"23200", "", "23200"})),
+			tg.NewBtn("Text", tg.NewCmd("mf", []string{"23200", "/", "23200"})),
 		),
 		tg.NewBtn("Search", tg.NewCustomCmd("search", nil, "iq")),
 		tg.NewRow(
-			tg.NewBtn("🗂️ Habits", tg.NewCmd("mv", []string{"51fc0", "", "232004794e5"})),
+			tg.NewBtn("🗂️ Habits", tg.NewCmd("mv", []string{"51fc0", "/", "232004794e5"})),
 			tg.NewBtn("🗂 New Dir", tg.NewCmd("new_dir", []string{"232004794e5"})),
 		),
 	})
@@ -2723,8 +2723,8 @@ func TestSaveToRecentFileIntegration(t *testing.T) {
 
 	selectFileKeyboard := tg.NewKeyboard([]tg.Row{
 		tg.NewRow(
-			tg.NewBtn("Text", tg.NewCmd("mf", []string{"23200", "", "72e56"})),
-			tg.NewBtn("New text", tg.NewCmd("mf", []string{"72e56", "", "72e56"})),
+			tg.NewBtn("Text", tg.NewCmd("mf", []string{"23200", "/", "72e56"})),
+			tg.NewBtn("New text", tg.NewCmd("mf", []string{"72e56", "/", "72e56"})),
 		),
 		tg.NewBtn("Search", tg.NewCustomCmd("search", nil, "iq")),
 		tg.NewRow(
@@ -2733,7 +2733,7 @@ func TestSaveToRecentFileIntegration(t *testing.T) {
 	})
 	r.Equal(selectFileKeyboard, tgram.LastEditedKeyboard)
 
-	err = bot.Reply(tg.NewUpdCmd(-1, tg.NewCmd("mf", []string{"23200", "", "72e56"})))
+	err = bot.Reply(tg.NewUpdCmd(-1, tg.NewCmd("mf", []string{"23200", "/", "72e56"})))
 	r.NoError(err)
 
 	r.Empty(tgram.LastEditedKeyboard)

@@ -406,10 +406,11 @@ func TestUnhashRootDirectory(t *testing.T) {
 
 	fs, err := NewFS(".", afero.NewMemMapFs())
 	r.NoError(err)
-	unhashed, err := fs.Unhash("", "")
+	// TODO is it used at all? What a strange behaviour?
+	unhashed, err := fs.Unhash("/", "/")
 	r.NoError(err)
 
-	r.Equal("", unhashed)
+	r.Equal("/", unhashed)
 }
 
 func TestSanitizeFilename(t *testing.T) {
