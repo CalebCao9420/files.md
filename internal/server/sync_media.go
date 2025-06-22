@@ -16,7 +16,7 @@ var syncMediasRequest struct {
 }
 
 type media struct {
-	Path         string `json:"path"`
+	Filename     string `json:"filename"`
 	LastModified int64  `json:"lastModified"`
 	Data         string `json:"data"`
 }
@@ -63,7 +63,7 @@ func SyncMedias(w http.ResponseWriter, r *http.Request) {
 		}
 
 		mediaFiles = append(mediaFiles, media{
-			Path:         filename,
+			Filename:     filename,
 			LastModified: modTime,
 		})
 	}
@@ -104,7 +104,7 @@ func SyncMedia(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exists, err := userFS.Exists(clientMedia.Path, "")
+	exists, err := userFS.Exists(fs.DirMedia, clientMedia.Filename)
 	if err != nil {
 		log.Printf("Error checking if media exists: %v", err)
 		http.Error(w, "Error checking media existence", http.StatusInternalServerError)
@@ -119,17 +119,17 @@ func SyncMedia(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = userFS.Write(clientMedia.Path, "", string(content))
+		err = userFS.Write(fs.DirMedia, clientMedia.Filename, string(content))
 		if err != nil {
 			http.Error(w, "Invalid base64 data", http.StatusBadRequest)
 			return
 		}
 
-		logSync(fmt.Sprintf("Media created: %s", clientMedia.Path))
+		logSync(fmt.Sprintf("Media created: %s", clientMedia.Filename))
 		return
 	}
 
-	path, err := userFS.SafePath(clientMedia.Path, "")
+	path, err := userFS.SafePath(fs.DirMedia, clientMedia.Filename)
 	if err != nil {
 		log.Printf("The path is unsafe: %v", err)
 		http.Error(w, "The path is unsafe", http.StatusInternalServerError)

@@ -344,7 +344,7 @@ async function syncMedia() {
                         'Authorization': localStorage.getItem('token')
                     },
                     body: JSON.stringify({
-                        path: mediaFilename,
+                        filename: mediaFilename,
                         data: base64String,
                     })
                 });
@@ -384,8 +384,8 @@ async function syncMedia() {
         // Process and save media files
         let filesProcessed = 0;
         for (const fileInfo of serverData.files) {
-            const {path, lastModified} = fileInfo;
-            console.log(`Downloading media file: ${path}`);
+            const {filename, lastModified} = fileInfo;
+            console.log(`Downloading media file: ${filename}`);
 
             try {
                 // Fetch the binary file
@@ -396,21 +396,20 @@ async function syncMedia() {
                         'Authorization': localStorage.getItem('token')
                     },
                     body: JSON.stringify({
-                        path: path,
+                        filename: filename,
                         timestamp: mediaTimestamp
                     })
                 });
                 if (!response.ok) {
-                    console.error(`Failed to download ${path}: ${response.status}`);
+                    console.error(`Failed to download ${filename}: ${response.status}`);
                     continue;
                 }
 
                 const blob = await response.blob();
-                console.log(path, blob);
-                await saveMediaFile(`media/${path}`, blob, lastModified);
+                await saveMediaFile(`media/${filename}`, blob, lastModified);
                 filesProcessed++;
             } catch (error) {
-                console.error(`Error processing media file ${path}:`, error);
+                console.error(`Error processing media file ${filename}:`, error);
             }
         }
 

@@ -66,7 +66,7 @@ func ReadLog(userID, afterTimestamp int64) map[string]string {
 			continue
 		}
 
-		// TODO exclude ../ from log to prevent Path Traversal attack
+		// TODO exclude ../ from log to prevent Filename Traversal attack
 
 		if !strings.HasPrefix(oldPath, userPathPrefix) || !strings.HasPrefix(newPath, userPathPrefix) {
 			continue
