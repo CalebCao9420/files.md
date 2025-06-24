@@ -290,12 +290,12 @@ async function syncLocalFileWithServer(dir, filename) {
             return;
         }
         if (json.status === 'updatedOnServer') {
-            console.log(`trying saved metadata3 for ${path} with timestamp ${json.lastModified}`, json);
             setServerFile(path, content, json.lastModified);
-            console.log(`saved metadata3 for ${path} with timestamp ${json.lastModified}`, json);
+            console.log(`saved metadata for ${path} with timestamp ${json.lastModified}`, json);
             saveServerFiles();
             return;
         }
+        // if status is "ok", it means it was merged?So we proceed
         serverFile = json
     } catch (error) {
         console.error('Network error occurred:', error.message);
@@ -304,7 +304,6 @@ async function syncLocalFileWithServer(dir, filename) {
     setServerFile(path, serverFile.content, serverFile.lastModified);
     console.log(`saved metadata2 for ${path} with timestamp ${serverFile.lastModified}`);
     saveServerFiles();
-    console.log(serverFile);
     await saveTextFile(path, serverFile.content);
     console.log('showing file sync one');
     await openFile(dir, filename);
