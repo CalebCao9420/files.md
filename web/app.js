@@ -773,7 +773,7 @@ function getMoveDestinations() {
 }
 
 function search() {
-    const search = document.getElementById('search-input').value.toLowerCase();
+    let search = document.getElementById('search-input').value.toLowerCase();
     if (search.trim() === '') {
         loadRecentFiles();
         return;
@@ -783,7 +783,7 @@ function search() {
     list.innerHTML = '';
 
     if (search.endsWith('/')) {
-        const folderName = search.slice(0, -1); // Remove the trailing slash
+        const folderName = search.slice(0, -1);
 
         // Check if the folder exists in files
         if (files[folderName]) {
@@ -808,8 +808,16 @@ function search() {
     let results = [];
     const lowPriorityDirs = ['archive', '_read_', '_watch_', '_shop_', 'habits', 'triggers', 'today', 'later'];
 
-    // Levenshtein distance
-    for (const dir in excludeDirs(SYSTEM_DIRS)) {
+    const searchDirs = search.includes('/') && search.split('/').length === 2
+        ? [search.split('/')[0]]
+        : Object.keys(excludeDirs(SYSTEM_DIRS));
+
+    search = search.includes('/')
+        ? search.split('/')[1].toLowerCase()
+        : search;
+
+    // Similarity matching, check for direct file matches across all directories.
+    for (const dir in searchDirs) {
         for (const filename in files[dir]) {
             const potentialMatch = filename.replace(/\.md$/, '');
             let similarityScore = similarity(search, potentialMatch);
@@ -825,8 +833,13 @@ function search() {
         }
     }
 
-    // Substring
+    // Substring matching
     for (const dir in files) {
+        // If dir is not in search dirs, skip
+        if (!searchDirs.includes(dir) && !searchDirs.includes('')) {
+            continue;
+        }
+
         for (const filename in files[dir]) {
             const potentialMatch = filename.replace(/\.md$/, '');
             const isSubstringMatch = potentialMatch.toLowerCase().includes(search.toLowerCase());
@@ -839,6 +852,17 @@ function search() {
 
             results.push({
                 filename: filename, dir: dir, score: Math.round(matchedPercent)
+            });
+        }
+    }
+
+    // If search is equal to directory
+    if (files[search]) {
+        for (const filename in files[search]) {
+            results.push({
+                filename: filename,
+                dir: search,
+                score: 100
             });
         }
     }
