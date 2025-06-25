@@ -199,15 +199,6 @@ function initEditor(el) {
         }
     });
 
-    // Remove '# ' from selection.
-    editor.on('cursorActivity', function(cm) {
-        const doc = cm.getDoc();
-        if (doc.getCursor('from').line === 0 && doc.getCursor('from').ch < 2) {
-            const to = doc.getCursor('to');
-            editor.setSelection({line: 0, ch: 2}, to);
-        }
-    }, true);
-
     initAutoscroll(editor);
 
     // Image upload
