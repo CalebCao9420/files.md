@@ -9,7 +9,7 @@ test.describe('Files.md Text Editor Sync Tests', () => {
     });
 
     test('should load the Files.md editor', async ({page}) => {
-        await expect(page).toHaveTitle('Files.md (Alpha version)');
+        await expect(page).toHaveTitle('Files.md (Beta version)');
 
         await expect(page.locator('#sidebar')).toBeVisible();
         await expect(page.locator('.CodeMirror')).toBeVisible();
