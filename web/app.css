@@ -98,6 +98,7 @@ body {
     width: 100%;
     display: flex;
     flex-direction: column;
+    background: var(--color-bg);
 }
 
 #editor {
@@ -533,10 +534,4 @@ body.dragging * {
 
 .cmd-pressed .cm-inline-code:hover {
     cursor: pointer;
-}
-
-#chat-input {
-    margin: 5px;
-    border-radius: 5px;
-    border: 1px solid var(--color-border);
 }
