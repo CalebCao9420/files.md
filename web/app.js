@@ -800,12 +800,11 @@ function closeMove() {
     document.getElementById('move').style.display = 'none';
 }
 
-// document.addEventListener('keydown', (event) => {
-//     if (event.key === 'Escape') {
-//         closeSearch();
-//         closeMove();
-//     }
-// });
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+        closeMove();
+    }
+});
 
 function openChat() {
     chatInput.focus();

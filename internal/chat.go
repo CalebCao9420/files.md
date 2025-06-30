@@ -118,9 +118,6 @@ func (b *Bot) moveFromChat(callback func(content string, timestamp time.Time) er
 		}
 	}
 
-	// Sort indices in descending order to avoid index shifting issues when removing
-	sort.Sort(sort.Reverse(sort.IntSlice(indices)))
-
 	// Remove duplicates
 	uniqueIndices := make([]int, 0, len(indices))
 	seen := make(map[int]bool)
@@ -131,11 +128,20 @@ func (b *Bot) moveFromChat(callback func(content string, timestamp time.Time) er
 		}
 	}
 
-	// Track which message indices to remove
-	messagesToRemove := make(map[int]bool)
+	// Collect all records to process (in original order)
+	var recordsToProcess []struct {
+		content      string
+		timestamp    time.Time
+		messageIndex int
+	}
 
-	// Process each record
-	for _, index := range uniqueIndices {
+	// Sort indices in ascending order for processing
+	sortedIndices := make([]int, len(uniqueIndices))
+	copy(sortedIndices, uniqueIndices)
+	sort.Ints(sortedIndices)
+
+	// Collect all records first
+	for _, index := range sortedIndices {
 		targetBlockIndex := recordIndices[index]
 		targetRecord := messages[targetBlockIndex]
 
@@ -179,13 +185,26 @@ func (b *Bot) moveFromChat(callback func(content string, timestamp time.Time) er
 			return fmt.Errorf("failed to parse timestamp for index %d: %w", index, err)
 		}
 
-		// Call callback with content and timestamp
-		if err := callback(recordContent, timestamp); err != nil {
-			return fmt.Errorf("callback failed for index %d: %w", index, err)
-		}
+		recordsToProcess = append(recordsToProcess, struct {
+			content      string
+			timestamp    time.Time
+			messageIndex int
+		}{
+			content:      recordContent,
+			timestamp:    timestamp,
+			messageIndex: targetBlockIndex,
+		})
+	}
 
-		// Mark message for removal
-		messagesToRemove[targetBlockIndex] = true
+	// Track which message indices to remove
+	messagesToRemove := make(map[int]bool)
+
+	// Process callbacks in order
+	for _, record := range recordsToProcess {
+		if err := callback(record.content, record.timestamp); err != nil {
+			return fmt.Errorf("callback failed: %w", err)
+		}
+		messagesToRemove[record.messageIndex] = true
 	}
 
 	// Remove target messages and rebuild content
