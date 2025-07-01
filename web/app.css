@@ -140,6 +140,7 @@ a:hover {
     background: var(--color-bg);
     display: flex;
     flex-direction: column;
+    z-index: 10000;
 }
 
 #search-input, #move-input {
@@ -531,4 +532,18 @@ body.dragging * {
 
 .cmd-pressed .cm-inline-code:hover {
     cursor: pointer;
+}
+
+#move, #search {
+    z-index: 10000;
+}
+
+.modal-reversed {
+    display: flex !important;
+    flex-direction: column-reverse !important;
+}
+
+.modal-reversed #search-input, .modal-reversed #move-input {
+    margin-top: 8px;
+    margin-bottom: 0 !important;
 }

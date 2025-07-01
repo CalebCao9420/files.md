@@ -28,7 +28,6 @@ class SearchModal {
 
             if (event.key === 'Escape') {
                 this.close();
-                closeMove();
             }
         });
 
@@ -168,6 +167,7 @@ class SearchModal {
     }
 
     open(text = '', messageIndex = null, buttonElement  = null) {
+        moveModal.close();
         this.messageIndex = messageIndex;
 
         let modal = document.getElementById('search');
@@ -189,17 +189,31 @@ class SearchModal {
             this.search();
         }
 
-        // Position the modal
         if (buttonElement && this.messageIndex !== null) {
-            // Position below the button, keep x centered
             const rect = buttonElement.getBoundingClientRect();
+            const modalHeight = 300;
+            const viewportHeight = window.innerHeight;
+            const spaceBelow = viewportHeight - rect.bottom;
+            const spaceAbove = rect.top;
+
+            const positionAbove = spaceBelow < modalHeight && spaceAbove > spaceBelow;
             modal.style.position = 'fixed';
-            modal.style.top = `${rect.bottom + 5}px`;
             modal.style.right = '20px';
             modal.style.left = '';
             modal.style.transform = '';
             modal.style.width = '320px';
-            // modal.style.transform = 'translateX(-50%)';
+
+            if (positionAbove) {
+                modal.style.bottom = `${viewportHeight - rect.top + 5}px`;
+                modal.style.top = '';
+                // Reverse the order: results on top, input at bottom
+                modal.classList.add('modal-reversed');
+            } else {
+                modal.style.top = `${rect.bottom + 5}px`;
+                modal.style.bottom = '';
+                // Normal order: input on top, results below
+                modal.classList.remove('modal-reversed');
+            }
         } else {
             // Default center position
             modal.style.position = 'fixed';
@@ -208,11 +222,13 @@ class SearchModal {
             modal.style.right = '';
             modal.style.transform = 'translate(-50%, 0)';
             modal.style.width = '';
+            modal.classList.remove('modal-reversed');
         }
     }
 
     close() {
         document.getElementById('search').style.display = 'none';
+        document.getElementById('search').classList.remove('modal-reversed');
         this.messageIndex = null;
     }
 
@@ -221,7 +237,7 @@ class SearchModal {
         list.innerHTML = '';
 
         results.forEach(({dir, filename}, index) => {
-            if (filename === CONFIG_FILENAME) {
+            if (filename === CONFIG_FILENAME || filename === CHAT_FILENAME) {
                 return;
             }
 
@@ -382,22 +398,40 @@ class MoveModal {
     }
 
     open(messageIndex = null, buttonElement = null) {
+        searchModal.close();
         this.messageIndex = messageIndex;
 
         let modal = document.getElementById('move');
-        modal.style.display = 'block';
+        modal.style.display = 'flex';
 
-        // Position the modal
+        const inputField = document.getElementById('move-input');
+        inputField.focus();
+
         if (buttonElement && this.messageIndex !== null) {
-            // Position below the button, keep x centered
             const rect = buttonElement.getBoundingClientRect();
+            const modalHeight = 300;
+            const viewportHeight = window.innerHeight;
+            const spaceBelow = viewportHeight - rect.bottom;
+            const spaceAbove = rect.top;
+
+            const positionAbove = spaceBelow < modalHeight && spaceAbove > spaceBelow;
             modal.style.position = 'fixed';
-            modal.style.top = `${rect.bottom + 5}px`;
             modal.style.right = '20px';
             modal.style.left = '';
             modal.style.transform = '';
             modal.style.width = '320px';
-            // modal.style.transform = 'translateX(-50%)';
+
+            if (positionAbove) {
+                modal.style.bottom = `${viewportHeight - rect.top + 5}px`;
+                modal.style.top = '';
+                // Reverse the order: results on top, input at bottom
+                modal.classList.add('modal-reversed');
+            } else {
+                modal.style.top = `${rect.bottom + 5}px`;
+                modal.style.bottom = '';
+                // Normal order: input on top, results below
+                modal.classList.remove('modal-reversed');
+            }
         } else {
             // Default center position
             modal.style.position = 'fixed';
@@ -406,11 +440,11 @@ class MoveModal {
             modal.style.right = '';
             modal.style.transform = 'translate(-50%, 0)';
             modal.style.width = '';
+            modal.classList.remove('modal-reversed');
         }
 
-        document.getElementById('move').style.display = 'block';
-        const inputField = document.getElementById('move-input');
-        inputField.focus();
+        // document.getElementById('move').style.display = 'block';
+
 
         this.focusedIndex = 0;
         const moveResults = document.getElementById('move-results');
@@ -420,6 +454,7 @@ class MoveModal {
 
     close() {
         document.getElementById('move').style.display = 'none';
+        document.getElementById('move').classList.remove('modal-reversed');
         this.messageIndex = null;
     }
 

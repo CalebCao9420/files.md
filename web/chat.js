@@ -377,7 +377,6 @@ function attachEventListeners() {
         btn.addEventListener('click', function (e) {
             e.stopPropagation();
             searchModal.open('', btn.dataset.index, e.target)
-            chatInput.focus();
         });
     });
 
@@ -385,7 +384,6 @@ function attachEventListeners() {
         btn.addEventListener('click', function (e) {
             e.stopPropagation();
             moveModal.open(btn.dataset.index, e.target)
-            chatInput.focus();
         });
     });
 
