@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"math/rand"
+	"os"
 	"regexp"
 	"slices"
 	"strconv"
@@ -973,10 +974,10 @@ func (b *Bot) ShowToday(_ []string) error {
 		kb.AddRow(btn)
 	}
 
-	// Adding items from chat
+	// Adding records from chat
 	content, err := b.fs.Read(fs.DirRoot, fs.ChatFilename)
-	if err != nil {
-		return err
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("show today: can't read chat file: %w", err)
 	}
 	messages := readMessages(content)
 	msgIndex := 0
@@ -984,7 +985,7 @@ func (b *Bot) ShowToday(_ []string) error {
 		if !strings.HasPrefix(msg, "`") {
 			continue
 		}
-		// Trim `xx:yy` timestamp from begging (not `)
+		// Trim `xx:yy` timestamp from begging
 		// TODO make it not as dirty
 		if len(msg) > 8 {
 			msg = strings.TrimSpace(msg[8:])

@@ -237,7 +237,11 @@ class SearchModal {
         list.innerHTML = '';
 
         results.forEach(({dir, filename}, index) => {
-            if (filename === CONFIG_FILENAME || filename === CHAT_FILENAME) {
+            console.log(this.messageIndex);
+            if (filename === CONFIG_FILENAME) {
+                return;
+            }
+            if (this.messageIndex !== null && filename === CHAT_FILENAME) {
                 return;
             }
 

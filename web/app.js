@@ -352,6 +352,10 @@ async function receive(val) {
     await loadData();
     renderMessages();
     scrollToBottom();
+
+    let file = await ((await getFileHandle(CHAT_FILENAME)).getFile());
+    // TODO inmemory lastmodified should be reloaded
+    files[editor.currentDir][editor.currentFile].lastModified =  file.lastModified;
 }
 
 function createAutocompleteDict() {
@@ -711,11 +715,14 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
-function openChat() {
+async function openChat() {
+    editor.currentDir = "";
+    editor.currentFile = CHAT_FILENAME;
+
     chatInput.focus();
-    if (isChat) {
-        return;
-    }
+    // if (isChat) {
+    //     return;
+    // }
 
     const codemirror = document.querySelector('.CodeMirror-wrap');
     codemirror.style.display = 'none';
@@ -724,6 +731,9 @@ function openChat() {
 
     chatInput.focus();
     isChat = true;
+    await loadData();
+    renderMessages();
+    scrollToBottom();
 }
 
 function openBot() {

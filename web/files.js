@@ -910,54 +910,56 @@ async function syncCurrentFile(syncWithServer = true) {
     }
     isSyncingCurrent = true;
 
-    // Track in-editor renaming.
-    try {
-        // TODO track if no first line?
-        const firstLine = editor.getValue().split('\n')[0];
+    if (editor.currentFile !== CHAT_FILENAME) {
+        // Track in-editor renaming.
+        try {
+            // TODO track if no first line?
+            const firstLine = editor.getValue().split('\n')[0];
 
-        let newFilename = ucfirst(fromHeaderToFilename(firstLine));
-        // If filename is empty, generate an available "Untitled" name
-        if (newFilename.trim() === '.md') {
-            let hasOldName = !editor.currentFile.startsWith('Untitled');
-            if (hasOldName) {
-                newFilename = 'Untitled.md';
-                let counter = 1;
-                while (files[editor.currentDir][newFilename]) {
-                    newFilename = `Untitled ${counter}.md`;
-                    counter++;
+            let newFilename = ucfirst(fromHeaderToFilename(firstLine));
+            // If filename is empty, generate an available "Untitled" name
+            if (newFilename.trim() === '.md') {
+                let hasOldName = !editor.currentFile.startsWith('Untitled');
+                if (hasOldName) {
+                    newFilename = 'Untitled.md';
+                    let counter = 1;
+                    while (files[editor.currentDir][newFilename]) {
+                        newFilename = `Untitled ${counter}.md`;
+                        counter++;
+                    }
+                } else {
+                    // TODO add tests
+                    // Already renamed to untitled
+                    newFilename = editor.currentFile;
                 }
-            } else {
-                // TODO add tests
-                // Already renamed to untitled
-                newFilename = editor.currentFile;
             }
-        }
 
-        const hasFilenameChanged = newFilename.toLowerCase() !== editor.currentFile.toLowerCase();
-        if (hasFilenameChanged) {
-            await removeFile(`${editor.currentDir}/${editor.currentFile}`);
-            delete files[editor.currentDir][editor.currentFile];
-            console.log('Removed', `${editor.currentDir}/${editor.currentFile}`);
-            // TODO Way to verbose, to we want to mess with it like this?
-            addFileToMemory(editor.currentDir, newFilename, {
-                content: getCurrentContent(),
-                lastModified: 0,
-                handle: await getFileHandle(toPath(editor.currentDir, newFilename), true),
-            });
-            editor.currentFile = newFilename;
+            const hasFilenameChanged = newFilename.toLowerCase() !== editor.currentFile.toLowerCase();
+            if (hasFilenameChanged) {
+                await removeFile(`${editor.currentDir}/${editor.currentFile}`);
+                delete files[editor.currentDir][editor.currentFile];
+                console.log('Removed', `${editor.currentDir}/${editor.currentFile}`);
+                // TODO Way to verbose, to we want to mess with it like this?
+                addFileToMemory(editor.currentDir, newFilename, {
+                    content: getCurrentContent(),
+                    lastModified: 0,
+                    handle: await getFileHandle(toPath(editor.currentDir, newFilename), true),
+                });
+                editor.currentFile = newFilename;
 
-            const path = `${editor.currentDir}/${editor.currentFile}`;
-            const content = getCurrentContent();
-            await saveTextFile(path, content);
-            setServerFile(path, content, 0);
-            saveServerFiles();
-            console.log('Created', `${editor.currentDir}/${editor.currentFile}`);
-            await updateSidebar();
+                const path = `${editor.currentDir}/${editor.currentFile}`;
+                const content = getCurrentContent();
+                await saveTextFile(path, content);
+                setServerFile(path, content, 0);
+                saveServerFiles();
+                console.log('Created', `${editor.currentDir}/${editor.currentFile}`);
+                await updateSidebar();
+            }
+        } catch (error) {
+            console.error('Error during filename change:', error);
+            isSyncingCurrent = false;
+            return;
         }
-    } catch (error) {
-        console.error('Error during filename change:', error);
-        isSyncingCurrent = false;
-        return;
     }
 
     let contentWasModifiedLocally = false;
@@ -976,7 +978,23 @@ async function syncCurrentFile(syncWithServer = true) {
     // If fs has fresher change, merge.
     // Sync with server.
 
-    if (contentWasModifiedLocally && editor.isClean() && !isChat) {
+    if (editor.currentFile === CHAT_FILENAME) {
+        try {
+            let inMemoryLastModified = files[editor.currentDir]?.[editor.currentFile]?.lastModified;
+            let file = await ((await getFileHandle(CHAT_FILENAME)).getFile());
+            let localLastModified = file.lastModified;
+            // TODO inmemory lastmodified should be reloaded
+            files[editor.currentDir][editor.currentFile].lastModified = localLastModified;
+            if (inMemoryLastModified !== localLastModified) {
+                console.log('CHAT WAS MODIFIED LOCALLY', editor.currentFile);
+                await openFile(editor.currentDir, editor.currentFile);
+            }
+        } catch (error) {
+            console.error('Error opening file:', error);
+            isSyncingCurrent = false;
+            return;
+        }
+    } else if (contentWasModifiedLocally && editor.isClean()) {
         console.log(contentWasModifiedLocally, editor.isClean());
         console.log('WAS MODIFIED LOCALLY', editor.currentFile);
         // Changes only from local system
