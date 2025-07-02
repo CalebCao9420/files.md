@@ -514,6 +514,11 @@ function TreeView(root, container, options) {
         span_desc.className = "tj_description";
         span_desc.tj_node = node;
 
+        if (node.isGroupEnd) {
+            console.log('yyyaah');
+            span_desc.classList.add("group-end");
+        }
+
         if (node.isLeaf()) {
             span_desc.draggable = true;
         }

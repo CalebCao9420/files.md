@@ -450,7 +450,6 @@ function renderSidebar(focusDir = '') {
         });
     }
 
-// Add remaining user directories (not in groups)
     const groupedDirs = new Set(['_read_', '_watch_', '_shop_', 'journal', 'habits', 'insights', 'archive', 'today', 'later']);
     for (const dir in files) {
         if (dir === '' || dir === 'media' || groupedDirs.has(dir)) continue;
@@ -462,9 +461,6 @@ function renderSidebar(focusDir = '') {
         }
     }
 
-    if (files[''] && files[''][CHAT_FILENAME]) {
-        delete files[''][CHAT_FILENAME];
-    }
     let chatNode = new TreeNode('chat', {expanded: false});
     chatNode.on('click', async function (n, node) {
         await openFile('', CHAT_FILENAME);
