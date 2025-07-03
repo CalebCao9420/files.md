@@ -757,19 +757,25 @@ window.addEventListener('keydown', async (event) => {
         event.preventDefault();
         event.stopPropagation();
 
-        let path = toPath(editor.currentDir, editor.currentFile);
         let dir = editor.currentDir;
         let filename = editor.currentFile;
         if (filename === CHAT_FILENAME) {
             return;
         }
-        editor.currentDir = undefined;
-        editor.currentFile = undefined;
-        await removeFile(path);
-        // Remove from files object
-        delete files[dir][filename];
-        openChat();
+
+        const nextFile = findNextFile(dir, filename);
+
+        let oldPath = toPath(dir, filename);
+        let newPath = toPath('archive', filename);
+
+        await moveFile(oldPath, newPath);
+
         await renderSidebar();
+        if (nextFile) {
+            await openFile(nextFile.dir, nextFile.filename);
+        } else {
+            showRandomFile();
+        }
     }
 
     if (isMetaKey(event) && event.key === 'n') {
@@ -1110,4 +1116,35 @@ function toggleSidebar() {
 
 function getCurrentVersion() {
     return window.COMMIT_HASH ? window.COMMIT_HASH.replace('?v=', '') : '';
+}
+
+function findNextFile(currentDir, currentFilename) {
+    const allFiles = [];
+
+    // Collect all files except system files
+    for (let dir in excludeDirs(SYSTEM_DIRS)) {
+        for (let file in files[dir]) {
+            if (file === CONFIG_FILENAME || file === CHAT_FILENAME) {
+                continue;
+            }
+            allFiles.push({dir, filename: file});
+        }
+    }
+
+    if (allFiles.length <= 1) {
+        return null; // No other files available
+    }
+
+    // Find current file index
+    const currentIndex = allFiles.findIndex(f =>
+        f.dir === currentDir && f.filename === currentFilename
+    );
+
+    if (currentIndex === -1) {
+        return allFiles[0]; // Fallback to first file
+    }
+
+    // Return next file, or first file if we're at the end
+    const nextIndex = (currentIndex + 1) % allFiles.length;
+    return allFiles[nextIndex];
 }
