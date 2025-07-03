@@ -164,7 +164,7 @@ async function syncTextsWithServer() {
     try {
         let response = await fetch(`${API_HOST}/syncTexts`, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json', 'Authorization': localStorage.getItem('token')},
+            headers: {'Content-Type': 'application/json', 'Authorization': localStorage.getItem('token'), 'Version': getCurrentVersion()},
             body: JSON.stringify({
                 modified: modified,
                 deleted: deleted,
@@ -274,7 +274,7 @@ async function syncLocalFileWithServer(dir, filename) {
     try {
         let response = await fetch(`${API_HOST}/syncText`, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json', 'Authorization': localStorage.getItem('token')},
+            headers: {'Content-Type': 'application/json', 'Authorization': localStorage.getItem('token'), 'Version': getCurrentVersion()},
             body: JSON.stringify({
                 path: toPath(dir, filename),
                 lastModified: serverTimestamp,
@@ -352,7 +352,8 @@ async function syncMedia() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': localStorage.getItem('token')
+                        'Authorization': localStorage.getItem('token'),
+                        'Version': getCurrentVersion()
                     },
                     body: JSON.stringify({
                         filename: mediaFilename,
@@ -379,7 +380,8 @@ async function syncMedia() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': localStorage.getItem('token')
+                'Authorization': localStorage.getItem('token'),
+                'Version': getCurrentVersion()
             },
             body: JSON.stringify({
                 timestamp: mediaTimestamp

@@ -17,7 +17,7 @@ deploy: # deploy as systemd service
 	@GREEN='\e[32m'; \
 	YELLOW='\e[33m'; \
 	RESET='\e[0m'; \
-	TIMESTAMP=$$(date +%s); \
+	COMMIT_HASH=$$(git rev-parse --short HEAD); \
 	printf "$${YELLOW}Building...$${RESET}\n" && \
 	make check && \
 	GOOS=linux GOARCH=amd64 go build -o /tmp/bot ./cmd/tgbot && \
@@ -25,14 +25,14 @@ deploy: # deploy as systemd service
 	scp /tmp/bot $(host):/app/bot.new && printf "$${GREEN}The binary is copied on the server$${RESET}\n" && \
 	ssh $(host) "mv /app/bot.new /app/bot && systemctl daemon-reload && systemctl restart bot.service" && \
 	rm /tmp/bot && \
-	printf "$${YELLOW}Versioning current files with: $${TIMESTAMP}$${RESET}\n" && \
-	find . -name "*.html" -exec grep -l "?v=" {} \; | xargs sed -i '' 's/?v=/?v='"$${TIMESTAMP}"'/g' && \
+	printf "$${YELLOW}Versioning current files with commit: $${COMMIT_HASH}$${RESET}\n" && \
+	find . -name "*.html" -exec grep -l "?v=" {} \; | xargs sed -i '' 's/?v=/?v='"$${COMMIT_HASH}"'/g' && \
 	tar --no-xattrs --disable-copyfile --no-fflags -czf web.tar.gz web && \
-    scp web.tar.gz files:/app/ && \
-    ssh files "cd /app && tar -xzf web.tar.gz && rm web.tar.gz" && \
-    rm web.tar.gz && \
+	scp web.tar.gz files:/app/ && \
+	ssh files "cd /app && tar -xzf web.tar.gz && rm web.tar.gz" && \
+	rm web.tar.gz && \
 	printf "$${GREEN}Removing versioning$${RESET}\n" && \
-	find . -name "*.html" -exec grep -l "?v=$${TIMESTAMP}" {} \; | xargs sed -i '' 's/?v='"$${TIMESTAMP}"'/?v=/g' && \
+	find . -name "*.html" -exec grep -l "?v=$${COMMIT_HASH}" {} \; | xargs sed -i '' 's/?v='"$${COMMIT_HASH}"'/?v=/g' && \
 	printf "$${GREEN}Successfully deployed!$${RESET}\n"
 
 lint:

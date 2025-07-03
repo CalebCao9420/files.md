@@ -1083,3 +1083,13 @@ function toggleSidebar() {
         openZone.style.display = 'block';
     }
 }
+
+function getCurrentVersion() {
+    const hash = window.COMMIT_HASH ? window.COMMIT_HASH.replace('?v=', '') : null;
+    return {
+        hash: hash,
+        short: hash || 'dev',
+        isDev: !hash,
+        display: hash ? `v${hash}` : 'development'
+    };
+}

@@ -351,8 +351,14 @@ func logSync(msg string, r *http.Request) {
 	}
 	defer file.Close()
 
+	if version := r.Header.Get("Version"); version != "" {
+		msg = fmt.Sprintf("%s (version: %s)", msg, version)
+	} else {
+		msg = fmt.Sprintf("%s (version: unknown)", msg)
+	}
 	time := time.Now().Format("2006-01-02 15:04:05")
-	if _, err := file.WriteString(time + ": " + msg + "\n"); err != nil {
+	msg = fmt.Sprintf("%s: %s\n", time, msg)
+	if _, err := file.WriteString(msg); err != nil {
 		slog.Error("Sync error: logSync: error writing to log file", "error", err)
 		return
 	}
