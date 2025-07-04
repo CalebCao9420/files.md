@@ -239,7 +239,6 @@ class SearchModal {
         list.innerHTML = '';
 
         results.forEach(({dir, filename}, index) => {
-            console.log(this.messageIndex);
             if (filename === CONFIG_FILENAME) {
                 return;
             }
