@@ -129,14 +129,14 @@ body {
     transform: translateX(0);
 }
 
-/* Keep the original layout rules but don't let them interfere */
-#content:has(#editor2-container:not([style*="display: none"])) {
-    flex-direction: row;
-}
+/*!* Keep the original layout rules but don't let them interfere *!*/
+/*#content:has(#editor2-container:not([style*="display: none"])) {*/
+/*    flex-direction: row;*/
+/*}*/
 
-#content:has(#editor2-container:not([style*="display: none"])) #editor-container {
-    flex: 0 0 50%;
-}
+/*#content:has(#editor2-container:not([style*="display: none"])) #editor-container {*/
+/*    flex: 0 0 50%;*/
+/*}*/
 
 #content:has(#editor2-container:not([style*="display: none"])) #editor2-container {
     flex: 0 0 50%;
