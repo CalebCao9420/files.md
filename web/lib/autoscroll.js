@@ -43,15 +43,10 @@ function checkAutoScroll(event, editor) {
     // Store the mouse position for selection extension during auto-scroll
     lastMousePos = {left: event.clientX, top: event.clientY};
 
-    console.log('Raw event.clientY:', event.clientY);
-    console.log(editor.getWrapperElement());
-    editor.refresh();
     const editorRect = editor.getWrapperElement().getBoundingClientRect();
-    console.log('Editor rect - top:', editorRect.top, 'bottom:', editorRect.bottom);
 
     const mouseY = event.clientY;
 
-    console.log(mouseY, editorRect.top, editorRect.bottom, scrollMargin);
     // Check if mouse is near top or bottom of editor
     if (mouseY < editorRect.top + scrollMargin) {
         startAutoScroll('up', editor);

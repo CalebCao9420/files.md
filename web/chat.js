@@ -25,6 +25,7 @@ async function openChat() {
     codemirror.style.display = 'none';
     chat.style.display = 'flex';
     chatInput.style.display = 'block';
+    hideEditor2();
 
     chatInput.focus();
     isChat = true;

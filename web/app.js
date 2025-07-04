@@ -100,7 +100,6 @@ async function init(el) {
 }
 
 function initEditor(el) {
-    console.log('init editor');
     if (window.editor !== undefined && el.id === 'editor-textarea' ) {
         editor.off();
         const wrapper = editor.getWrapperElement();
@@ -146,6 +145,10 @@ function initEditor(el) {
         configureMouse: () => ({addNew: false}) // disable multicursor
     });
     newEditor.setSize(null, '100%');
+    newEditor.on('focus', function() {
+        currentEditor = newEditor;
+        console.log('Switched to:', newEditor.currentFile);
+    });
 
     newEditor.hmdResolveURL = function (path) {
         if (typeof path === 'undefined') {
@@ -234,7 +237,7 @@ function initEditor(el) {
                         };
 
                         const markdownImageSyntax = `![](media/${fileName})`;
-                        editor.replaceSelection(markdownImageSyntax);
+                        currentEditor.replaceSelection(markdownImageSyntax);
                         console.log(`Image saved as: ${fileName}`);
                     } else {
                         console.error('Failed to save the image.');
@@ -385,7 +388,7 @@ function initEditor(el) {
         setTimeout(() => document.body.removeChild(toast), 1000);
     }, true);
 
-    // initAutoscroll(newEditor);
+    initAutoscroll(newEditor);
 
     return newEditor;
 }
@@ -661,12 +664,6 @@ async function openFile(dir, filename, saveToHistory = true, el = 'editor-textar
     const end = performance.now();
     console.log(`File opened in: ${(end - start).toFixed(3)} milliseconds`);
     // Get the editor instance
-
-    if (el === 'editor-textarea') {
-        initAutoscroll(editor);
-    } else if (el === 'editor2-textarea') {
-        initAutoscroll(editor2);
-    }
 }
 
 async function newFile() {
@@ -767,6 +764,10 @@ function isMetaKey(event) {
 
 // Hotkeys
 window.addEventListener('keydown', async (event) => {
+    if (isMetaKey(event) && event.key == 'w') {
+        hideEditor2();
+    }
+
     if (isMetaKey(event) && event.key === 'p') {
         event.preventDefault();
         event.stopPropagation();
@@ -832,6 +833,7 @@ document.addEventListener('keydown', (event) => {
         moveModal.close();
         closeChatModal();
         editor.focus();
+        hideEditor2();
 
         const allMessages = chat.querySelectorAll('.message');
         allMessages.forEach(message => message.classList.remove('selected'));
@@ -1185,12 +1187,21 @@ function findNextFile(currentDir, currentFilename) {
 }
 
 function showEditor2() {
-    document.getElementById('editor2-container').style.display = 'flex';
-    editor2.setValue(editor.getValue()); // Copy content from editor to editor2
+    const editor2Container = document.getElementById('editor2-container');
+
+    editor2Container.style.display = 'flex';
+    editor2Container.offsetHeight; // Force reflow
+    editor2Container.classList.add('show');
+
+    editor2.focus();
 }
 
 function hideEditor2() {
-    document.getElementById('editor2-container').style.display = 'none';
-    // editor.setValue(editor2.getValue()); // Copy content back to editor
-    editor.focus();
+    const editor2Container = document.getElementById('editor2-container');
+
+    editor2Container.classList.remove('show');
+
+    setTimeout(() => {
+        editor2Container.style.display = 'none';
+    }, 300);
 }
