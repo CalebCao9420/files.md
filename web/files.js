@@ -299,7 +299,7 @@ async function syncLocalFileWithServer(dir, filename) {
     setServerFile(path, serverFile.content, serverFile.lastModified, lastSynced);
     console.log(`saved server file for ${path} with timestamp ${serverFile.lastModified}`);
     saveServerFiles();
-    console.log('showing file sync one');
+    console.log('Opening file after sync');
     await openFile(dir, filename);
     console.log('File synced with server');
 }
@@ -991,7 +991,7 @@ async function syncCurrentFile(syncWithServer = true) {
     isSyncingCurrentFile = true;
 
     const dir = currentEditor.currentDir;
-    const filename = currentEditor.currentFile;
+    let filename = currentEditor.currentFile;
     let isCurrentEditorSame = () => {
         return filename === window.currentEditor.currentFile && dir === window.currentEditor.currentDir;
     }
@@ -1031,14 +1031,13 @@ async function syncCurrentFile(syncWithServer = true) {
                 await removeFile(`${dir}/${filename}`);
                 delete files[dir][filename];
                 console.log('Removed', `${dir}/${filename}`);
-                // TODO Way to verbose, to we want to mess with it like this?
 
                 // Get fresher content after await.
                 if (isCurrentEditorSame()) {
                     content = getCurrentContent();
                 }
                 addFileToMemory(dir, newFilename, {
-                    content: content, // TODO do we have to store it in memory?
+                    content: content,
                     lastModified: 0,
                     handle: await getFileHandle(toPath(dir, newFilename), true),
                 });
@@ -1047,19 +1046,19 @@ async function syncCurrentFile(syncWithServer = true) {
                     // Change current file if the editor is unchanged.
                     currentEditor.currentFile = newFilename;
                 }
-
                 const path = `${dir}/${newFilename}`;
                 await saveTextFile(path, getCurrentContent());
 
-                // Why adding to server files? What if we add a few consecutive renames?
                 setServerFile(path, content, 0);
                 saveServerFiles();
                 console.log('Created', `${dir}/${newFilename}`);
 
-                // Let's call it a day?
                 await renderSidebar();
-                isSyncingCurrentFile = false;
-                return;
+
+                // Used further for syncing.
+                filename = newFilename;
+                // isSyncingCurrentFile = false;
+                // return;
             }
         } catch (error) {
             console.error('Error during filename change:', error);
