@@ -2,7 +2,7 @@
 // TODO migrate to unversal file id = filepath, instead of two components
 const API_HOST = window.API_HOST || 'https://api.files.md';
 // TODO that's quite often. Maybe on edit + focus?
-const SAVE_INTERVAL = 1000; // ms, how often to save currently open file
+const CURRENT_FILE_SYNC_INTERVAL = 1000; // ms, how often to save currently open file
 const LOAD_INTERVAL = 3000; // ms, how often to load current file from local file system
 
 let isSaving = false;
@@ -28,7 +28,7 @@ let isLoadingLocalFiles = false;
 //     ...
 //   ]
 // }
-let files = []; // In-memory representation of files.
+let files = {}; // In-memory representation of files
 let serverFiles = {files: {}, media: {}, timestamps: {}, mediaTimestamp: 0};
 const SERVER_STORAGE_KEY = 'files';
 const SUPPORTED_EXTENSIONS = ['md', 'txt', 'png', 'jpg', 'jpeg', 'webp', 'gif',];
@@ -1004,7 +1004,8 @@ async function syncCurrentFile(syncWithServer = true) {
             let newFilename = ucfirst(fromHeaderToFilename(firstLine));
             // If filename is empty, generate an available "Untitled" name
             // TODO check for forbidden filename chars
-            if (newFilename.trim() === '.md') {
+            let hasEmptyName = newFilename.trim() === '.md';
+            if (hasEmptyName) {
                 let hasOldName = !filename.startsWith('Untitled');
                 if (hasOldName) {
                     newFilename = 'Untitled.md';
@@ -1022,6 +1023,9 @@ async function syncCurrentFile(syncWithServer = true) {
 
             const hasFilenameChanged = newFilename.toLowerCase() !== filename.toLowerCase();
             if (hasFilenameChanged) {
+                // 1. Remove file with old filename
+                // 2. Create file with new filename
+
                 let content = getCurrentContent();
                 // TODO every await means we can can have RC due to editor content change
                 await removeFile(`${dir}/${filename}`);
@@ -1038,14 +1042,13 @@ async function syncCurrentFile(syncWithServer = true) {
                     lastModified: 0,
                     handle: await getFileHandle(toPath(dir, newFilename), true),
                 });
-                // Get fresher content after await.
                 if (isCurrentEditorSame()) {
                     content = getCurrentContent();
                     // Change current file if the editor is unchanged.
                     currentEditor.currentFile = newFilename;
                 }
 
-                const path = `${dir}/${filename}`;
+                const path = `${dir}/${newFilename}`;
                 await saveTextFile(path, getCurrentContent());
 
                 // Why adding to server files? What if we add a few consecutive renames?
@@ -1251,4 +1254,4 @@ window.addEventListener('beforeunload', function () {
 
 
 // Worker to process the saving queue
-window.saver = setInterval(syncCurrentFile, SAVE_INTERVAL);
+window.saver = setInterval(syncCurrentFile, CURRENT_FILE_SYNC_INTERVAL);

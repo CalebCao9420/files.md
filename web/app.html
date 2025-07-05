@@ -158,7 +158,7 @@
 <script>
     window.COMMIT_HASH = '?v=';
 
-    currentEditor = null;
+    window.currentEditor = null; // Expose to global scope
     editor = initEditor(document.getElementById("editor-textarea"));
     init(editor);
     currentEditor = editor;

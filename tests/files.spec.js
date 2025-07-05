@@ -278,6 +278,84 @@ test('create file and move', async ({ page }) => {
     await page.pause();
 });
 
+test('rename should not create multiply files', async ({ page }) => {
+    await page.evaluate(() => {
+        window.getRootDirHandle = async function() {
+            const root = await navigator.storage.getDirectory();
+            const subDir = await root.getDirectoryHandle('dir', { create: true });
+
+            const testFiles = [
+                { name: 'README.md', content: 'Hello world' },
+                { name: 'Notes.md', content: '**Bold text**' }
+            ];
+
+            for (const fileData of testFiles) {
+                try {
+                    await root.getFileHandle(fileData.name);
+                } catch (error) {
+                    const fileHandle = await root.getFileHandle(fileData.name, { create: true });
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(fileData.content);
+                    await writable.close();
+                }
+            }
+
+            return root;
+        };
+    });
+
+    await page.evaluate(() => {
+        init(document.getElementById("editor"));
+    });
+
+    await page.click('#sidebar >> text=README');
+    await page.waitForTimeout(100);
+
+    await page.click('#new-file');
+    await page.waitForTimeout(100);
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('Meta+a');
+    await page.keyboard.type('New');
+    await page.waitForTimeout(1000);
+    await page.keyboard.type(' fi');
+    await page.waitForTimeout(1000);
+    await page.keyboard.type('le');
+    await page.waitForTimeout(500);
+    await page.keyboard.press('Enter')
+    await page.keyboard.type('content');
+    await page.waitForTimeout(700);
+
+    await page.evaluate(() => {
+        window.dispatchEvent(new Event('focus'));
+    });
+
+    await page.click('#sidebar >> text=New file');
+    await page.waitForTimeout(100);
+    const codeMirrorContent = await page.evaluate(() => {
+        const cm = document.querySelector('.CodeMirror').CodeMirror;
+        return cm.getValue();
+    });
+    expect(codeMirrorContent).toBe("# New file\ncontent\n");
+    await page.pause();
+
+    const debug = await page.evaluate(() => {
+        return {
+            filesExists: typeof window.files !== 'undefined',
+            filesValue: window.files,
+            emptyKeyExists: window.files && ('' in window.files),
+            emptyKeyValue: window.files && window.files[''],
+            allKeys: window.files && Object.keys(window.files)
+        };
+    });
+    const clientFiles = await page.evaluate(() => {
+        return Object.keys(files['']);
+    })
+
+    expect(clientFiles).toBeDefined();
+    expect(clientFiles.length).toBe(5);
+    expect(clientFiles).toContain('New file.md');
+});
+
 test('create dirs and move', async ({ page }) => {
     await page.evaluate(() => {
         window.getRootDirHandle = async function() {
