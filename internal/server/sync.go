@@ -80,6 +80,7 @@ func SyncTexts(w http.ResponseWriter, r *http.Request) {
 			slog.Error("Sync error: syncTexts: error deleting file", "path", path, "error", err)
 			continue
 		}
+		logSync(fmt.Sprintf("Sync texts: deleting file: '%s'", path), r)
 		logDelete(fmt.Sprintf("Deleting file: '%s'", path), r)
 	}
 
