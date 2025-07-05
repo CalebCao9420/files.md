@@ -1028,9 +1028,6 @@ async function syncCurrentFile(syncWithServer = true) {
 
             const hasFilenameChanged = newFilename.toLowerCase() !== filename.toLowerCase();
             if (hasFilenameChanged) {
-                // Change the file immediately, because on further await calls it can be synced by syncTexts.
-                currentEditor.currentFile = newFilename;
-
                 // 1. Remove file with old filename
                 // 2. Create file with new filename
 
@@ -1040,11 +1037,22 @@ async function syncCurrentFile(syncWithServer = true) {
                 delete files[dir][filename];
                 console.log('Removed', `${dir}/${filename}`);
 
+                // Get fresher content after await.
+                if (isCurrentEditorSame()) {
+                    content = getCurrentContent();
+                }
                 addFileToMemory(dir, newFilename, {
                     content: content,
                     lastModified: 0,
                     handle: await getFileHandle(toPath(dir, newFilename), true),
                 });
+                // sleep
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                if (isCurrentEditorSame()) {
+                    content = getCurrentContent();
+                    // Change current file if the editor is unchanged.
+                    currentEditor.currentFile = newFilename;
+                }
                 const path = `${dir}/${newFilename}`;
                 await saveTextFile(path, getCurrentContent());
 

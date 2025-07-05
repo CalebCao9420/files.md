@@ -159,6 +159,34 @@ test('changed on both client and serve, should merge', async ({ page }) => {
     await expectCurrentContent(page, '# File\ntest content\nadded from server\naddded from client');
 });
 
+test("sync one new file from client doesn't conflict with syncTexts", async ({ page }) => {
+    await setup(page);
+
+    await page.click('#new-file');
+    await page.waitForTimeout(100);
+    await page.keyboard.type('abc');
+    await page.keyboard.type('def');
+    await page.keyboard.type('abc');
+
+    await page.waitForTimeout(500);
+
+    // Trigger syncTexts
+    await page.evaluate(() => {
+        window.dispatchEvent(new Event('focus'));
+    });
+
+    await page.keyboard.type('def');
+
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('def');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('Content');
+    await page.waitForTimeout(3000);
+    await page.pause();
+
+    await expectFileOnServer(page, 'New file.md', 'abcdefabcdef\ndef\nContents');
+});
+
 async function createFileOnServer(filepath, content) {
     const p = path.join(getServerDir(), filepath);
     await fs.writeFile(p, content, 'utf8');
