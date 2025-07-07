@@ -52,7 +52,7 @@ self.addEventListener('install', event => {
         caches.open(cacheName)
             .then(cache => {
                 const cachePromises = urlsToCache.map(url => {
-                    if (url !== "/") {
+                    if (url !== "/" && url !== 'favicon.ico' && url !== 'small_icon.png' && url !== 'icon.png') {
                         url += COMMIT_HASH;
                     }
                     return cache.add(url)
