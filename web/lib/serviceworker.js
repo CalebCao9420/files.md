@@ -57,6 +57,10 @@ self.addEventListener('install', event => {
                 });
                 return Promise.allSettled(cachePromises); // Won't fail if one fails
             })
+            .then(() => {
+                console.log('Caching complete, skipping waiting');
+                return self.skipWaiting();
+            })
     );
 });
 
