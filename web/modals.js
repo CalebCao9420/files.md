@@ -168,7 +168,6 @@ class SearchModal {
             }
         }
         results = Array.from(uniqueResultsMap.values()).sort((a, b) => b.score - a.score);
-        console.log(results);
         searchModal.showResults(results);
     }
 
