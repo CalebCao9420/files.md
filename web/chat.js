@@ -767,7 +767,7 @@ function sendCmd(cmd, params) {
 function getRecentlyModifiedFiles() {
     if (!files || typeof files !== 'object') return [];
 
-    return Object.entries(files[''])
+    return Object.entries(files)
         .filter(([filename, content]) => filename && content && filename !== CHAT_FILENAME && filename !== CONFIG_FILENAME)
         .sort(([, a], [, b]) => {
             return new Date(b.lastModified || 0) - new Date(a.lastModified || 0);

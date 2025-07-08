@@ -104,8 +104,7 @@ async function loadLocalFiles(rootDirHandle) {
                     continue;
                 }
 
-                currentDir[filename] = {isFile: true, handle: entry};
-
+                currentDir[filename] = {path: `${path}${filename}`, isFile: true, handle: entry};
                 entry.getFile().then(file => {
                     currentDir[filename].lastModified = file.lastModified;
                 });
@@ -113,6 +112,7 @@ async function loadLocalFiles(rootDirHandle) {
                 // TODO support any dirs
                 if (dirs[0] === 'media' || dirs[0] === 'img') {
                     getImageUrl(entry).then(imageUrl => {
+                        currentDir[filename].path = `${path}${filename}`;
                         currentDir[filename].isFile = true;
                         currentDir[filename].imageUrl = imageUrl;
                     });
