@@ -61,7 +61,6 @@ self.addEventListener('install', event => {
                 return Promise.allSettled(cachePromises); // Won't fail if one fails
             })
             .then(() => {
-                console.log('Caching complete, skipping waiting');
                 return self.skipWaiting();
             })
     );
@@ -86,12 +85,10 @@ self.addEventListener("fetch", (event) => {
         caches.match(event.request)
             .then(response => {
                 if (response) {
-                    console.log('✓ Serving from cache:', event.request.url);
                     return response;
                 }
 
                 // Not in cache, try network
-                console.log('Not in cache, trying network:', event.request.url);
                 return fetch(event.request);
             })
             .catch(err => {
