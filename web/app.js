@@ -712,9 +712,9 @@ function renderSidebar(focusDir = '') {
                 const aIsDir = a.getOptions()?.dir === true;
                 const bIsDir = b.getOptions()?.dir === true;
 
-                if (aIsDir && !bIsDir) return -1; // a is dir, b is file
-                if (!aIsDir && bIsDir) return 1;  // a is file, b is dir
-                return 0; // both same type
+                if (aIsDir && !bIsDir) return -1;
+                if (!aIsDir && bIsDir) return 1;
+                return 0;
             });
 
             // Recursively sort children
