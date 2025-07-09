@@ -755,10 +755,8 @@ async function newFile() {
 
     // TODO check tests
     let num = 1;
-    console.log('TRYING dir', dir);
-    console.log(files);
-    while (files[dir + '/'] && files[dir + '/'][filename]) {
-        console.log('TRYING dir', dir + '/');
+    while (getMemFile(dir + '/' + filename) !== null) {
+        console.log('file eixts', dir + '/' + filename);
         filename = `New file (${num}).md`;
         num++;
     }

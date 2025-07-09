@@ -367,22 +367,19 @@ test('create new file, move to new dir, create new file is subdir, move to root'
     // await page.waitForTimeout(500); // TODO shoudln't be rc, maybe save file on focus out or something
     await page.keyboard.press('Enter');
     await page.keyboard.type('content');
-    // await page.waitForTimeout(300);
+    await page.waitForTimeout(300);
 
-    // await page.click('#new-folder');
-    // await page.waitForTimeout(100);
-
-    // await page.keyboard.press('Meta+m');
-    // await page.waitForTimeout(100);
-    // await page.click('#move-results >> text=dir1');
+    await page.click('#new-folder');
     await page.waitForTimeout(100);
-    // Before multidir we didn't wait for file sync
-    // await page.waitForTimeout(2000);
+
+    await page.keyboard.press('Meta+m');
+    await page.waitForTimeout(100);
+    await page.click('#move-results >> text=dir1');
+    await page.waitForTimeout(100);
 
     // Create second file in same subdir
     await page.click('#new-file');
-    await page.pause();
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(100);
     await page.keyboard.press('ArrowUp');
     await page.waitForTimeout(200);
     await page.keyboard.press('Meta+a');
@@ -397,8 +394,8 @@ test('create new file, move to new dir, create new file is subdir, move to root'
     await page.click('#move-results >> text=/');
     await page.waitForTimeout(500);
 
-    // await page.click('#sidebar-tree li:has-text("dir1")');
-    // await page.click('#sidebar-tree li:has-text("dir1") ul li:has-text("File1")')
+    await page.click('#sidebar-tree li:has-text("dir1")');
+    await page.click('#sidebar-tree li:has-text("dir1") ul li:has-text("File1")')
     await page.click('#sidebar-tree li:has-text("File2")');
 
 });
