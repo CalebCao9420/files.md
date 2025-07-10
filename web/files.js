@@ -217,7 +217,7 @@ async function syncTextsWithServer() {
                     handle: await getFileHandle(path),
                 });
 
-                console.log('SYNC texsts: write file: ', path);
+                console.log('SYNC texts: write file: ', path);
                 addServerFile(path, content, lastModified);
                 // Unfortunately rename is not working, so we have to delete the old file
                 const shouldRemoveOldFile = path in server.renames;
@@ -958,7 +958,7 @@ function addServerFile(path, content, lastModifiedAt, clientLastSynced = null) {
     for (let dir of dirs) {
         dir += '/';
         if (!currentDir[dir]) {
-            return null;
+            currentDir[dir] = {};
         }
         currentDir = currentDir[dir];
     }

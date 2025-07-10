@@ -297,8 +297,97 @@ test('files exist on both client and server, config is not removed on first sync
     await expectFileOnServer(page, 'config.json', '{}');
 });
 
+test('files exist on both client and server, serverFiles contains proper server files', async ({ page }) => {
+    await createFileOnServer('file.md', 'test content');
+    await createFileOnServer('dir/file2.md', 'test content2');
+    await createFileOnServer('another.md', '*italic*');
+
+    await setup(page);
+    await page.waitForTimeout(300);
+
+    // Check that existing files are not removed
+    await clickAndExpectContent(page, 'Notes', '# Notes\nSome Text');
+    await clickAndExpectContent(page, 'README', '# README\nHello world');
+
+    // Check that new files are added
+    await clickAndExpectContent(page, 'file', '# File\ntest content');
+    await clickAndExpectContent(page, 'another', '# Another\n*italic*');
+
+    // Trigger syncTexts
+    await page.waitForTimeout(2000);
+    await page.evaluate(() => {
+        window.dispatchEvent(new Event('focus'));
+    });
+    await page.waitForTimeout(2000);
+
+    await expectFileOnServer(page, 'file.md', 'test content');
+    await expectFileOnServer(page, 'another.md', '*italic*');
+    await expectFileOnServer(page, 'config.json', '{}');
+
+    let filesOnServer = await page.evaluate(() => {
+        return serverFiles['files'];
+    });
+    expect(filesOnServer).toEqual({
+        'Chat.txt': {
+            hash: expect.any(Number),
+            isFile: true,
+            lastModified: expect.any(Number),
+            lastSynced: null,
+            path: 'Chat.txt'
+        },
+        'Notes.md': {
+            hash: expect.any(Number),
+            isFile: true,
+            lastModified: expect.any(Number),
+            lastSynced: null,
+            path: 'Notes.md'
+        },
+        'README.md': {
+            hash: expect.any(Number),
+            isFile: true,
+            lastModified: expect.any(Number),
+            lastSynced: null,
+            path: 'README.md'
+        },
+        'another.md': {
+            hash: expect.any(Number),
+            isFile: true,
+            lastModified: expect.any(Number),
+            lastSynced: null,
+            path: 'another.md'
+        },
+        'config.json': {
+            hash: expect.any(Number),
+            isFile: true,
+            lastModified: expect.any(Number),
+            lastSynced: null,
+            path: 'config.json'
+        },
+        'dir/': {
+            'file2.md': {
+                hash: expect.any(Number),
+                isFile: true,
+                lastModified: expect.any(Number),
+                lastSynced: null,
+                path: 'dir/file2.md'
+            }
+        },
+        'file.md': {
+            hash: expect.any(Number),
+            isFile: true,
+            lastModified: expect.any(Number),
+            lastSynced: null,
+            path: 'file.md'
+        }
+    });
+});
+
 async function createFileOnServer(filepath, content) {
     const p = path.join(getServerDir(), filepath);
+
+    // Create all intermediate directories
+    await fs.mkdir(path.dirname(p), { recursive: true });
+
     await fs.writeFile(p, content, 'utf8');
 }
 
