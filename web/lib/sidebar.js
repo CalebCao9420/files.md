@@ -1106,7 +1106,6 @@ window.handleNodeMove = async function(sourceDir, sourceFile, targetDir) {
 
     console.log(`${sourceDir}/${sourceFile}`);
     if (currentEditor.path === `${sourceDir}/${sourceFile}`) {
-        console.log('move currentl');
        await moveCurrentFile(targetDir);
     } else {
         await moveFile(`${sourceDir}/${sourceFile}`, `${targetDir}/${sourceFile}`);
