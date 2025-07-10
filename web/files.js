@@ -1463,6 +1463,10 @@ function walkFilesExcludingSystemDirs(callback) {
 }
 
 function toFilename(path) {
+    if (path === '/') {
+        return '/';
+    }
+
     const {filename} = toDirPathAndFilename(path);
 
     return filename;

@@ -365,7 +365,7 @@ test('create new file, move to new dir, create new file is subdir, move to root'
     await page.keyboard.press('Meta+a');
     await page.keyboard.type('file1');
     // await page.waitForTimeout(500); // TODO shoudln't be rc, maybe save file on focus out or something
-    await page.keyboard.press('Enter');
+    await page.keyboard.press('ArrowDown');
     await page.keyboard.type('content');
     await page.waitForTimeout(300);
 
@@ -385,7 +385,7 @@ test('create new file, move to new dir, create new file is subdir, move to root'
     await page.keyboard.press('Meta+a');
     await page.keyboard.type('file2');
     await page.waitForTimeout(100);
-    await page.keyboard.press('Enter');
+    await page.keyboard.press('ArrowDown');
     await page.keyboard.type('content');
     await page.waitForTimeout(300);
 
@@ -394,7 +394,7 @@ test('create new file, move to new dir, create new file is subdir, move to root'
     await page.click('#move-results >> text=/');
     await page.waitForTimeout(500);
 
-    await page.click('#sidebar-tree li:has-text("dir1")');
+    // await page.click('#sidebar-tree li:has-text("dir1")');
     await page.click('#sidebar-tree li:has-text("dir1") ul li:has-text("File1")')
     await page.click('#sidebar-tree li:has-text("File2")');
 

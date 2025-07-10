@@ -607,12 +607,12 @@ function renderSidebar(focusDir = '') {
         dirNodes[path] = dirNode;
 
         // Add to parent
-        const {dirPath, _ } = toDirPathAndFilename(path);
-        const parentNode = dirNodes[dirPath + '/'] || root;
+        const dirPath = toDirPath(path);
+        const parentNode = dirNodes[dirPath] || root;
         parentNode.addChild(dirNode);
 
         // Handle focus directory or restore previous state
-        let dir = trimPostfix(dirPath, '/');
+        let dir = toFilename(path);
         if (dir === focusDir) {
             dirNode.setExpanded(true);
             dirNode.setSelected(true);
