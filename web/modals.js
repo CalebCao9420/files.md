@@ -285,7 +285,7 @@ class SearchModal {
             if (dirName === '/') {
                 listItem.textContent = title;
             } else {
-                listItem.textContent = `${dirName}/${title}`;
+                listItem.textContent = trimPrefix(`${dirName}/${title}`, '/');
             }
             listItem.setAttribute('data-path', path);
             listItem.setAttribute('data-index', index);
