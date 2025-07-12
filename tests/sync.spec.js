@@ -341,7 +341,6 @@ test('files exist on both client and server, serverFiles contains proper server 
     let filesOnServer = await page.evaluate(() => {
         return server['files'];
     });
-    console.log(filesOnServer);
     expect(filesOnServer).toEqual({
         'Chat.txt': {
             hash: expect.any(Number),
@@ -389,12 +388,86 @@ test('files exist on both client and server, serverFiles contains proper server 
         },
 
         'file.md': {
-            hash: expect.any(Number),
             isFile: true,
+            hash: expect.any(Number),
             lastModified: expect.any(Number),
             lastSynced: null,
             path: '/file.md'
-        }
+        },
+        'happiness/': {
+            'Boredom is just an emotion.md': {
+                isFile: true,
+                hash: expect.any(Number),
+                lastModified: expect.any(Number),
+                lastSynced: null,
+                path: '/happiness/Boredom is just an emotion.md'
+            },
+            'Meditation.md': {
+                isFile: true,
+                hash: expect.any(Number),
+                lastModified: expect.any(Number),
+                lastSynced: null,
+                path: '/happiness/Meditation.md'
+            }
+        },
+        '🪴 Welcome.md': {
+            isFile: true,
+            hash: expect.any(Number),
+            lastModified: expect.any(Number),
+            lastSynced: null,
+            path: '/🪴 Welcome.md'
+        },
+        'Hotkeys.md': {
+            isFile: true,
+            hash: expect.any(Number),
+            lastModified: expect.any(Number),
+            lastSynced: null,
+            path: '/Hotkeys.md'
+        },
+        'Links.md': {
+            isFile: true,
+            hash: expect.any(Number),
+            lastModified: expect.any(Number),
+            lastSynced: null,
+            path: '/Links.md'
+        },
+        'My thoughts.md': {
+            isFile: true,
+            hash: expect.any(Number),
+            lastModified: expect.any(Number),
+            lastSynced: null,
+            path: '/My thoughts.md'
+        },
+        'Markdown Guide.md': {
+            isFile: true,
+            hash: expect.any(Number),
+            lastModified: expect.any(Number),
+            lastSynced: null,
+            path: '/Markdown Guide.md'
+        },
+        'brain/': {
+            'Change your environment instead of using willpower.md': {
+                isFile: true,
+                hash: expect.any(Number),
+                lastModified: expect.any(Number),
+                lastSynced: null,
+                path: '/brain/Change your environment instead of using willpower.md'
+            },
+            'Brain is the most complex object in known universe.md': {
+                isFile: true,
+                hash: expect.any(Number),
+                lastModified: expect.any(Number),
+                lastSynced: null,
+                path: '/brain/Brain is the most complex object in known universe.md'
+            },
+            'We think that we understand, but in reality we just know.md': {
+                isFile: true,
+                hash: expect.any(Number),
+                lastModified: expect.any(Number),
+                lastSynced: null,
+                path: '/brain/We think that we understand, but in reality we just know.md'
+            }
+        },
     });
 
     // await page.pause();
