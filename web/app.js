@@ -696,32 +696,7 @@ window.addEventListener('keydown', async (event) => {
         console.log('cmd+d');
         event.preventDefault();
         event.stopPropagation();
-
-        const path = currentEditor.path;
-        if (path === CHAT_PATH) {
-            return;
-        }
-
-        const nextFilePath = findSiblingPath(path);
-
-        let oldPath = path;
-        let newPath = '/archive/' + toFilename(path);
-
-        currentEditor.path = undefined;
-        if (toDirPath(path) === '/archive') {
-            console.log('Removing file permanently', path);
-            await removeFile(oldPath);
-        } else {
-            console.log('Moving file to archive', path);
-            await moveFile(oldPath, newPath);
-        }
-
-        await renderSidebar();
-        if (nextFilePath) {
-            await openFile(nextFilePath);
-        } else {
-            showRandomFile();
-        }
+        removeCurrentFile();
     }
 
     if (isMetaKey(event) && event.key === 'n') {
