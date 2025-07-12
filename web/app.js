@@ -294,6 +294,7 @@ function initEditor(el) {
                             files['media/'] = {};
                         }
                         files['media/'][fileName] = {
+                            isFile: true,
                             handle: fileHandle,
                             lastModified: Date.now(),
                             imageUrl: URL.createObjectURL(file)
