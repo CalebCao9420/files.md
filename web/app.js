@@ -49,7 +49,7 @@ async function init(el) {
         // document.getElementById('new-file').style.display = 'none';
         // document.getElementById('new-folder').style.display = 'none';
         // document.getElementById('open-chat').style.display = 'none';
-        // document.getElementById('open-chat-modal').style.display = 'none';
+        document.getElementById('open-chat-modal').style.display = 'inline';
         // files = DEFAULT_FILES;
         // isWelcome = true;
         // renderSidebar();
@@ -62,7 +62,7 @@ async function init(el) {
         // document.getElementById('new-file').style.display = 'inline';
         // document.getElementById('new-folder').style.display = 'inline';
         // document.getElementById('open-chat').style.display = 'inline';
-        // document.getElementById('open-chat-modal').style.display = 'inline';
+        document.getElementById('open-chat-modal').style.display = 'inline';
     }
 
     // Alert if there's no "Allow on every visit" check.
