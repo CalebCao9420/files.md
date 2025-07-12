@@ -1436,7 +1436,7 @@ function walk(obj, callback, path = '/') {
         // But in case of an error, a watchdog like that can prevent freezing.
         iterations++;
         if (iterations > maxAllowedIterations) {
-            console.log(files);
+            console.log(obj);
             console.log(lastStackTraces.slice(-30));
             alert("An infinite loop during files walk");
             neverAgain = true;
