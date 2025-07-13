@@ -637,3 +637,7 @@ body.dragging * {
 #sidebar:not([style*="display: none"]) ~ #open-sidebar {
     display: none;
 }
+
+.cm-s-hypermd-light .cm-header {
+    font-weight: 650 !important;
+}

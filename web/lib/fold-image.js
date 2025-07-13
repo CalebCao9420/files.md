@@ -144,7 +144,7 @@
             if (url_end === null) {
                 return;
             }
-            
+
             let from = {line: lineNo, ch: token.start};
             let to = {line: lineNo, ch: url_end.token.end};
 
