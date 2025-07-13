@@ -188,7 +188,7 @@ func TestSyncText_UpdateExistingFile_Conflict(t *testing.T) {
 	var response map[string]interface{}
 	err = json.Unmarshal(w.Body.Bytes(), &response)
 	r.NoError(err)
-	r.Equal("ok", response["status"])
+	r.Equal("merged", response["status"])
 
 	// Verify content was updated
 	content, err := userFS.Read("", "test.md")
@@ -233,7 +233,7 @@ func TestSyncText_UpdateExistingFile_JournalConflict(t *testing.T) {
 	var response map[string]interface{}
 	err = json.Unmarshal(w.Body.Bytes(), &response)
 	r.NoError(err)
-	r.Equal("ok", response["status"])
+	r.Equal("merged", response["status"])
 
 	// Verify content was updated
 	content, err := userFS.Read("", "test.md")
