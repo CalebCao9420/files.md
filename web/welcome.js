@@ -193,7 +193,7 @@ const DEFAULT_FILES = {
             "You can insert your own links by typing `[`.\n\n" +
             "[Why using links](/Links.md)\n" +
             "[Welcome](/🪴 Welcome.md)\n" +
-            "[My thoughts](/My thoughts.md)",
+            "[My project](/My project.md)",
         isFile: true,
     },
     "Hotkeys.md": {
@@ -229,7 +229,7 @@ const DEFAULT_FILES = {
             "[Markdown Guide](/Markdown Guide.md)",
         isFile: true,
     },
-    "My thoughts.md": {
+    "My project.md": {
         "content": "You can dump project related thoughts here.",
         isFile: true,
     }
