@@ -570,7 +570,6 @@ async function collectModifiedAndDeletedFiles() {
             .then(result => {
                 if (result.status === 'modified' || result.status === 'new') {
                     modifiedFiles.push(result);
-                    existingFiles[result.path] = true;
                 }
 
                 if (result.status !== 'error') {
@@ -650,7 +649,13 @@ async function getFileStatus(path) {
     let content;
     try {
         const memFile = getMemFile(path);
-        if (!memFile?.handle) {
+        let fileHandle = memFile?.handle;
+        // First try to get the file from memory, if not found try to open from local fs.
+        if (!(fileHandle instanceof FileSystemFileHandle)) {
+            fileHandle = await getFileHandle(path, false);
+        }
+        if (!(fileHandle instanceof FileSystemFileHandle)) {
+            console.log("Can't get file status for", path);
             return {
                 status: 'error',
             }
