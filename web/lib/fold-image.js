@@ -98,6 +98,7 @@
                             event.stopPropagation();
                             event.preventDefault();
                             closeModal();
+                            currentEditor.focus();
                         }
                     };
                     document.addEventListener("keydown", handleKeyDown, true);
@@ -217,6 +218,7 @@
                             event.stopPropagation();
                             event.preventDefault();
                             closeModal();
+                            currentEditor.focus();
                         }
                     };
                     document.addEventListener("keydown", handleKeyDown, true);
