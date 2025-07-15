@@ -874,7 +874,11 @@ func (b *Bot) showMoveTo(params []string) error {
 
 	b.delAllKeyboards()
 
-	err = b.showHTML(b.tr("Saved!"), &kb)
+	msg := b.tr("Saved to <b>inbox</b>!")
+	if b.cfg.TasksOnlyMode() {
+		msg = b.tr("Saved to <b>today</b>!")
+	}
+	err = b.showHTML(msg, &kb)
 	if err != nil {
 		return fmt.Errorf("move: %w", err)
 	}

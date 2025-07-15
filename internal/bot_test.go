@@ -1555,7 +1555,7 @@ func TestShowMoveTo(t *testing.T) {
 	err = bot.Reply(tg.NewUpd(-1, "New task\nContent"))
 	r.NoError(err)
 
-	r.Equal("Saved!", tgram.SentTexts[0])
+	r.Equal("Saved to <b>today</b>!", tgram.SentTexts[0])
 
 	kb := tg.NewKeyboard([]tg.Row{
 		[]tg.Btn{
