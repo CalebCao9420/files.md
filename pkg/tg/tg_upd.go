@@ -16,6 +16,7 @@ import (
 
 var (
 	errNoUserID    = errors.New("update should always have at least one userID")
+	errNoChannelID = errors.New("update doesn't have channelID")
 	imageMimeTypes = []string{
 		"image/gif",
 		"image/jpeg",
@@ -54,6 +55,19 @@ func (u *TGUpd) UserID() int64 {
 	default:
 		jsonData, _ := json.Marshal(u.raw)
 		panic(fmt.Sprintf("%v: %s", errNoUserID, string(jsonData)))
+	}
+}
+
+func (u *TGUpd) ChannelID() (int64, error) {
+	switch {
+	case u.raw.ChannelPost != nil:
+		return u.raw.ChannelPost.Chat.ID, nil
+	case u.raw.EditedChannelPost != nil:
+		return u.raw.EditedChannelPost.Chat.ID, nil
+	case u.raw.CallbackQuery != nil && u.raw.CallbackQuery.Message != nil && u.raw.CallbackQuery.Message.Chat != nil && u.raw.CallbackQuery.Message.Chat.Type == "channel":
+		return u.raw.CallbackQuery.Message.Chat.ID, nil
+	default:
+		return 0, errNoChannelID
 	}
 }
 

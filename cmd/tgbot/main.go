@@ -96,23 +96,44 @@ func main() {
 	tgConfig.Timeout = 60 // TODO release, check if it's enough
 	updates := api.GetUpdatesChan(tgConfig)
 	for update := range updates {
-		upd := tg.NewTGUpd(update)
-		userID := upd.UserID()
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					slog.Error("Bot panic", "update", update, "err", err, "stacktrace", string(debug.Stack()))
+				}
+			}()
 
-		userCh, exists := userChannels[userID]
-		if !exists {
-			userCh = make(chan tgbotapi.Update, 100)
-			userChannels[userID] = userCh
-			go supervisor(userID, userCh, telegram, infolog)
-		}
+			var updJSON []byte
+			updJSON, _ = json.Marshal(update)
+			infolog.Info("Bot update: ", "update", string(updJSON))
 
-		userCh <- update
+			var userID int64
+			upd := tg.NewTGUpd(update)
+			channelID, err := upd.ChannelID()
+			if err != nil {
+				userID, err = telegram.ChannelCreatorID(channelID)
+				if err != nil {
+					slog.Error("Bot error: can't get channel creator ID", "upd", string(updJSON), "err", err)
+				}
+			} else {
+				userID = upd.UserID()
+			}
+
+			userCh, exists := userChannels[userID]
+			if !exists {
+				userCh = make(chan tgbotapi.Update, 100)
+				userChannels[userID] = userCh
+				go supervisor(userID, userCh, telegram)
+			}
+
+			userCh <- update
+		}()
 	}
 }
 
 // Runs per-user worker that listens for updates.
 // Restarts infinitely upon panics.
-func supervisor(userID int64, updates <-chan tgbotapi.Update, telegram *tg.TG, infolog *slog.Logger) {
+func supervisor(userID int64, updates <-chan tgbotapi.Update, telegram *tg.TG) {
 	for {
 		func() {
 			defer func() {
@@ -120,21 +141,17 @@ func supervisor(userID int64, updates <-chan tgbotapi.Update, telegram *tg.TG, i
 					slog.Error("Bot panic", "userID", userID, "err", err, "stacktrace", string(debug.Stack()))
 				}
 			}()
-			processUserUpdates(updates, telegram, infolog)
+			processUserUpdates(updates, telegram)
 		}()
 		time.Sleep(time.Second)
 		slog.Info("Restarting worker", "userID", userID)
 	}
 }
 
-func processUserUpdates(updates <-chan tgbotapi.Update, telegram *tg.TG, infolog *slog.Logger) {
+func processUserUpdates(updates <-chan tgbotapi.Update, telegram *tg.TG) {
 	for update := range updates {
 		upd := tg.NewTGUpd(update)
 		userID := upd.UserID()
-
-		var updJSON []byte
-		updJSON, _ = json.Marshal(update)
-		infolog.Info("Bot update: ", "update", string(updJSON))
 
 		storagePath := config.BotCfg.StorageDir
 		storagePath, err := filepath.Abs(storagePath)

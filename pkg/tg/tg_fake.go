@@ -82,3 +82,7 @@ func (f *FakeTG) AnswerInlineQuery(queryID string, results []interface{}, cacheT
 func (f *FakeTG) DownloadFile(fileID string, writer io.Writer) (string, error) {
 	return "", nil
 }
+
+func (f *FakeTG) ChannelCreatorID(chatID int64) (int64, error) {
+	return 0, nil
+}

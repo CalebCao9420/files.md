@@ -216,6 +216,27 @@ func (tg *TG) DownloadFile(fileID string, outFile io.Writer) (string, error) {
 	return path.Ext(file.FilePath), nil
 }
 
+func (tg *TG) ChannelCreatorID(chatID int64) (int64, error) {
+	config := tgbotapi.ChatAdministratorsConfig{
+		ChatConfig: tgbotapi.ChatConfig{
+			ChatID: chatID,
+		},
+	}
+
+	admins, err := tg.api.GetChatAdministrators(config)
+	if err != nil {
+		return 0, err
+	}
+
+	for _, admin := range admins {
+		if admin.Status == "creator" {
+			return admin.User.ID, nil
+		}
+	}
+
+	return 0, fmt.Errorf("tg channel owner not found")
+}
+
 func (tg *TG) buildInlineKeyboard(kb *Keyboard) *tgbotapi.InlineKeyboardMarkup {
 	if kb == nil || len(kb.Btns) == 0 {
 		return nil
