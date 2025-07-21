@@ -877,7 +877,7 @@ func (b *Bot) showMoveTo(params []string) error {
 	}
 
 	toTodayCmd := tg.NewCmd(consts.CmdMoveToExistingDir, []string{fs.Hash(fs.DirToday), msgIndexStr})
-	toTodayLabel := txt.Emoji(i18n.Emoji("move"), i18n.Tr("To Today"))
+	toTodayLabel := txt.Emoji(i18n.Emoji("tasks"), i18n.Tr("To Today"))
 	userMoveToBtns = append(userMoveToBtns, tg.NewBtn(toTodayLabel, toTodayCmd))
 
 	showTodayCmd := tg.NewCmd(consts.CmdShowToday, []string{})
