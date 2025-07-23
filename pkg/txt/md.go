@@ -27,6 +27,41 @@ var closeTags = map[string]string{
 	"__": "</b>",
 }
 
+func ChecklistItems(md string) map[string]bool {
+	items := make(map[string]bool)
+	lines := strings.Split(md, "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "- [ ] ") {
+			items[strings.TrimPrefix(line, "- [ ] ")] = false
+		} else if strings.HasPrefix(line, "- [x] ") {
+			items[strings.TrimPrefix(line, "- [x] ")] = true
+		}
+	}
+	return items
+}
+
+func AddChecklistItem(md, item string, checked bool) string {
+	if checked {
+		md += "\n- [x] " + item
+	} else {
+		md += "\n- [ ] " + item
+	}
+	return md
+}
+
+func RemoveChecklistItem(md, item string) string {
+	lines := strings.Split(md, "\n")
+	var newLines []string
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line != "- [ ] "+item && line != "- [x] "+item {
+			newLines = append(newLines, line)
+		}
+	}
+	return strings.Join(newLines, "\n")
+}
+
 // MarkdownToHTML naively converts user's markdown to Telegram-supported subset of HTML.
 // We don't need to implement full-blown AST parser because TG only supports a few HTML tags.
 // Telegram supports the following HTML tags:

@@ -53,6 +53,8 @@ const (
 	DirWatch    = "_watch_"
 	DirShop     = "_shop_"
 
+	TodayFilename    = "Today.txt"
+	LaterFilename    = "Later.txt"
 	InboxFilename    = "Inbox.txt"
 	PomodoroFilename = "Finished a break.md"
 
