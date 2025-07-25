@@ -124,36 +124,6 @@ function renderSidebar(focusDir = '', modifiedPaths) {
         }
     });
 
-    // Second pass: add all files
-    walk(files, (path, isFile) => {
-        if (path === '/media' || path.startsWith('/media/')) {
-            return;
-        }
-
-        if (path === CONFIG_PATH || path === INBOX_PATH) {
-            return;
-        }
-
-        if (!isFile) {
-            return;
-        }
-
-        const {dirPath, filename} = toDirPathAndFilename(path);
-
-        let fileNode = new TreeNode(filename.replace(/\.md$/, '').replace(/\.txt$/, ''), {expanded: false});
-        fileNode.path = path;
-        fileNode.on('click', async function (n, node) {
-            await openFile(path);
-        });
-
-        const parentNode = dirNodes[dirPath] || root;
-        parentNode.addChild(fileNode);
-
-        if (modifiedPaths !== undefined && modifiedPaths.includes(path)) {
-            fileNode.shouldBlink = true;
-        }
-    });
-
     const groupedDirs = new Set(['_read_', '_watch_', '_shop_', 'journal', 'habits', 'insights', 'archive', 'today', 'later']);
     const underscoreDirs = [];
     // Group all checklists
@@ -175,26 +145,68 @@ function renderSidebar(focusDir = '', modifiedPaths) {
         }
     });
 
-    const groups = [
-        ['today', 'later'],
-        ['journal', 'habits', 'insights'],
-    ];
-    for (let i = 0; i < groups.length; i++) {
-        const dirList = groups[i];
-        const existingDirs = dirList.filter(dir => dirNodes['/' + dir]);
-        if (existingDirs.length === 0) continue;
+    // if (files[toFilename(TODAY_PATH)] !== undefined) {
+    //     let node = new TreeNode('Today list', {expanded: false, dir: false});
+    //     node.path = path;
+    //     node.on('click', async function (n, node) {
+    //         await openFile(TODAY_PATH);
+    //     });
+    //     node.isGroupEnd = true;
+    //     root.addChild(node);
+    // }
 
-        existingDirs.forEach((dir, index) => {
-            const dirNode = dirNodes['/' + dir];
-            if (dirNode && dirNode.parent === root) {
-                // Add in the end
-                root.removeChild(dirNode);
-                if (index === existingDirs.length - 1) {
-                    dirNode.isGroupEnd = true;
-                }
-                root.addChild(dirNode);
-            }
+// Step 1: Tasks group
+    if (dirNodes['/today']) {
+        const todayNode = dirNodes['/today'];
+        if (todayNode && todayNode.parent === root) {
+            root.removeChild(todayNode);
+            root.addChild(todayNode);
+        }
+    }
+
+    if (dirNodes['/later']) {
+        const laterNode = dirNodes['/later'];
+        if (laterNode && laterNode.parent === root) {
+            root.removeChild(laterNode);
+            root.addChild(laterNode);
+        }
+    }
+
+    if (files[toFilename(TODAY_PATH)] !== undefined) {
+        let node = new TreeNode('Today list', {expanded: false, dir: false});
+        node.path = TODAY_PATH;
+        node.on('click', async function (n, node) {
+            await openFile(TODAY_PATH);
         });
+        node.isGroupEnd = true;
+        root.addChild(node);
+    }
+
+// Step 2: Personal group
+    if (dirNodes['/journal']) {
+        const journalNode = dirNodes['/journal'];
+        journalNode.isGroupEnd = true;
+        if (journalNode && journalNode.parent === root) {
+            root.removeChild(journalNode);
+            root.addChild(journalNode);
+        }
+    }
+
+    if (dirNodes['/habits']) {
+        const habitsNode = dirNodes['/habits'];
+        if (habitsNode && habitsNode.parent === root) {
+            root.removeChild(habitsNode);
+            root.addChild(habitsNode);
+        }
+    }
+
+    if (dirNodes['/insights']) {
+        const insightsNode = dirNodes['/insights'];
+        if (insightsNode && insightsNode.parent === root) {
+            root.removeChild(insightsNode);
+            root.addChild(insightsNode);
+            insightsNode.isGroupEnd = true;
+        }
     }
 
     // Hide if only 2 groups
@@ -221,6 +233,36 @@ function renderSidebar(focusDir = '', modifiedPaths) {
             root.addChild(dirNode);
         }
     }
+
+    // Second pass: add all files
+    walk(files, (path, isFile) => {
+        if (path === '/media' || path.startsWith('/media/')) {
+            return;
+        }
+
+        if (path === CONFIG_PATH || path === INBOX_PATH || path === TODAY_PATH || path === LATER_PATH) {
+            return;
+        }
+
+        if (!isFile) {
+            return;
+        }
+
+        const {dirPath, filename} = toDirPathAndFilename(path);
+
+        let fileNode = new TreeNode(filename.replace(/\.md$/, '').replace(/\.txt$/, ''), {expanded: false});
+        fileNode.path = path;
+        fileNode.on('click', async function (n, node) {
+            await openFile(path);
+        });
+
+        const parentNode = dirNodes[dirPath] || root;
+        parentNode.addChild(fileNode);
+
+        if (modifiedPaths !== undefined && modifiedPaths.includes(path)) {
+            fileNode.shouldBlink = true;
+        }
+    });
 
     // Process root-level files
     // if (files['']) {
@@ -257,6 +299,8 @@ function renderSidebar(focusDir = '', modifiedPaths) {
                 if (aName === 'inbox') return 1;
                 if (bName === 'inbox') return 1;
 
+                if (aName === 'Today list') return -1;
+
                 // Then sort by directory vs file
                 if (aIsDir && !bIsDir) return -1;
                 if (!aIsDir && bIsDir) return 1;
@@ -268,7 +312,7 @@ function renderSidebar(focusDir = '', modifiedPaths) {
             children.forEach(child => sortTreeNode(child));
         }
     }
-    sortTreeNode(root);
+    // sortTreeNode(root);
 
     tree = new TreeView(root, '#tree', {
         show_root: false,
@@ -777,7 +821,6 @@ function TreeView(root, container, options) {
     }
 
     function handleExternalFileDrop(e) {
-        console.log(e);
         const files = Array.from(e.dataTransfer.files);
         files.forEach(file => {
             if (file.type === 'text/plain' || file.name.endsWith('.md')) {
@@ -847,6 +890,9 @@ function TreeView(root, container, options) {
                     groupHeaderText = "Lists";
                     groupHeaderClass = "lists";
                 } else if (['today', 'later'].includes(nodeStr)) {
+                    groupHeaderText = "Tasks";
+                    groupHeaderClass = "tasks";
+                } else if (nodeStr === 'Today list') {
                     groupHeaderText = "Tasks";
                     groupHeaderClass = "tasks";
                 } else if (['journal', 'habits', 'insights'].includes(nodeStr)) {
