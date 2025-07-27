@@ -116,9 +116,6 @@ function renderSidebar(focusDir = '', modifiedPaths) {
             if (selectedNodes.has(dir)) dirNode.setSelected(true);
         }
 
-        if (modifiedPaths !== undefined) {
-            console.log('PATHS', toRootDirName(modifiedPaths[0]), dir);
-        }
         if (modifiedPaths !== undefined && modifiedPaths.some(modPath => toRootDirName(modPath) === dir)) {
             dirNode.shouldBlink = true;
         }

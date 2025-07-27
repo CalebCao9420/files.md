@@ -1795,6 +1795,10 @@ func (b *Bot) moveToChecklist(params []string) error {
 		}
 		msgIndices = append(msgIndices, msgIndex)
 	}
+	// Sort indices in descending order to avoid issues with removing items.
+	sort.Slice(msgIndices, func(i, j int) bool {
+		return msgIndices[i] > msgIndices[j]
+	})
 
 	for _, msgIndex := range msgIndices {
 		_, err := b.addToChecklist(toChecklistHash, msgIndex)
