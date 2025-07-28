@@ -334,7 +334,7 @@ func TestAddChecklistItemWithNewlines(t *testing.T) {
 	md := "text"
 	result := AddChecklistItem(md, "task with\nnewlines", false)
 
-	r.Equal("- [ ] task with newlines", result)
+	r.Equal("text\n- [ ] task with newlines", result)
 }
 
 func TestAddChecklistItemRemovesDuplicate(t *testing.T) {

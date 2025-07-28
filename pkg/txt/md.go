@@ -40,6 +40,7 @@ func ChecklistItems(md string) map[string]bool {
 			items[strings.TrimPrefix(line, "- [x] ")] = true
 		}
 	}
+
 	return items
 }
 
@@ -83,7 +84,9 @@ func RemoveChecklistItem(md, itemOrHash string) (string, string) {
 	var newLines []string
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
+		// Preserve invalid lines
 		if len(line) < 6 {
+			newLines = append(newLines, line)
 			continue
 		}
 
@@ -104,6 +107,7 @@ func RemoveCompletedChecklistItems(md string) (string, string) {
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 		if len(line) < 6 {
+			newLines = append(newLines, line)
 			continue
 		}
 
