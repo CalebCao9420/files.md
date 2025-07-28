@@ -83,7 +83,7 @@ async function loadLocalFiles(rootDirHandle) {
             }
 
             if (entry.kind === 'directory') {
-                if (filename.startsWith('.') || depth >= 5) continue;
+                if (filename.startsWith('.') || depth >= 5 || filename === 'today' || filename === 'later') continue;
 
                 currentDir[filename + '/'] = {};
                 const dir = `${path}${filename}/`;
