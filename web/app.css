@@ -753,3 +753,11 @@ body.dragging * {
     text-indent: -10px !important;
     padding-inline-start: 24px !important;
 }
+
+.HyperMD-list-line:has(.cm-formatting-task) {
+    padding-left: 30px !important;
+}
+
+.HyperMD-list-line:has(.cm-formatting-task.hmd-hidden-token) {
+    text-indent: -5px !important;
+}
