@@ -61,11 +61,11 @@ func CompleteChecklistItem(md, itemHash string) (string, string) {
 	foundItem := ""
 	lines := strings.Split(md, "\n")
 	for i, line := range lines {
+		line = strings.TrimSpace(line)
 		if len(line) < 6 {
 			continue
 		}
 
-		line = strings.TrimSpace(line)
 		if strings.HasPrefix(line, "- [ ] ") && Hash(line[6:]) == itemHash {
 			foundItem = line[6:]
 			lines[i] = "- [x] " + line[6:]
@@ -82,11 +82,11 @@ func RemoveChecklistItem(md, itemOrHash string) (string, string) {
 	lines := strings.Split(md, "\n")
 	var newLines []string
 	for _, line := range lines {
+		line = strings.TrimSpace(line)
 		if len(line) < 6 {
 			continue
 		}
 
-		line = strings.TrimSpace(line)
 		if Hash(line[6:]) == itemOrHash || line[6:] == itemOrHash {
 			removedItem = line[6:]
 			continue
@@ -99,11 +99,11 @@ func RemoveChecklistItem(md, itemOrHash string) (string, string) {
 func ChecklistItem(md, itemOrHash string) string {
 	lines := strings.Split(md, "\n")
 	for _, line := range lines {
+		line = strings.TrimSpace(line)
 		if len(line) < 6 {
 			continue
 		}
 
-		line = strings.TrimSpace(line)
 		if Hash(line[6:]) == itemOrHash || line[6:] == itemOrHash {
 			return line[6:]
 		}
