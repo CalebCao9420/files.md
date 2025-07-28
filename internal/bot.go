@@ -1870,11 +1870,6 @@ func (b *Bot) completeChecklistItem(params []string) error {
 		return fmt.Errorf("complete checklist item: can't complete item from chat: %w", err)
 	}
 
-	err = b.addToFile(fs.DirArchive, fs.DoneFilename, fmt.Sprintf("✅ %s", fs.Title(item)))
-	if err != nil {
-		return fmt.Errorf("complete checklist item: can't add to archive: %w", err)
-	}
-
 	if item == fs.PomodoroTask {
 		err = b.cfg.AddToSchedule(item, time.Now().Unix()+int64(b.cfg.PomodoroDuration().Seconds()), "")
 		if err != nil {

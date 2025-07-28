@@ -251,3 +251,247 @@ func TestMarkdownToHTMLHeaderWithInlineCode(t *testing.T) {
 
 	r.Equal("<b>Header</b>\n<code>inline code</code>", html)
 }
+
+func TestChecklistItems(t *testing.T) {
+	r := require.New(t)
+
+	md := "- [ ] unchecked item\n- [x] checked item\n- [ ] another unchecked"
+	items := ChecklistItems(md)
+
+	expected := map[string]bool{
+		"unchecked item":    false,
+		"checked item":      true,
+		"another unchecked": false,
+	}
+	r.Equal(expected, items)
+}
+
+func TestChecklistItemsEmpty(t *testing.T) {
+	r := require.New(t)
+
+	md := ""
+	items := ChecklistItems(md)
+
+	r.Equal(map[string]bool{}, items)
+}
+
+func TestChecklistItemsWithRegularText(t *testing.T) {
+	r := require.New(t)
+
+	md := "# Header\n- [ ] task one\nregular text\n- [x] task two"
+	items := ChecklistItems(md)
+
+	expected := map[string]bool{
+		"task one": false,
+		"task two": true,
+	}
+	r.Equal(expected, items)
+}
+
+func TestChecklistItemsWithWhitespace(t *testing.T) {
+	r := require.New(t)
+
+	md := "   - [ ] spaced task   \n\t- [x] tabbed task\t"
+	items := ChecklistItems(md)
+
+	expected := map[string]bool{
+		"spaced task": false,
+		"tabbed task": true,
+	}
+	r.Equal(expected, items)
+}
+
+func TestAddChecklistItemUnchecked(t *testing.T) {
+	r := require.New(t)
+
+	md := "existing text"
+	result := AddChecklistItem(md, "new task", false)
+
+	r.Equal("existing text\n- [ ] new task", result)
+}
+
+func TestAddChecklistItemChecked(t *testing.T) {
+	r := require.New(t)
+
+	md := "existing text"
+	result := AddChecklistItem(md, "completed task", true)
+
+	r.Equal("existing text\n- [x] completed task", result)
+}
+
+func TestAddChecklistItemToEmpty(t *testing.T) {
+	r := require.New(t)
+
+	md := ""
+	result := AddChecklistItem(md, "first task", false)
+
+	r.Equal("- [ ] first task", result)
+}
+
+func TestAddChecklistItemWithNewlines(t *testing.T) {
+	r := require.New(t)
+
+	md := "text"
+	result := AddChecklistItem(md, "task with\nnewlines", false)
+
+	r.Equal("- [ ] task with newlines", result)
+}
+
+func TestAddChecklistItemRemovesDuplicate(t *testing.T) {
+	r := require.New(t)
+
+	md := "- [ ] existing task\nother text"
+	result := AddChecklistItem(md, "existing task", true)
+
+	r.Equal("other text\n- [x] existing task", result)
+}
+
+func TestCompleteChecklistItem(t *testing.T) {
+	r := require.New(t)
+
+	md := "- [ ] task one\n- [ ] task two"
+	itemHash := Hash("task one")
+	result, foundItem := CompleteChecklistItem(md, itemHash)
+
+	r.Equal("- [x] task one\n- [ ] task two", result)
+	r.Equal("task one", foundItem)
+}
+
+func TestCompleteChecklistItemNotFound(t *testing.T) {
+	r := require.New(t)
+
+	md := "- [ ] task one\n- [ ] task two"
+	result, foundItem := CompleteChecklistItem(md, "nonexistent")
+
+	r.Equal(md, result)
+	r.Equal("", foundItem)
+}
+
+func TestCompleteChecklistItemWithWhitespace(t *testing.T) {
+	r := require.New(t)
+
+	md := "   - [ ] spaced task   \nother text"
+	itemHash := Hash("spaced task")
+	result, foundItem := CompleteChecklistItem(md, itemHash)
+
+	r.Equal("- [x] spaced task\nother text", result)
+	r.Equal("spaced task", foundItem)
+}
+
+func TestRemoveChecklistItemByText(t *testing.T) {
+	r := require.New(t)
+
+	md := "- [ ] task one\n- [x] task two\n- [ ] task three"
+	result, removedItem := RemoveChecklistItem(md, "task two")
+
+	r.Equal("- [ ] task one\n- [ ] task three", result)
+	r.Equal("task two", removedItem)
+}
+
+func TestRemoveChecklistItemByHash(t *testing.T) {
+	r := require.New(t)
+
+	md := "- [ ] task one\n- [x] task two"
+	itemHash := Hash("task one")
+	result, removedItem := RemoveChecklistItem(md, itemHash)
+
+	r.Equal("- [x] task two", result)
+	r.Equal("task one", removedItem)
+}
+
+func TestRemoveChecklistItemNotFound(t *testing.T) {
+	r := require.New(t)
+
+	md := "- [ ] task one\n- [x] task two"
+	result, removedItem := RemoveChecklistItem(md, "nonexistent")
+
+	r.Equal(md, result)
+	r.Equal("", removedItem)
+}
+
+func TestRemoveChecklistItemWithRegularText(t *testing.T) {
+	r := require.New(t)
+
+	md := "# Header\n- [ ] task one\nregular text\n- [x] task two"
+	result, removedItem := RemoveChecklistItem(md, "task one")
+
+	r.Equal("# Header\nregular text\n- [x] task two", result)
+	r.Equal("task one", removedItem)
+}
+
+func TestRemoveCompletedChecklistItems(t *testing.T) {
+	r := require.New(t)
+
+	md := "- [ ] unchecked\n- [x] completed one\n- [ ] another unchecked\n- [x] completed two"
+	result, removedMD := RemoveCompletedChecklistItems(md)
+
+	r.Equal("- [ ] unchecked\n- [ ] another unchecked", result)
+	r.Equal("- [x] completed one\n- [x] completed two\n", removedMD)
+}
+
+func TestRemoveCompletedChecklistItemsNoneCompleted(t *testing.T) {
+	r := require.New(t)
+
+	md := "- [ ] unchecked one\n- [ ] unchecked two"
+	result, removedMD := RemoveCompletedChecklistItems(md)
+
+	r.Equal(md, result)
+	r.Equal("", removedMD)
+}
+
+func TestRemoveCompletedChecklistItemsAllCompleted(t *testing.T) {
+	r := require.New(t)
+
+	md := "- [x] completed one\n- [x] completed two"
+	result, removedMD := RemoveCompletedChecklistItems(md)
+
+	r.Equal("", result)
+	r.Equal("- [x] completed one\n- [x] completed two\n", removedMD)
+}
+
+func TestRemoveCompletedChecklistItemsWithRegularText(t *testing.T) {
+	r := require.New(t)
+
+	md := "# Header\n- [ ] unchecked\nregular text\n- [x] completed"
+	result, removedMD := RemoveCompletedChecklistItems(md)
+
+	r.Equal("# Header\n- [ ] unchecked\nregular text", result)
+	r.Equal("- [x] completed\n", removedMD)
+}
+
+func TestChecklistItem(t *testing.T) {
+	r := require.New(t)
+
+	md := "- [ ] task one\n- [x] task two"
+	result := ChecklistItem(md, "task one")
+
+	r.Equal("task one", result)
+}
+
+func TestChecklistItemByHash(t *testing.T) {
+	r := require.New(t)
+
+	md := "- [ ] task one\n- [x] task two"
+	itemHash := Hash("task two")
+	result := ChecklistItem(md, itemHash)
+
+	r.Equal("task two", result)
+}
+
+func TestChecklistItemNotFound(t *testing.T) {
+	r := require.New(t)
+
+	md := "- [ ] task one\n- [x] task two"
+	result := ChecklistItem(md, "nonexistent")
+
+	r.Equal("", result)
+}
+
+func TestChecklistItemWithWhitespace(t *testing.T) {
+	r := require.New(t)
+
+	md := "   - [ ] spaced task   \nother text"
+	result := ChecklistItem(md, "spaced task")
+
+	r.Equal("spaced task", result)
+}

@@ -25,6 +25,10 @@ const (
 
 var now = time.Now
 
+// Map to store that we've already removed completed items from today/later.
+// The key is userID#day.
+var alreadyRemoved = make(map[string]bool)
+
 // MoveDueTasks moves due tasks from archive to later or today, or from later to today
 func MoveDueTasks(
 	storagePath,
@@ -106,6 +110,86 @@ func MoveDueTasks(
 				continue
 			}
 		}
+	}
+
+	return nil
+}
+
+func RemoveCompletedChecklistItems(
+	storagePath,
+	configFilename string,
+	fsBackend afero.Fs,
+) error {
+	rootFS, err := fs.NewFS(storagePath, fsBackend)
+	if err != nil {
+		return fmt.Errorf("schedule worker: can't create FS: %s", err)
+	}
+
+	userDirs, err := rootFS.FilesAndDirs(fs.DirRoot)
+	if err != nil {
+		return fmt.Errorf("schedule worker: %w", err)
+	}
+
+	for _, userDir := range userDirs {
+		userID, err := strconv.ParseInt(userDir.Name, 10, 64)
+		if err != nil {
+			slog.Error("schedule worker: can't parse user ID", "dir", userDir.Name, "err", err)
+			continue
+		}
+		userPath := path.Join(storagePath, txt.I64(userID))
+		userFS, err := fs.NewFS(userPath, fsBackend)
+		if err != nil {
+			slog.Error("schedule worker: can't create user FS", "err", err)
+			continue
+		}
+
+		if alreadyRemoved[txt.I64(userID)+"#"+now().Format("2006-01-02")] {
+			continue
+		}
+
+		userconf := userconfig.NewConfig(userFS, userID, configFilename)
+		tz := userconf.Timezone()
+		// If we are less than 10 minutes before the end of the day - return
+		if now().In(tz).Hour() == 23 && now().In(tz).Minute() >= 50 {
+			continue
+		}
+
+		for _, checklist := range []string{fs.TodayFilename, fs.LaterFilename} {
+			md, err := userFS.Read(fs.DirRoot, checklist)
+			if err != nil {
+				if errors.Is(err, os.ErrNotExist) {
+					continue
+				}
+				slog.Error("schedule worker: can't read today file", "err", err)
+				continue
+			}
+
+			reducedMD, removedMD := txt.RemoveCompletedChecklistItems(md)
+			if removedMD == "" {
+				continue
+			}
+
+			err = userFS.Write(fs.DirRoot, checklist, reducedMD)
+			if err != nil {
+				slog.Error("schedule worker: can't write today file", "err", err)
+				continue
+			}
+
+			doneMD, err := userFS.Read(fs.DirArchive, fs.DoneFilename)
+			if err != nil && !errors.Is(err, os.ErrNotExist) {
+				slog.Error("schedule worker: can't read done file", "err", err)
+				continue
+			}
+			header := fmt.Sprintf("#### %d %s %d, %s", now().Day(), now().Format("January"), now().Year(), now().Weekday())
+			doneMD = txt.InsertTextAfterHeader(doneMD, header, removedMD)
+
+			err = userFS.Write(fs.DirArchive, fs.DoneFilename, doneMD)
+			if err != nil {
+				slog.Error("schedule worker: can't write done file", "err", err)
+			}
+		}
+
+		alreadyRemoved[txt.I64(userID)+"#"+now().Format("2006-01-02")] = true
 	}
 
 	return nil

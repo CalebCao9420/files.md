@@ -96,6 +96,26 @@ func RemoveChecklistItem(md, itemOrHash string) (string, string) {
 	return strings.Join(newLines, "\n"), removedItem
 }
 
+// RemoveCompletedChecklistItems returns newMarkdown, removedMarkdown
+func RemoveCompletedChecklistItems(md string) (string, string) {
+	removedMD := ""
+	lines := strings.Split(md, "\n")
+	var newLines []string
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if len(line) < 6 {
+			continue
+		}
+
+		if strings.HasPrefix(line, "- [x] ") {
+			removedMD += line + "\n"
+			continue
+		}
+		newLines = append(newLines, line)
+	}
+	return strings.Join(newLines, "\n"), removedMD
+}
+
 func ChecklistItem(md, itemOrHash string) string {
 	lines := strings.Split(md, "\n")
 	for _, line := range lines {

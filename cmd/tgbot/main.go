@@ -67,6 +67,11 @@ func main() {
 				if err != nil {
 					fmt.Printf("Worker's error: %s\n", err)
 				}
+
+				err = worker.RemoveCompletedChecklistItems(config.BotCfg.StorageDir, config.BotCfg.ConfigFilename, fsBackend)
+				if err != nil {
+					fmt.Printf("Worker's error: %s\n", err)
+				}
 			case <-quit:
 				ticker.Stop()
 				return
