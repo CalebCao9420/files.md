@@ -986,13 +986,26 @@ func (b *Bot) ShowToday(_ []string) error {
 	if len(todayChecklistMD) != 0 {
 		tasks := txt.IncompleteChecklistItems(todayChecklistMD)
 		for _, task := range tasks {
-			if len([]rune(task)) >= maxTitleLengthForMobile {
+			// Skip image link if any.
+			parts := strings.Split(task, "\n")
+			title := txt.Ucfirst(strings.TrimSpace(parts[0]))
+			if txt.HasImage(title) {
+				if len(parts) > 1 {
+					title = txt.Ucfirst(strings.TrimSpace(parts[1]))
+				}
+
+				if title == "" || len(parts) == 1 {
+					title = fmt.Sprintf("Img %s", now().Format("02.01.06 15:04"))
+				}
+			}
+
+			if len([]rune(title)) >= maxTitleLengthForMobile {
 				cmd := tg.NewCmd(consts.CmdShowLongItem, []string{fs.Hash(fs.TodayFilename), fs.Hash(task)})
-				btn := tg.NewBtn(txt.Emoji(i18n.Emoji("eyes"), task), cmd)
+				btn := tg.NewBtn(txt.Emoji(i18n.Emoji("eyes"), title), cmd)
 				kb.AddRow(btn)
 			} else {
 				cmd := tg.NewCmd(consts.CmdCompleteChecklistItem, []string{fs.Hash(fs.TodayFilename), fs.Hash(task)})
-				btn := tg.NewBtn(i18n.AddEmoji(task), cmd)
+				btn := tg.NewBtn(i18n.AddEmoji(title), cmd)
 				kb.AddRow(btn)
 			}
 		}
