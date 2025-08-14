@@ -471,7 +471,7 @@ function createAutocompleteDict() {
 
     // Collect all files with their metadata
     walkFilesExcludingSystemDirs((path) => {
-        if (path === CONFIG_PATH || path === INBOX_PATH) {
+        if (path === CONFIG_PATH || path === INBOX_PATH || path === TODAY_PATH || path === LATER_PATH) {
             return;
         }
 
