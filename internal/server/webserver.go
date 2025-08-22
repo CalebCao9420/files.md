@@ -58,6 +58,12 @@ func newRouter(logger *log.Logger) *http.ServeMux {
 	// TODO add hashing or secrets
 	// TODO before release habits_v2 => habits
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// Log Range requests
+		if rangeHeader := r.Header.Get("Range"); rangeHeader != "" {
+			log.Printf("🔍 Range request: %s %s - Range: %s", r.Method, r.URL.Path, rangeHeader)
+			log.Printf("📱 User-Agent: %s", r.Header.Get("User-Agent"))
+		}
+
 		// Serving the PWA app
 		host := r.Host
 		if strings.HasPrefix(host, "app.") {

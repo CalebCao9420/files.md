@@ -92,21 +92,11 @@ self.addEventListener("fetch", (event) => {
             .catch(() => fetch(event.request)) // Retry 1
             .catch(() => fetch(event.request)) // Retry 2
             .then(async response => {
+                // In South America I had poor internet connection, and some js files
+                // were partly loaded/cached :( It seems like Chromium fires
+                // range requests for some files.
                 if (response.status === 206) {
                     console.warn('⚠️ Partial content (206), not caching:', event.request.url);
-                    return response;
-                }
-
-                const contentLength = response.headers.get('content-length');
-                const responseClone = response.clone();
-                const actualData = await responseClone.arrayBuffer();
-                // In South America I had poor internet connection, and some js files
-                // were partly loaded/cached :(
-                if (contentLength && actualData.byteLength !== parseInt(contentLength)) {
-                    console.log(`File: ${event.request.url}`);
-                    console.log(`Expected size: ${contentLength}`);
-                    console.log(`Actual size: ${actualData.byteLength}`);
-                    console.error('❌ SIZE MISMATCH!', event.request.url);
                     return response;
                 }
 
