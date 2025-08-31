@@ -11,6 +11,18 @@ const READ_PATH = '/Read.txt';
 const SHOP_PATH = '/Shop.txt';
 const WATCH_PATH = '/Watch.txt';
 
+async function sendMsg() {
+    const text = chatInput.value.trim();
+    if (!text) return;
+
+    await saveToInbox(text);
+    chatInput.value = '';
+    chatIsClean = false;
+    await loadMessages();
+    renderMessages();
+    scrollToBottom();
+}
+
 async function openChat() {
     closeChatModal();
     chatContainer.style.display = 'flex';
@@ -213,18 +225,6 @@ function initChat() {
             autoResize();
         }
     });
-}
-
-async function sendMsg() {
-    const text = chatInput.value.trim();
-    if (!text) return;
-
-    await saveToInbox(text);
-    chatInput.value = '';
-    chatIsClean = false;
-    await loadMessages();
-    renderMessages();
-    scrollToBottom();
 }
 
 async function initWasm() {
