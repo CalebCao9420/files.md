@@ -112,7 +112,7 @@ async function handleRequest(request) {
 
         } catch (error) {
             if (i === 2) {
-                return new Response('Network failed', { status: 503 });
+                return await caches.match(request);
             }
 
             console.warn(`Fetch failed (attempt ${i + 1}), retrying...`, error);
