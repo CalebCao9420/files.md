@@ -78,8 +78,10 @@
                 if (cm.somethingSelected()) return;
 
                 // PATCHED, prevent blinking
-                _this.updateImmediately();
-                // _this.update();
+                // Actually that works bad when we show/hide a header with 2 lines of text (expanded) and 1 line of text hidden.
+                // Cursor jumps to wrong positions
+                // _this.updateImmediately();
+                _this.update();
             };
             this.update = core_1.debounce(function () { return _this.updateImmediately(); }, 100);
             /** Current user's selections, in each line */
