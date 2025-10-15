@@ -320,7 +320,7 @@ function renderMessages() {
         <div class="message ${i % 2 === 1 ? 'own' : ''}" data-text="${message.text}">
             <div class="message-content" 
                  contenteditable="true" 
-                 data-index="${message.index}"
+                 data-text="${message.text}"
                  spellcheck="false">${escapeHtml(message.text)}</div>
             <div class="message-hover-zone"></div>
             <div class="message-footer">
@@ -328,7 +328,7 @@ function renderMessages() {
                 <div class="message-actions">
                     ${recentFilesButtons}
                     <div class="btn-wrapper">
-                    <button class="action-btn to-file-btn" data-index="${message.index}">
+                    <button class="action-btn to-file-btn" data-text="${message.text}">
                         
 <?xml version="1.0" encoding="utf-8"?>
 <svg width="32px" height="32px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -338,20 +338,20 @@ function renderMessages() {
                     <span class="btn-label">To File</span>
                     </div>
                      <div class="btn-wrapper"> 
-                    <button class="action-btn submenu-btn to-dir-btn" data-index="${message.index}">
+                    <button class="action-btn submenu-btn to-dir-btn" data-text="${message.text}">
                         <svg width="32px" height="32px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none"> <path stroke-linecap="round" stroke-width="3" fill="none" d="M28 11v13a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h6c3 0 3 3 5 3h9.003C27.108 9 28 9.895 28 11z"/> </svg>
                     </button>
                         <span class="btn-label">To Dir</span>
                     </div>
                    <div class="btn-wrapper">
-                    <button class="action-btn to-today-btn" data-index="${message.index}">
+                    <button class="action-btn to-today-btn" data-text="${message.text}">
 <?xml version="1.0" encoding="utf-8"?>
 <svg width="32px" height="32px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="m20.215 2.387-8.258 10.547-2.704-3.092a1 1 0 1 0-1.506 1.316l3.103 3.548a1.5 1.5 0 0 0 2.31-.063L21.79 3.62a1 1 0 1 0-1.575-1.233zM20 11a1 1 0 0 0-1 1v6.077c0 .459-.021.57-.082.684a.364.364 0 0 1-.157.157c-.113.06-.225.082-.684.082H5.923c-.459 0-.57-.022-.684-.082a.363.363 0 0 1-.157-.157c-.06-.113-.082-.225-.082-.684V5.5a.5.5 0 0 1 .5-.5l8.5.004a1 1 0 1 0 0-2L5.5 3A2.5 2.5 0 0 0 3 5.5v12.577c0 .76.082 1.185.319 1.627.224.419.558.753.977.977.442.237.866.319 1.627.319h12.154c.76 0 1.185-.082 1.627-.319.42-.224.754-.558.978-.977.236-.442.318-.866.318-1.627V12a1 1 0 0 0-1-1z" stroke="none"/></svg>   
                     </button>
                     <span class="btn-label">To Do</span>
                     </div>
                        <div class="btn-wrapper">
-                    <button class="action-btn to-journal-btn" data-index="${message.index}">
+                    <button class="action-btn to-journal-btn" data-text="${message.text}">
                         <svg width="32px" height="32px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" clip-rule="evenodd" d="M12 6.00019C10.2006 3.90317 7.19377 3.2551 
                             4.93923 5.17534C2.68468 7.09558 2.36727 10.3061 4.13778 12.5772C5.60984 14.4654 10.0648 
@@ -577,7 +577,7 @@ function attachEventListeners() {
             if (searchModalElement.style.display !== 'none' && searchModalElement.style.display !== '') {
                 searchModal.close();
             } else {
-                searchModal.open('', btn.dataset.index, e.target);
+                searchModal.open('', btn.closest('.message').dataset.text, e.target);
             }
         });
     });
@@ -972,12 +972,13 @@ async function addHeaderAndText(path, header, text, atStart = false) {
     await write(path, result);
 }
 
-async function addToJournal(record) {
-    record = record.trim();
+async function addToJournal(text) {
+    text = text.trim();
     const journalFilename = todayJournalFilename();
     const journalPath = `journal/${journalFilename}`;
-    await addHeaderAndText(journalPath, todayHeader(), record);
+    await addHeaderAndText(journalPath, todayHeader(), text);
 }
+
 
 async function moveFromInbox(record, callback) {
     callback(record);

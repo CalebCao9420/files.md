@@ -2,7 +2,7 @@ class SearchModal {
     static RECENT_RESULTS = 15;
 
     constructor() {
-        this.messageIndex = null;
+        this.selectedMsgText = null;
         this.focusedIndex = 0;
         this.init();
     }
@@ -185,9 +185,9 @@ class SearchModal {
         searchModal.showResults(results);
     }
 
-    open(text = '', messageIndex = null, buttonElement  = null) {
+    open(text = '', selectedMsgText = null, buttonElement  = null) {
         moveModal.close();
-        this.messageIndex = messageIndex;
+        this.selectedMsgText = selectedMsgText;
 
         let modal = document.getElementById('search');
         modal.style.display = 'flex';
@@ -200,7 +200,7 @@ class SearchModal {
         const goToFileResults = document.getElementById('search-results');
         goToFileResults.innerHTML = '';
 
-        if (text === '' && this.messageIndex === null) {
+        if (text === '' && this.selectedMsgText === null) {
             this.showRecentFiles();
         } else if (text === '') {
             this.showRootFiles();
@@ -208,7 +208,7 @@ class SearchModal {
             this.search();
         }
 
-        if (buttonElement && this.messageIndex !== null) {
+        if (buttonElement && this.selectedMsgText !== null) {
             const rect = buttonElement.getBoundingClientRect();
             const modalHeight = 300;
             const viewportHeight = window.innerHeight;
@@ -250,7 +250,7 @@ class SearchModal {
     close() {
         document.getElementById('search').style.display = 'none';
         document.getElementById('search').classList.remove('modal-reversed');
-        this.messageIndex = null;
+        this.selectedMsgText = null;
     }
 
     showResults(results) {
@@ -261,7 +261,7 @@ class SearchModal {
             if (path === CONFIG_PATH) {
                 return;
             }
-            if (this.messageIndex !== null && path === INBOX_PATH) {
+            if (this.selectedMsgText !== null && path === INBOX_PATH) {
                 return;
             }
 
@@ -289,26 +289,26 @@ class SearchModal {
         this.updateFocusedItem();
     }
 
-    handleClick(path) {
-        if (this.messageIndex !== null) {
+    async handleClick(path) {
+        if (this.selectedMsgText !== null) {
             const selectedMessages = document.querySelectorAll('.message.selected');
-            let indices = [];
+
+            let msgs = [];
             let messagesToRemove = [];
             if (selectedMessages.length > 0) {
-                indices = Array.from(selectedMessages).map(msg => msg.dataset.index);
+                msgs = Array.from(selectedMessages).map(msg => msg.dataset.text);
                 messagesToRemove = selectedMessages;
             } else {
-                indices = [this.messageIndex.toString()];
-                const btn = document.querySelector(`.message[data-index="${this.messageIndex}"] button`);
+                const btn = document.querySelector(`.message[data-text="${this.selectedMsgText}"] button`);
+                msgs = [btn.closest('.message').dataset.text];
                 messagesToRemove = [btn.closest('.message')];
             }
 
-            let {dirPath, filename} = toDirPathAndFilename(path)
-            // Make relative path, as bot supports only relative paths
-            if (dirPath !== '/') {
-                dirPath = trimPrefix(dirPath, '/');
+            let callback = async text => await addHeaderAndText(path, todayHeader(), text, true);
+            for (const msg of msgs) {
+                await moveFromInbox(msg, callback);
             }
-            sendCmd('mvn', [filename, dirPath, indices.join(',')]);
+
             messagesToRemove.forEach(message => {
                 message.classList.add('removing');
                 setTimeout(() => {
@@ -319,7 +319,7 @@ class SearchModal {
             renderSidebar();
             this.close();
         } else {
-            openFile(path);
+            await openFile(path);
             this.close();
         }
     }

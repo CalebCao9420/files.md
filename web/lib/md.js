@@ -1,26 +1,5 @@
 // Various string functions, ported from Golang bot.
 
-// Add content at the beginning of the file, prepending current's day header
-async function addToFile(path, content) {
-    let existingContent = '';
-
-    existingContent = read(path);
-
-    const now = new Date();
-    const monthNames = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    const dayNames = [
-        'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
-    ];
-
-    const header = `#### ${now.getDate()} ${monthNames[now.getMonth()]} ${now.getFullYear()}, ${dayNames[now.getDay()]}`;
-    const newContent = insertTextAfterHeader(existingContent, header, content);
-
-    await write(path, newContent);
-}
-
 function insertTextAfterHeader(existingContent, header, newContent) {
     if (!existingContent.includes(header)) {
         if (existingContent === "") {

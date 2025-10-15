@@ -40,7 +40,7 @@ func Serve(apiHost, appHost, certDir, logFilename string) {
 	if certDir == "" {
 		srv := &http.Server{
 			Addr:    ":8080",
-			Handler: newRouter(serverLogger),
+			Handler: router(serverLogger),
 		}
 
 		serverLogger.Printf("Starting HTTP server on %s", srv.Addr)
@@ -66,7 +66,7 @@ func Serve(apiHost, appHost, certDir, logFilename string) {
 		WriteTimeout: 2 * time.Minute,  // For slow files like inbox.wasm.
 		ErrorLog:     serverLogger,
 	}
-	srv.Handler = newRouter(serverLogger)
+	srv.Handler = router(serverLogger)
 
 	err = srv.ListenAndServeTLS("", "") // Key and cert provided automatically by autocert
 	if err != nil {
@@ -74,7 +74,7 @@ func Serve(apiHost, appHost, certDir, logFilename string) {
 	}
 }
 
-func newRouter(serverLogger *log.Logger) *http.ServeMux {
+func router(serverLogger *log.Logger) *http.ServeMux {
 	r := http.NewServeMux()
 
 	// TODO add hashing or secrets
