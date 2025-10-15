@@ -104,7 +104,10 @@ async function toggleInboxModal() {
     }
 }
 
-function parseMessages(chat) {
+async function parseMessagesFromInbox() {
+    const file = await ((await getFileHandle(INBOX_PATH, true)).getFile());
+    let chat = await file.text();
+
     // Normalize line endings
     chat = chat.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     const lines = chat.split('\n');
@@ -176,9 +179,7 @@ function parseMessages(chat) {
     return messages;
 }
 
-function formatMessages(messages) {
-    if (messages.length === 0) return '';
-
+async function saveMessagesToInbox(messages) {
     // Group messages by date
     const messagesByDate = {};
     messages.forEach(msg => {
@@ -198,17 +199,12 @@ function formatMessages(messages) {
         });
     });
 
-    return content;
+    await write(INBOX_PATH, content);
 }
 
 async function loadMessages() {
     try {
-        const file = await ((await getFileHandle(INBOX_PATH, true)).getFile());
-        const content = await file.text();
-
-        // Parse the content and load messages
-        messages = parseMessages(content);
-
+        messages = await parseMessagesFromInbox();
         log(`Loaded ${messages.length} messages from ${INBOX_PATH}`);
     } catch (error) {
         console.error('Error loading data:', error);
@@ -409,7 +405,7 @@ function todayHeader(timezone) {
     const year = parseInt(now.toLocaleDateString('en-US', { year: 'numeric', timeZone: timezone }));
     const dayIndex = new Date(now.toLocaleDateString('en-US', { timeZone: timezone })).getDay();
 
-    return `#### ${day} ${monthNames[monthIndex]} ${year}, ${dayNames[dayIndex]}`;
+    return `#### ${day} ${monthNames[monthIndex]}, ${dayNames[dayIndex]}`;
 }
 
 async function addToJournal(text) {
@@ -421,18 +417,12 @@ async function addToJournal(text) {
 
 async function moveFromInbox(text, callback) {
     callback(text);
-    const inboxContent = await read(INBOX_PATH);
-    const lines = normNewLines(inboxContent).split('\n');
-    let filteredLines = [];
-    // remove lines that has `xx:xx` + record
-    const timePattern = /^\`\d{2}:\d{2}\`\s*/;
-    for (const line of lines) {
-        if (line.replace(timePattern, '').trim() !== text.trim()) {
-            filteredLines.push(line);
-        }
-    }
 
-    await write(INBOX_PATH, filteredLines.join('\n'));
+    let messages = await parseMessagesFromInbox();
+    console.log(messages);
+    const filteredMessages = messages.filter(msg => msg.text !== text);
+    console.log(filteredMessages);
+    await saveMessagesToInbox(filteredMessages);
 }
 
 function attachEventListeners() {
@@ -697,9 +687,10 @@ function attachEventListeners() {
 
             for (const msg of msgs) {
                 const [header, body] = extractHeaderAndBody(msg, MAX_TITLE_LENGTH);
-                const path = joinPath(btn.dataset.dir, header);
+                const path = joinPath('/', btn.dataset.dir, header) + '.md';
                 for (const msg of msgs) {
-                    await moveFromInbox(msg, async msg => {await write(path, body)});
+                    console.log(path, body);
+                    await moveFromInbox(msg, async () => {await write(path, body)});
                 }
             }
 
