@@ -308,6 +308,7 @@ class SearchModal {
             let callback = async text => await addHeaderAndText(path, todayHeader(), text, true);
             for (const msg of msgs) {
                 await moveFromInbox(msg, callback);
+                await renderMessages();
             }
 
             messagesToRemove.forEach(message => {
@@ -609,6 +610,7 @@ class MoveModal {
                     await moveFromInbox(msg, async () => {
                         await write(path, body)
                     });
+                    await renderMessages();
                 }
             }
             await renderMessages();
