@@ -811,8 +811,6 @@ console.log = function(...args) {
     }
 };
 
-// Logging a JavaScript object to the console isn't logging that object's state, it is logging an object reference.
-// We make a deep copy of the object at the moment of calling so to display its true value.
 function log2(...args) {
     console.log(...args);
 
@@ -831,6 +829,60 @@ function log2(...args) {
         typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
     ).join(' ');
     const logMsg = `\`${now}\` ${msg}\n`;
+    try {
+        writeAtEnd(LOG_PATH, logMsg);
+    } catch (error) {
+    }
+}
+
+// Custom global log() function that display immediate values and writes to a file.
+// Logging a JavaScript object to the console isn't logging that object's state, it is logging an object reference.
+// We make a deep copy of the object at the moment of calling so to display its true value.
+function log(...args) {
+    logf('', '#4CAF50', args);
+}
+
+function logError(...args) {
+    logf('Error: ', '#F44336', args);
+}
+
+function logf(prefix, color, args) {
+    // Capture real caller from stack (skip 2 levels: _logInternal and log/error)
+    const stack = new Error().stack;
+    const callerFull = stack.split('\n')[3].trim(); // Real caller line
+
+    // Extract only the last path segment
+    const callerMatch = callerFull.match(/([^\/\\]+:\d+:\d+)/);
+    const caller = callerMatch ? callerMatch[1] : callerFull;
+
+    // Format message
+    const msg = args.map(arg =>
+        typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+    ).join(' ');
+
+    // Get time for console
+    const date = new Date();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+    const time = `${hours}:${minutes}:${seconds}`;
+
+    // Compact console output with colors
+    console.log(
+        `%c[${time}]%c ${msg}%c ${caller}`,
+        'color: #888; font-size: 0.9em',      // Time in gray
+        `color: ${color}; font-weight: bold`, // Message in specified color
+        'color: #888; font-size: 0.9em'       // Stack trace in gray
+    );
+
+    // File logging with full timestamp
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+
+    const now = `${day}.${month}.${year} ${time}`;
+    const logMsg = `${now} ${prefix}[${callerFull}] ${msg}\n`;
+
     try {
         writeAtEnd(LOG_PATH, logMsg);
     } catch (error) {

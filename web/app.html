@@ -150,13 +150,13 @@
 <script src="modals.js?v="></script>
 <script>
     window.COMMIT_HASH = '?v=';
-    console.log('Current version:', window.COMMIT_HASH);
+    log('Current version:', window.COMMIT_HASH);
 
     // Allow offline mode.
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('offline.js?v=')
-            .then(reg => console.log('Service Worker registered'))
-            .catch(err => console.log('Service Worker registration failed'));
+            .then(reg => log('Service Worker registered'))
+            .catch(err => logError('Service Worker registration failed'));
     }
 
     window.currentEditor = null;

@@ -1152,8 +1152,8 @@ async function syncCurrentFile(syncWithServer = true) {
                     isSyncingCurrentFile = false;
                     return;
                 }
-            } catch (error) {
-                console.error('Error opening file:', error);
+            } catch (e) {
+                logError('Error opening file:', e);
                 isSyncingCurrentFile = false;
                 return;
             }

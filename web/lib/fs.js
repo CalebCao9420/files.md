@@ -102,7 +102,7 @@ async function remove(path) {
     let fileHandle = await getFileHandle(path);
     if (fileHandle === null) {
         // TODO fix once Chromium fixes the bug
-        log('Malformed name, skipping file...');
+        logError('Malformed name, skipping file...');
         return;
     }
     await fileHandle.remove()
@@ -121,9 +121,9 @@ async function mkdir(path) {
     try {
         let currentDirHandle = await getRootDirHandle();
         await currentDirHandle.getDirectoryHandle(path, {create: true});
-    } catch (error) {
-        log(error);
-        throw error;
+    } catch (e) {
+        logError(e);
+        throw e;
     }
 }
 
