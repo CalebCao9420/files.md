@@ -795,7 +795,7 @@ function logError(...args) {
     logf('Error: ', '#F44336', args);
 }
 
-function logf(prefix, color, args) {
+async function logf(prefix, color, args) {
     // Capture real caller from stack (skip 2 levels: _logInternal and log/error)
     const stack = new Error().stack;
     const callerFull = stack.split('\n')[3].trim(); // Real caller line
@@ -833,7 +833,7 @@ function logf(prefix, color, args) {
     const logMsg = `${now} ${prefix}[${callerFull}] ${msg}\n`;
 
     try {
-        writeAtEnd(LOG_PATH, logMsg);
+        await writeAtEnd(LOG_PATH, logMsg);
     } catch (error) {
     }
 }
