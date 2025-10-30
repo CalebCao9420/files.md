@@ -21,8 +21,8 @@ async function addToInbox() {
     const text = chatInput.value.trim();
     if (!text) return;
 
-    if (text.toLowerCase().endsWith('jj') || text.toLowerCase().endsWith('жж')) {
-        await addToJournal(text);
+    if (text.toLowerCase().endsWith(' jj') || text.toLowerCase().endsWith(' жж')) {
+        await addToJournal(text.slice(0, -3).trim(););
         chatInput.value = '';
         chatIsClean = false;
         return;
