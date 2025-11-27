@@ -17,6 +17,9 @@ const LATER_PATH = '/Later.txt';
 const DONE_PATH = '/archive/Done.txt';
 const LOG_PATH = '/archive/Log.txt';
 
+const OPEN_INBOX_AFTER_IDLE = 1 * 60 * 60 * 1000; // ms
+let openInboxIdleTimer = null;
+
 async function init() {
     // Authorize if we have one-time token in URL.
     const urlParams = new URLSearchParams(window.location.search);
@@ -367,33 +370,6 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
-function openBot() {
-    if (isInbox) {
-        return;
-    }
-
-    sidebarContainer.style.display = 'none';
-    content.style.display = 'none';
-    inbox.style.display = 'flex';
-    input.focus();
-    isInbox = true;
-
-    let cmd = {
-        n: 'today',
-        t: 'cmd'
-    }
-    wasmReplyCmd(JSON.stringify(cmd));
-
-    window.resizeTo(520, 530);
-    const left = (screen.availWidth - 500) / 2;
-    const top = (screen.availHeight - 500) / 2;
-    window.moveTo(left, top);
-}
-
-
-async function switchChat() {
-
-}
 
 // Toggle focus mode
 document.addEventListener('keydown', function (event) {
@@ -578,6 +554,12 @@ async function getRootDirHandle() {
 
 // Reload files once the app gains focus.
 window.addEventListener('focus', async () => {
+    // Clear any pending inbox open timer
+    if (openInboxIdleTimer) {
+        clearTimeout(openInboxIdleTimer);
+        openInboxIdleTimer = null;
+    }
+
     // We don't want to do heavy stuff when chat is open.
     if (isInbox || isWelcome) {
         return false;
@@ -613,9 +595,16 @@ window.addEventListener('focus', async () => {
 window.addEventListener('blur', async function () {
     log('Window lost focus');
     editor.refresh();
-    if (!isInbox) {
-        return;
-    }
+
+    // Start timer to open inbox after idle
+    openInboxIdleTimer = setTimeout(() => {
+        openInbox();
+    }, OPEN_INBOX_AFTER_IDLE);
+
+    // if (!isInbox) {
+    //     return;
+    // }
+    // Why we did that?
 
     // Sync media first, so that new images for current file would be loaded
     await syncMedia();
