@@ -524,15 +524,68 @@ async function saveDirectoryHandle(directoryHandle) {
     await store.put(directoryHandle, 'savedDirectoryHandle');
 }
 
+// async function getSavedRootDirHandle() {
+//     const db = await initDB();
+//     return new Promise((resolve, reject) => {
+//         const transaction = db.transaction('handles', 'readonly');
+//         const store = transaction.objectStore('handles');
+//         const request = store.get('savedDirectoryHandle');
+//         request.onsuccess = () => resolve(request.result);
+//         request.onerror = () => reject(request.error);
+//     });
+// }
+//
+//
+//
+
 async function getSavedRootDirHandle() {
-    const db = await initDB();
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction('handles', 'readonly');
-        const store = transaction.objectStore('handles');
-        const request = store.get('savedDirectoryHandle');
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
+  try {
+    const db = await initDB().catch((err) => {
+      console.error("[getSavedRootDirHandle] initDB failed:", err);
+      throw err;
     });
+
+    return await new Promise((resolve, reject) => {
+      let transaction;
+
+      try {
+        transaction = db.transaction("handles", "readonly");
+      } catch (err) {
+        console.error("[getSavedRootDirHandle] db.transaction() threw:", err);
+        reject(err);
+        return;
+      }
+
+      transaction.onabort = () => {
+        console.error("[getSavedRootDirHandle] transaction aborted:", transaction.error);
+        reject(transaction.error ?? new Error("IndexedDB transaction aborted"));
+      };
+
+      transaction.onerror = () => {
+        console.error("[getSavedRootDirHandle] transaction error:", transaction.error);
+        reject(transaction.error ?? new Error("IndexedDB transaction error"));
+      };
+
+      const store = transaction.objectStore("handles");
+      const request = store.get("savedDirectoryHandle");
+
+      request.onsuccess = () => {
+        const result = request.result;
+        if (!result) {
+          console.log("[getSavedRootDirHandle] savedDirectoryHandle not found (null/undefined).");
+        }
+        resolve(result);
+      };
+
+      request.onerror = () => {
+        console.error("[getSavedRootDirHandle] request error:", request.error);
+        reject(request.error ?? new Error("IndexedDB request error"));
+      };
+    });
+  } catch (err) {
+    console.error("[getSavedRootDirHandle] failed:", err);
+    throw err;
+  }
 }
 
 async function removeSavedRootDirHandle() {
