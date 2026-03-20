@@ -142,9 +142,10 @@
 .cm-s-hypermd-light span.cm-def {
     color: #00f;
 }
-.cm-s-hypermd-light span.cm-variable {
-    color: black;
-}
+/* MODIFIED */
+/* .cm-s-hypermd-light span.cm-variable { */
+/*     color: black; */
+/* } */
 .cm-s-hypermd-light span.cm-variable-2 {
     color: #0000C0;
 }
