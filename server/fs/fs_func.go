@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/zakirullin/files.md/config"
 	"github.com/zakirullin/files.md/pkg/txt"
+	"github.com/zakirullin/files.md/server/config"
 )
 
 // ForbiddenChars hold replacements for characters

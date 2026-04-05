@@ -23,11 +23,11 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"golang.org/x/exp/slog"
 
-	"github.com/zakirullin/files.md/config"
 	"github.com/zakirullin/files.md/i18n"
 	"github.com/zakirullin/files.md/pkg/slice"
 	"github.com/zakirullin/files.md/pkg/tg"
 	"github.com/zakirullin/files.md/pkg/txt"
+	"github.com/zakirullin/files.md/server/config"
 	"github.com/zakirullin/files.md/server/consts"
 	"github.com/zakirullin/files.md/server/fs"
 	"github.com/zakirullin/files.md/server/habits"

@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/zakirullin/files.md/config"
+	"github.com/zakirullin/files.md/server/config"
 	"github.com/zakirullin/files.md/server/fs"
 	"github.com/zakirullin/files.md/server/habits"
 	"github.com/zakirullin/files.md/server/journal"

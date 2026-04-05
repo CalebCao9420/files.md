@@ -17,7 +17,7 @@ import (
 
 	"github.com/spf13/afero"
 
-	"github.com/zakirullin/files.md/config"
+	"github.com/zakirullin/files.md/server/config"
 	"github.com/zakirullin/files.md/server/fs"
 )
 

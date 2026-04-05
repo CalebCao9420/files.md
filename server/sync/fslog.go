@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/zakirullin/files.md/config"
+	"github.com/zakirullin/files.md/server/config"
 )
 
 const (
