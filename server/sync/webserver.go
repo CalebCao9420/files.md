@@ -183,7 +183,7 @@ func router(serverLogger *log.Logger) *http.ServeMux {
 			}
 		}
 
-		userConf := userconfig.NewConfig(userFS, userID, config.BotCfg.ConfigFilename)
+		userConf := userconfig.NewConfig(userFS, userID, config.ServerCfg.ConfigFilename)
 		err = journal.AddEmoji(userFS, emoji, userConf.Timezone())
 		if err != nil {
 			serverLogger.Printf("failed to write habit emoji to journal: %v", err)
@@ -259,7 +259,7 @@ func panicMiddleware(next http.HandlerFunc) http.HandlerFunc {
 func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
-		if origin == config.BotCfg.AppHost {
+		if origin == config.ServerCfg.AppHost {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 		}
 

@@ -21,7 +21,7 @@ func Render(userID int64, userFS *fs.FS) ([]byte, error) {
 		return nil, fmt.Errorf("can't parse habits template: %w", err)
 	}
 
-	cfg := userconfig.NewConfig(userFS, userID, config.BotCfg.ConfigFilename)
+	cfg := userconfig.NewConfig(userFS, userID, config.ServerCfg.ConfigFilename)
 
 	habits, err := LastWeekHabits(userFS, cfg.Timezone())
 	if err != nil {
@@ -38,7 +38,7 @@ func Render(userID int64, userFS *fs.FS) ([]byte, error) {
 		"habits":     habits,
 		"moods":      moods,
 		"moodEmojis": MoodEmojis,
-		"host":       config.BotCfg.ApiHost,
+		"host":       config.ServerCfg.APIHost,
 		"userID":     userID,
 		"currentDay": time.Now().YearDay(),
 	})

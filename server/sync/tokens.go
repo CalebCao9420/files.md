@@ -55,7 +55,7 @@ func GenOneTimeToken(userID int64) string {
 }
 
 func findUserID(token string) (int64, bool) {
-	tokens, err := fs.NewFS(config.BotCfg.TokensDir, afero.NewOsFs())
+	tokens, err := fs.NewFS(config.ServerCfg.TokensDir, afero.NewOsFs())
 	if err != nil {
 		slog.Error("Failed to create file system for tokens", "error", err)
 		return 0, false
@@ -198,7 +198,7 @@ func issueNewPermanentToken(r *http.Request) (string, bool) {
 	mu.Unlock()
 
 	token := genToken()
-	tokens, err := fs.NewFS(config.BotCfg.TokensDir, afero.NewOsFs())
+	tokens, err := fs.NewFS(config.ServerCfg.TokensDir, afero.NewOsFs())
 	if err != nil {
 		slog.Error("Failed to create file system for tokens", "error", err)
 		return "", false
@@ -221,7 +221,7 @@ func hashToken(token string) string {
 	// A token is a server-generated 32 bytes of entropy, so SHA-256 is fine here.
 	// At 1 billion SHA256 hashes per second it would take ~10^60 years to brute force.
 	h := sha256.New()
-	h.Write([]byte(token + config.BotCfg.TokensSalt))
+	h.Write([]byte(token + config.ServerCfg.TokensSalt))
 	return hex.EncodeToString(h.Sum(nil))
 }
 

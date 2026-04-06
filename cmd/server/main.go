@@ -42,7 +42,7 @@ func main() {
 		panic(fmt.Sprintf("Error loading i18n: %s\n", err))
 	}
 
-	api, err := tgbotapi.NewBotAPI(config.BotCfg.BotAPIToken)
+	api, err := tgbotapi.NewBotAPI(config.ServerCfg.BotAPIToken)
 	if err != nil {
 		panic(fmt.Sprintf("Can't create api: %s\n", err))
 	}
@@ -65,12 +65,12 @@ func main() {
 		for {
 			select {
 			case <-ticker.C:
-				err := worker.MoveDueTasks(config.BotCfg.StorageDir, config.BotCfg.ConfigFilename, fsBackend, telegram)
+				err := worker.MoveDueTasks(config.ServerCfg.StorageDir, config.ServerCfg.ConfigFilename, fsBackend, telegram)
 				if err != nil {
 					fmt.Printf("Worker's error: %s\n", err)
 				}
 
-				err = worker.RemoveCompletedChecklistItems(config.BotCfg.StorageDir, config.BotCfg.ConfigFilename, fsBackend)
+				err = worker.RemoveCompletedChecklistItems(config.ServerCfg.StorageDir, config.ServerCfg.ConfigFilename, fsBackend)
 				if err != nil {
 					fmt.Printf("Worker's error: %s\n", err)
 				}
@@ -83,12 +83,12 @@ func main() {
 
 	// TODO apphost?
 	// Launch habits server if needed
-	if config.BotCfg.ApiHost != "" {
+	if config.ServerCfg.APIHost != "" {
 		go sync.Serve(
-			config.BotCfg.ApiHost,
-			config.BotCfg.AppHost,
-			config.BotCfg.ServerCertDir,
-			config.BotCfg.ServerLogFile,
+			config.ServerCfg.APIHost,
+			config.ServerCfg.AppHost,
+			config.ServerCfg.ServerCertDir,
+			config.ServerCfg.ServerLogFile,
 		)
 	}
 
@@ -169,7 +169,7 @@ func processUserUpdates(userID int64, updates <-chan tgbotapi.Update, telegram *
 }
 
 func newBot(telegram *tg.TG, userID int64) (*internal.Bot, error) {
-	storagePath := config.BotCfg.StorageDir
+	storagePath := config.ServerCfg.StorageDir
 	storagePath, err := filepath.Abs(storagePath)
 	userPath := path.Join(storagePath, txt.I64(userID))
 	userFS, err := fs.NewFS(userPath, afero.NewOsFs())
@@ -181,7 +181,7 @@ func newBot(telegram *tg.TG, userID int64) (*internal.Bot, error) {
 		return nil, fmt.Errorf("can't create user dirs: %w", err)
 	}
 
-	confFilename := config.BotCfg.ConfigFilename
+	confFilename := config.ServerCfg.ConfigFilename
 	userconf := userconfig.NewConfig(userFS, userID, confFilename)
 	err = userconf.CreateDefaultIfNotExists()
 	if err != nil {

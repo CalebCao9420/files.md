@@ -85,7 +85,7 @@ type File struct {
 
 // newUserFS creates a new FS for a specific user with os.FS backend.
 func newUserFS(userID int64) (*FS, error) {
-	userAbsPath := path.Join(config.BotCfg.StorageDir, txt.I64(userID))
+	userAbsPath := path.Join(config.ServerCfg.StorageDir, txt.I64(userID))
 	backend := afero.NewOsFs()
 
 	return NewFS(userAbsPath, backend)

@@ -244,10 +244,10 @@ func TestSyncText_UpdateExistingFile_JournalConflict(t *testing.T) {
 func TestSyncAllTexts_EmptyRequest(t *testing.T) {
 	r := require.New(t)
 
-	origFilename := config.BotCfg.ConfigFilename
-	config.BotCfg.ConfigFilename = "config.json"
+	origFilename := config.ServerCfg.ConfigFilename
+	config.ServerCfg.ConfigFilename = "config.json"
 	defer func() {
-		config.BotCfg.ConfigFilename = origFilename
+		config.ServerCfg.ConfigFilename = origFilename
 	}()
 
 	userFS, err := fs.NewFS("/", afero.NewMemMapFs())
@@ -288,10 +288,10 @@ func TestSyncAllTexts_EmptyRequest(t *testing.T) {
 func TestSyncAllTexts_CreateNewFilesOnServer(t *testing.T) {
 	r := require.New(t)
 
-	origFilename := config.BotCfg.ConfigFilename
-	config.BotCfg.ConfigFilename = "config.json"
+	origFilename := config.ServerCfg.ConfigFilename
+	config.ServerCfg.ConfigFilename = "config.json"
 	defer func() {
-		config.BotCfg.ConfigFilename = origFilename
+		config.ServerCfg.ConfigFilename = origFilename
 	}()
 
 	userFS, err := fs.NewFS("/", afero.NewMemMapFs())
@@ -406,10 +406,10 @@ func TestSyncAllTexts_UpdateExistingFilesOnServer(t *testing.T) {
 func TestSyncAllTexts_SendUpdatedFilesToClient(t *testing.T) {
 	r := require.New(t)
 
-	origFilename := config.BotCfg.ConfigFilename
-	config.BotCfg.ConfigFilename = "config.json"
+	origFilename := config.ServerCfg.ConfigFilename
+	config.ServerCfg.ConfigFilename = "config.json"
 	defer func() {
-		config.BotCfg.ConfigFilename = origFilename
+		config.ServerCfg.ConfigFilename = origFilename
 	}()
 
 	userFS, err := fs.NewFS("/", afero.NewMemMapFs())

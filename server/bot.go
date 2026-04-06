@@ -2818,7 +2818,7 @@ func (b *Bot) addToFile(dir, filename, content string) error {
 
 func (b *Bot) openInApp(_ []string) error {
 	token := sync.GenOneTimeToken(b.userID)
-	onetimeURL := fmt.Sprintf("%s?token=%s", config.BotCfg.AppHost, token)
+	onetimeURL := fmt.Sprintf("%s?token=%s", config.ServerCfg.AppHost, token)
 	kb := tg.NewKeyboard([]tg.Row{tg.NewBtn(i18n2.Tr("Open in app"), tg.NewURLCmd(onetimeURL))})
 
 	return b.showHTML(i18n2.Tr("🔗 Here's your <b>one-time</b> link! <b>Desktop-only</b> for now."), kb)
@@ -2944,7 +2944,7 @@ func (b *Bot) completeHabit(params []string) error {
 
 	emoji := habits.Emoji(b.fs, habit)
 
-	userConf := userconfig.NewConfig(b.fs, b.userID, config.BotCfg.ConfigFilename)
+	userConf := userconfig.NewConfig(b.fs, b.userID, config.ServerCfg.ConfigFilename)
 	err = journal.AddEmoji(b.fs, emoji, userConf.Timezone())
 	if err != nil {
 		return fmt.Errorf("complete habit: can't write emoji to journal: %w", err)

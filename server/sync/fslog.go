@@ -23,7 +23,7 @@ func LogRename(time int64, oldPath, newPath string) {
 	lock.Lock()
 	defer lock.Unlock()
 
-	file, err := os.OpenFile(path.Join(config.BotCfg.WorkingDir, "fslog"), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(path.Join(config.ServerCfg.WorkingDir, "fslog"), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		return
 	}
@@ -41,7 +41,7 @@ func LogDelete(time int64, filepath string) {
 	lock.Lock()
 	defer lock.Unlock()
 
-	file, err := os.OpenFile(path.Join(config.BotCfg.WorkingDir, "fslog"), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(path.Join(config.ServerCfg.WorkingDir, "fslog"), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		return
 	}
@@ -62,7 +62,7 @@ func RenamesLog(userID, afterTimestamp int64) map[string]string {
 	defer lock.RUnlock()
 
 	// TODO can we tolerate errors? The worst that happens are duplicates on client side
-	file, err := os.Open(path.Join(config.BotCfg.WorkingDir, "fslog"))
+	file, err := os.Open(path.Join(config.ServerCfg.WorkingDir, "fslog"))
 	if err != nil {
 		return nil
 	}
@@ -70,7 +70,7 @@ func RenamesLog(userID, afterTimestamp int64) map[string]string {
 
 	logEntries := make(map[string]string)
 	scanner := bufio.NewScanner(file)
-	userPathPrefix := path.Join(config.BotCfg.StorageDir, fmt.Sprintf("%d", userID)) + "/"
+	userPathPrefix := path.Join(config.ServerCfg.StorageDir, fmt.Sprintf("%d", userID)) + "/"
 	for scanner.Scan() {
 		line := scanner.Text()
 		var timestamp int64

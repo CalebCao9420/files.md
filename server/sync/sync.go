@@ -150,7 +150,7 @@ func SyncTexts(w http.ResponseWriter, r *http.Request) {
 
 		// We don't accept config from client, because for now it is only modified on server.
 		// Plus we need to mess with JSON merging :)
-		if clientFile.Path == config.BotCfg.ConfigFilename {
+		if clientFile.Path == config.ServerCfg.ConfigFilename {
 			continue
 		}
 
@@ -176,10 +176,10 @@ func SyncTexts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Include config file timestamp, so it will be sent to the client if stale.
-	configCtime, err := userFS.Mtime(fs.DirRoot, config.BotCfg.ConfigFilename)
+	configCtime, err := userFS.Mtime(fs.DirRoot, config.ServerCfg.ConfigFilename)
 	// We can ignore the error since config.json is not used on client in any way, pure for read-only purposes.
 	if err == nil {
-		serverTimestamps[config.BotCfg.ConfigFilename] = configCtime
+		serverTimestamps[config.ServerCfg.ConfigFilename] = configCtime
 	}
 
 	// Prepare the list of files to send to the client

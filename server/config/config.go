@@ -8,7 +8,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-type BotConfig struct {
+type Config struct {
 	WorkingDir     string
 	StorageDir     string `default:"./storage"  envconfig:"STORAGE_DIR"`
 	BotAPIToken    string `required:"true" envconfig:"BOT_API_TOKEN"`
@@ -21,10 +21,10 @@ type BotConfig struct {
 	ServerLogFile  string `default:"/tmp/server.log" envconfig:"LOG_FILE"`
 }
 
-var BotCfg BotConfig
+var ServerCfg Config
 
 func LoadBotConfig() error {
-	if err := envconfig.Process("", &BotCfg); err != nil {
+	if err := envconfig.Process("", &ServerCfg); err != nil {
 		return fmt.Errorf("can't load config: %w", err)
 	}
 
@@ -32,10 +32,10 @@ func LoadBotConfig() error {
 	if err != nil {
 		return fmt.Errorf("config can't get working directory: %w", err)
 	}
-	BotCfg.WorkingDir = wd
+	ServerCfg.WorkingDir = wd
 
-	if !filepath.IsAbs(BotCfg.StorageDir) {
-		BotCfg.StorageDir = filepath.Join(wd, BotCfg.StorageDir)
+	if !filepath.IsAbs(ServerCfg.StorageDir) {
+		ServerCfg.StorageDir = filepath.Join(wd, ServerCfg.StorageDir)
 	}
 
 	return nil

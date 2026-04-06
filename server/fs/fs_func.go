@@ -114,7 +114,7 @@ func ExcludeTaskDirs(dirs []File) []File {
 func ExcludeConfig(files []File) []File {
 	var newFiles []File
 	for _, file := range files {
-		if file.Name == config.BotCfg.ConfigFilename && file.ParentDir == DirRoot {
+		if file.Name == config.ServerCfg.ConfigFilename && file.ParentDir == DirRoot {
 			continue
 		}
 
