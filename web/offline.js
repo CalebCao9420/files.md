@@ -1,5 +1,10 @@
+// We need our application to work online, so we install a service worker.
+// Server worker intercept calls to the specified urls and returns cached copies.
+
+// Web folder is our doc root.
 const urlsToCache = [
     '/',
+    '/index.js',
     '/favicon.ico',
     '/icon.png',
     '/icon_small.png',
@@ -37,7 +42,6 @@ const urlsToCache = [
     '/welcome.js',
     '/files.js',
     '/editor.js',
-    '/app.js',
     '/inbox.js',
     '/modals.js',
 ];
@@ -46,7 +50,6 @@ const urlParams = new URLSearchParams(self.location.search);
 const COMMIT_HASH = urlParams.get('v') ? `?v=${urlParams.get('v')}` : '';
 
 const cacheName = `files-md-v${COMMIT_HASH}`;
-
 
 self.addEventListener('install', event => {
     event.waitUntil((async () => {
