@@ -46,9 +46,6 @@ var (
 )
 
 const (
-	maxHeaderLength          = 100
-	maxHeaderLengthForMobile = 33 // Fits regular mobile screen
-	inlineResultsCacheTime   = 15 // Seconds
 	btnsPerRow               = 3
 	quickBtnsPerRow          = 4
 	maxBtns                  = 50
@@ -57,6 +54,9 @@ const (
 	maxInlineResults         = 20
 	maxMsgLength             = 4096 // In UTF-8 characters (runes), skin-tone emojis count as 2
 	maxMsgsToSendAtOnce      = 5    // For lengthy messages
+	maxHeaderLength          = 100
+	maxHeaderLengthForMobile = 33 // Fits regular mobile screen
+	inlineResultsCacheTime   = 15 // Seconds
 
 	// On mobile phones buttons shrink to the message width, and sometimes it's too narrow, so we make the message wider
 	wideSpacer = "<code>            ⁠</code>"
@@ -119,14 +119,6 @@ type Database interface {
 type BotPlugin interface {
 	CanHandle(string) bool
 	Handle(string) (output string, error error)
-}
-
-type Bot struct {
-	userID int64
-	tg     Chat
-	fs     *fs.FS
-	db     Database
-	cfg    *userconfig.Config
 }
 
 var now = time.Now
@@ -218,6 +210,19 @@ var Shortcuts = map[string][]string{
 	CmdAddToJournalShortcut:            {"/ж", "jj", "жж"},
 	CmdAddToJournalAndContinueShortcut: {"жд", "jd", "ja"},
 	CmdAddToRecentFileShortcut:         {"++"},
+}
+
+// Bot has all the things that we need to handle a message or command from a user.
+// We use tg chat to talk with the user.
+// We use fs to save artefacts to the disk (.md files).
+// We use db to save temporal things like recent command.
+// We use cfg to configure bot behaviour (config.json).
+type Bot struct {
+	userID int64
+	tg     Chat
+	fs     *fs.FS
+	db     Database
+	cfg    *userconfig.Config
 }
 
 func NewBot(userID int64, tg Chat, fs *fs.FS, db Database, cfg *userconfig.Config) *Bot {
