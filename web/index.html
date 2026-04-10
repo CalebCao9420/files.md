@@ -137,10 +137,11 @@
     log('Current version:', window.COMMIT_HASH);
 
     // Allow offline mode.
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('offline.js?v=')
-            .then(_ => log('Service Worker registered'))
-            .catch(_ => logError('Service Worker registration failed'));
+    try {
+        await navigator.serviceWorker.register('offline.js?v=');
+        log('Service Worker registered');
+    } catch {
+        logError('Service Worker registration failed');
     }
 
     window.currentEditor = null;
