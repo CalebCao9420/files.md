@@ -90,8 +90,8 @@ deploy_systemd: # deploy as systemd service, TODO make timestamps hussle in sepa
 	make check && \
 	GOOS=linux GOARCH=amd64 go build -o /tmp/server ./cmd/server && \
 	printf "$${GREEN}Build Completed$${RESET}\n" && \
-	scp /tmp/server $(host):/app/server.new && printf "$${GREEN}The binary is copied on the server$${RESET}\n" && \
-	ssh $(host) "mv /app/server.new /app/server && systemctl daemon-reload && systemctl restart server.service" && \
+	scp /tmp/server $(host):/tmp/server.new && printf "$${GREEN}The binary is copied on the server$${RESET}\n" && \
+	ssh $(host) "sudo mv /tmp/server.new /app/server && sudo systemctl daemon-reload && sudo systemctl restart server.service" && \
 	rm /tmp/server && \
 	printf "$${YELLOW}Versioning current files with commit: $${COMMIT_HASH}$${RESET}\n" && \
 	TMPWEB=$$(mktemp -d) && \
@@ -111,10 +111,10 @@ deploy_binary: # deploy as regular binary, kinda deprecated, but ok for simple s
 	make check && \
 	GOOS=linux GOARCH=amd64 go build -o /tmp/server ./cmd/server && \
 	printf "$${GREEN}Build Completed$${RESET}\n" && \
-	ssh $(host) "killall server || true" && \
-	scp /tmp/server $(host):/app/server && printf "$${GREEN}The binary is copied on the server$${RESET}\n" && \
-  	ssh $(host) "sudo setcap 'cap_net_bind_service=+ep' /app/server" && \
-	ssh $(host) "su -c \"cd /app && nohup ./server >> /app/log 2>>/app/err &\" -s /bin/sh www-data" && \
+	ssh $(host) "sudo killall server || true" && \
+	scp /tmp/server $(host):/tmp/server.new && printf "$${GREEN}The binary is copied on the server$${RESET}\n" && \
+	ssh $(host) "sudo mv /tmp/server.new /app/server && sudo setcap 'cap_net_bind_service=+ep' /app/server" && \
+	ssh $(host) "sudo su -c \"cd /app && nohup ./server >> /app/log 2>>/app/err &\" -s /bin/sh www-data" && \
 	rm /tmp/server && \
 	printf "$${GREEN}Successfully deployed!$${RESET}\n"
 
