@@ -3,12 +3,11 @@
 //
 // DESCRIPTION: Fold and render links
 //
-// This file is actually for links folding, not emojis.
 
 (function (mod){ //[HyperMD] UMD patched!
     /*commonjs*/  ("object"==typeof exports&&"undefined"!=typeof module) ? mod(null, exports, require("codemirror"), require("../core"), require("./fold")) :
         /*amd*/       ("function"==typeof define&&define.amd) ? define(["require","exports","codemirror","../core","./fold"], mod) :
-            /*plain env*/ mod(null, (this.HyperMD.FoldEmoji = this.HyperMD.FoldEmoji || {}), CodeMirror, HyperMD, HyperMD.Fold);
+            /*plain env*/ mod(null, (this.HyperMD.FoldLink = this.HyperMD.FoldLink || {}), CodeMirror, HyperMD, HyperMD.Fold);
 })(function (require, exports, CodeMirror, core_1, fold_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -23,37 +22,37 @@
     /********************************************************************************** */
     //#region Folder
     /**
-     * Detect if a token is emoji and fold it
+     * Detect if a token is a link and fold it
      *
      * @see FolderFunc in ./fold.ts
      */
-    exports.EmojiFolder = function (stream, token) {
-        if (!token.type || !/ formatting-emoji/.test(token.type))
+    exports.LinkFolder = function (stream, token) {
+        if (!token.type || !/ formatting-link/.test(token.type))
             return null;
         var cm = stream.cm;
         var from = { line: stream.lineNo, ch: token.start };
         var to = { line: stream.lineNo, ch: token.end };
-        var name = token.string; // with ":"
+        var name = token.string;
         var addon = exports.getAddon(cm);
-        if (!addon.isEmoji(name))
+        if (!addon.isLink(name))
             return null;
         var reqAns = stream.requestRange(from, to);
         if (reqAns !== fold_1.RequestRangeResult.OK)
             return null;
         // now we are ready to fold and render!
-        var marker = addon.foldEmoji(name, from, to);
+        var marker = addon.foldLink(name, from, to);
         return marker;
     };
     //#endregion
-    fold_1.registerFolder("emoji", exports.EmojiFolder, true);
+    fold_1.registerFolder("link", exports.LinkFolder, true);
     exports.defaultOption = {
-        myEmoji: {},
-        emojiRenderer: exports.defaultRenderer,
-        emojiChecker: exports.defaultChecker,
+        myLinks: {},
+        linkRenderer: exports.defaultRenderer,
+        linkChecker: exports.defaultChecker,
     };
     exports.suggestedOption = {};
-    core_1.suggestedEditorConfig.hmdFoldEmoji = exports.suggestedOption;
-    CodeMirror.defineOption("hmdFoldEmoji", exports.defaultOption, function (cm, newVal) {
+    core_1.suggestedEditorConfig.hmdFoldLink = exports.suggestedOption;
+    CodeMirror.defineOption("hmdFoldLink", exports.defaultOption, function (cm, newVal) {
         ///// convert newVal's type to `Partial<Options>`, if it is not.
         if (!newVal) {
             newVal = {};
@@ -67,21 +66,21 @@
     //#endregion
     /********************************************************************************** */
         //#region Addon Class
-    var FoldEmoji = /** @class */ (function () {
-            function FoldEmoji(cm) {
+    var FoldLink = /** @class */ (function () {
+            function FoldLink(cm) {
                 this.cm = cm;
                 // options will be initialized to defaultOption when constructor is finished
             }
-            FoldEmoji.prototype.isEmoji = function (text) {
-                return text in this.myEmoji || this.emojiChecker(text);
+            FoldLink.prototype.isLink = function (text) {
+                return text in this.myLinks || this.linkChecker(text);
             };
-            FoldEmoji.prototype.foldEmoji = function (text, from, to) {
+            FoldLink.prototype.foldLink = function (text, from, to) {
                 var cm = this.cm;
-                var el = ((text in this.myEmoji) && this.myEmoji[text](text)) || this.emojiRenderer(text);
+                var el = ((text in this.myLinks) && this.myLinks[text](text)) || this.linkRenderer(text);
                 if (!el || !el.tagName)
                     return null;
-                if (el.className.indexOf('hmd-emoji') === -1)
-                    el.className += " hmd-emoji";
+                if (el.className.indexOf('hmd-link') === -1)
+                    el.className += " hmd-link";
                 var marker = cm.markText(from, to, {
                     replacedWith: el,
                 });
@@ -92,14 +91,14 @@
                 }
                 return marker;
             };
-            return FoldEmoji;
+            return FoldLink;
         }());
-    exports.FoldEmoji = FoldEmoji;
+    exports.FoldLink = FoldLink;
     //#endregion
-    /** ADDON GETTER (Singleton Pattern): a editor can have only one FoldEmoji instance */
-    exports.getAddon = core_1.Addon.Getter("FoldEmoji", FoldEmoji, exports.defaultOption /** if has options */);
+    /** ADDON GETTER (Singleton Pattern): a editor can have only one FoldLink instance */
+    exports.getAddon = core_1.Addon.Getter("FoldLink", FoldLink, exports.defaultOption /** if has options */);
     /********************************************************************************** */
-    //#region initialize compact emoji dict
+    //#region initialize compact link dict
     (function (dest) {
         var parts = [];
         var matRE = /([-\w]+:)([^;]+);/g;

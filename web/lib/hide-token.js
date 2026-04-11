@@ -4,7 +4,6 @@
 // DESCRIPTION: Auto show/hide markdown tokens like `##` or `*`
 //
 // Only works with `hypermd` mode, require special CSS rules
-//
 
 (function (mod){ //[HyperMD] UMD patched!
     /*commonjs*/  ("object"==typeof exports&&"undefined"!=typeof module) ? mod(null, exports, require("codemirror"), require("../core"), require("../core"), require("../core")) :
