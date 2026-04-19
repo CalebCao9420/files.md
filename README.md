@@ -91,7 +91,7 @@ My friends and I have been using this approach for 5+ years.
 - A note should be understood without context
 - Related notes should be linked between each other
 
-That's all you need to know to take notes.  
+That's all you need to take notes.  
 
 Telegram bot: [@FilesMDBot](https://t.me/FilesMDBot) (other messengers will follow).
 
@@ -111,11 +111,10 @@ However, if it is more about self-help, then collecting a lot of notes **can pre
 - **At some point our knowing is so good, that we start thinking that we actually do it (or at least tried)**
 
 Do not collect techniques and advice for your future self.  
-Your knowledge base will cause you stress.   
-It would be overwhelming to that that there's so much to try, and you haven't done a thing yet.  
+Pure knowledge and postponed action will cause you stress.    
 
-While you are reading something or listening to somebody, you have a slight chance to convert this new insight into experience.  
-**Do not spend your energy for just writing it down in the hope that one day you'll actually do it.**
+When you read or listen, there is a small chance to turn an insight into experience.  
+**Do not spend your energy for just writing it down in the hope that one day you'll actually try it.**  
 
 I was reading `Atomic Habits` the other day, and I stumbled upon an insight:
 
@@ -123,17 +122,17 @@ I was reading `Atomic Habits` the other day, and I stumbled upon an insight:
 
 _Wow! That's a great insight._
 
-I feel the urge to save it in my knowledge base.  
-Instead, I take time and reflect...
+I feel the urge to take a note.   
+Instead, I take time and reflect...  
 
-I had an issue with the gym. I like working out. What I don't like was the preparation and changing clothes at the gym.
-The preparation and changing clothes at the gym were a resistance for me. My resistance to those things.
-What I could change, is the environment. I reduced my equipment to the bare minimum and started getting dressed in my workout clothes at home.
+I had an issue with the gym. I like working out. What I don't like was the preparation and changing clothes at the gym.  
+The preparation and changing clothes at the gym were a resistance for me. My resistance to those things.  
+What I could change, is the environment. I reduced my equipment to the bare minimum and started getting dressed in my workout clothes at home.  
 
-After a few weeks, the habit stuck. I got feedback from reality. I experienced it.
+After a few weeks, the habit stuck. I got feedback from reality. _I experienced it._  
 
 Only then I added this useful insight to my knowledge base.  
-This experience helped me to discover that I don't like taking notes with traditional applications, too much resistance.    
+This experience helped me to discover that I don't like taking notes with traditional applications, too much resistance.   
 At the same time, chatting with friends is effortless for me. That's how the bot for taking notes appeared.  
 
 ## No productivity, no planning no stress
