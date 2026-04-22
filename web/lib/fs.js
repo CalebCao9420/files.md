@@ -117,6 +117,101 @@ async function rename(oldpath, newpath) {
     await remove(oldpath)
 }
 
+// removeDir deletes a directory and everything under it. Files are deleted
+// one-by-one so the in-memory file tree and server-sync bookkeeping stay in
+// sync; the empty parent entry is then pruned from OPFS.
+async function removeDir(dirPath) {
+    const filePaths = collectFilePathsInDir(dirPath);
+    for (const p of filePaths) {
+        try {
+            await remove(p);
+        } catch (err) {
+            logError('removeDir: failed to remove file', p, err);
+        }
+    }
+
+    const parts = trimPrefix(dirPath, '/').split('/').filter(Boolean);
+    const dirName = parts.pop();
+    const parentPath = '/' + parts.join('/');
+
+    const rootHandle = await getRootDirHandle();
+    let parentHandle = rootHandle;
+    for (const seg of parts) {
+        parentHandle = await parentHandle.getDirectoryHandle(seg);
+    }
+    try {
+        await parentHandle.removeEntry(dirName, { recursive: true });
+    } catch (err) {
+        logError('removeDir: removeEntry failed', dirPath, err);
+    }
+
+    removeMemDir(dirPath);
+    log(`Dir ${dirPath} removed.`);
+}
+
+// renameDir moves every file under oldDirPath into a sibling directory called
+// newName. Per-file moves keep server-sync bookkeeping intact; afterwards the
+// empty old directory entry is removed from OPFS.
+async function renameDir(oldDirPath, newName) {
+    const parts = trimPrefix(oldDirPath, '/').split('/').filter(Boolean);
+    parts.pop();
+    const parentPath = '/' + parts.join('/');
+    const newDirPath = joinPath(parentPath, newName);
+
+    if (newDirPath === oldDirPath) return;
+
+    const filePaths = collectFilePathsInDir(oldDirPath);
+    for (const oldFilePath of filePaths) {
+        const rel = oldFilePath.slice(oldDirPath.length);
+        const newFilePath = newDirPath + rel;
+        try {
+            await moveFile(oldFilePath, newFilePath);
+        } catch (err) {
+            logError('renameDir: failed to move file', oldFilePath, err);
+        }
+    }
+
+    const rootHandle = await getRootDirHandle();
+    let parentHandle = rootHandle;
+    for (const seg of parts) {
+        parentHandle = await parentHandle.getDirectoryHandle(seg);
+    }
+    const oldDirName = oldDirPath.split('/').filter(Boolean).pop();
+    try {
+        await parentHandle.removeEntry(oldDirName, { recursive: true });
+    } catch (err) {
+        logError('renameDir: removeEntry old dir failed', oldDirPath, err);
+    }
+
+    removeMemDir(oldDirPath);
+    log(`Dir ${oldDirPath} renamed to ${newDirPath}.`);
+}
+
+// collectFilePathsInDir returns absolute paths of every file under dirPath,
+// using the in-memory file tree so we don't hit OPFS for the listing.
+function collectFilePathsInDir(dirPath) {
+    const collected = [];
+    walk(files, (p, isFile) => {
+        if (!isFile) return;
+        if (p === dirPath || p.startsWith(dirPath + '/')) {
+            collected.push(p);
+        }
+    });
+    return collected;
+}
+
+// removeMemDir drops a directory subtree from the in-memory file map.
+function removeMemDir(dirPath) {
+    const parts = trimPrefix(dirPath, '/').split('/').filter(Boolean);
+    const dirName = parts.pop();
+    let cur = files;
+    for (const seg of parts) {
+        cur = cur[seg + '/'];
+        if (!cur) return;
+    }
+    delete cur[dirName + '/'];
+}
+
 async function mkdir(path) {
     try {
         let currentDirHandle = await getRootDirHandle();

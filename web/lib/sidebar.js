@@ -1285,5 +1285,90 @@ var TreeConfig = {
     tasks_icon: TreeUtil.tasks_icon,
     chat_icon: TreeUtil.inbox_icon,
     checklists_icon: TreeUtil.checklists_icon,
-    context_menu: undefined
+    context_menu: function (e, node) { return folderContextMenu(e, node); }
 };
+
+// folderContextMenu handles right-click on sidebar nodes. Renders a small
+// Rename/Delete menu for any directory node. Rename/Delete prompts are native
+// — they work on touch via long-press which fires the same contextmenu.
+async function folderContextMenu(e, node) {
+    const isDir = node && node.getOptions && node.getOptions().dir === true;
+    if (!isDir) return;
+
+    const dirPath = node.path;
+    if (!dirPath || dirPath === '/') return;
+    const dirName = dirPath.split('/').filter(Boolean).pop();
+
+    const menu = document.createElement('div');
+    menu.className = 'sidebar-ctx-menu';
+    menu.style.left = e.clientX + 'px';
+    menu.style.top = e.clientY + 'px';
+
+    function item(label, onClick) {
+        const el = document.createElement('div');
+        el.className = 'sidebar-ctx-menu-item';
+        el.textContent = label;
+        el.addEventListener('click', async (ev) => {
+            ev.stopPropagation();
+            close();
+            await onClick();
+        });
+        menu.appendChild(el);
+    }
+
+    function close() {
+        menu.remove();
+        document.removeEventListener('mousedown', onOutside, true);
+        document.removeEventListener('keydown', onEsc, true);
+    }
+    function onOutside(ev) { if (!menu.contains(ev.target)) close(); }
+    function onEsc(ev) { if (ev.key === 'Escape') close(); }
+
+    const pathIsInsideDir = (p) => p && (p === dirPath || p.startsWith(dirPath + '/'));
+
+    item('Rename', async () => {
+        const newName = prompt('Rename folder:', dirName);
+        if (newName === null) return;
+        const trimmed = newName.trim();
+        if (!trimmed || trimmed === dirName) return;
+        if (trimmed.includes('/')) { alert('Folder name cannot contain "/"'); return; }
+        try {
+            const editorWasInside = pathIsInsideDir(currentEditor.path);
+            const oldEditorPath = currentEditor.path;
+            await renameDir(dirPath, trimmed);
+            if (editorWasInside) {
+                const parentParts = dirPath.split('/').filter(Boolean).slice(0, -1);
+                const newDirPath = '/' + parentParts.concat(trimmed).join('/');
+                currentEditor.path = newDirPath + oldEditorPath.slice(dirPath.length);
+            }
+            await renderSidebar();
+        } catch (err) {
+            console.error('renameDir failed', err);
+            alert('Rename failed: ' + (err && err.message ? err.message : err));
+        }
+    });
+
+    item('Delete', async () => {
+        if (!confirm(`Delete folder "${dirName}" and everything inside it?`)) return;
+        try {
+            const editorWasInside = pathIsInsideDir(currentEditor.path);
+            await removeDir(dirPath);
+            if (editorWasInside) {
+                currentEditor.path = undefined;
+            }
+            await renderSidebar();
+            if (editorWasInside && typeof showRandomFile === 'function') {
+                showRandomFile();
+            }
+        } catch (err) {
+            console.error('removeDir failed', err);
+            alert('Delete failed: ' + (err && err.message ? err.message : err));
+        }
+    });
+
+    document.body.appendChild(menu);
+    setTimeout(() => {
+        document.addEventListener('mousedown', onOutside, true);
+        document.addEventListener('keydown', onEsc, true);
+    });
+}

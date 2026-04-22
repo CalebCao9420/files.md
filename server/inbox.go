@@ -53,7 +53,7 @@ func findInboxBlockByHash(content, msgHash string) (int, string, bool) {
 }
 
 // renameInboxBlock replaces the body of the block identified by msgHash with
-// newBody, preserving the `- [ ] `/`- [x] ` marker and the `` `HH:MM` ``
+// newBody, preserving the `- [ ] `/`- [x] ` marker and the “ `HH:MM` “
 // timestamp. Returns the rewritten file content.
 func renameInboxBlock(content, msgHash, newBody string) (string, error) {
 	blocks := readBlocks(content)

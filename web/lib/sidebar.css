@@ -206,3 +206,26 @@
 	background: transparent;
 	z-index: 12;
 }
+
+.sidebar-ctx-menu {
+	position: fixed;
+	background: var(--col-bg, #fff);
+	color: var(--col-tx, #000);
+	border: 1px solid var(--col-border, rgba(0, 0, 0, 0.15));
+	border-radius: 6px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+	padding: 4px 0;
+	z-index: 10000;
+	min-width: 140px;
+	font-size: 14px;
+	user-select: none;
+}
+
+.sidebar-ctx-menu-item {
+	padding: 6px 12px;
+	cursor: pointer;
+}
+
+.sidebar-ctx-menu-item:hover {
+	background: color-mix(in srgb, var(--col-tx, #000) 10%, transparent);
+}
