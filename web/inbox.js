@@ -12,6 +12,10 @@ const WATCH_PATH = '/Watch.md';
 
 const MAX_TITLE_LENGTH = 100;
 
+// Cache of the last Inbox.md content we rendered from. renderMessages skips
+// work when the file's content hasn't changed.
+let lastInboxText = null;
+
 // Add event listener for input changes
 chatInput.addEventListener('input', autoResize);
 // Initial resize to set proper height
@@ -36,6 +40,7 @@ async function addToInbox() {
     });
     const formattedContent = `\n- [ ] \`${timestamp}\` ${text}\n`;
     await writeAtEnd(INBOX_PATH, formattedContent);
+    if (lastInboxText !== null) lastInboxText += formattedContent;
 
     chatInput.value = '';
     chatIsClean = false;
@@ -181,7 +186,7 @@ async function parseMessagesFromInbox() {
         }
     }
 
-    return messages;
+    return { messages, text: chat };
 }
 
 async function saveMessagesToInbox(messages) {
@@ -205,6 +210,7 @@ async function saveMessagesToInbox(messages) {
     });
 
     await write(INBOX_PATH, content);
+    lastInboxText = content;
 }
 
 // Toggle the checkbox marker on a single inbox line in place.
@@ -235,6 +241,7 @@ async function toggleInboxLine(timestamp, text, done) {
     const writable = await handle.createWritable();
     await writable.write(content);
     await writable.close();
+    lastInboxText = content;
 }
 
 function initInbox() {
@@ -394,7 +401,7 @@ async function addToJournal(text) {
 async function moveFromInbox(text, callback) {
     await callback(text);
 
-    let messages = await parseMessagesFromInbox();
+    const { messages } = await parseMessagesFromInbox();
     const filteredMessages = messages.filter(msg => msg.text !== text);
     await saveMessagesToInbox(filteredMessages);
 }
@@ -758,7 +765,12 @@ function attachEventListeners() {
 }
 
 async function renderMessages() {
-    const messages = await parseMessagesFromInbox();
+    const { messages, text } = await parseMessagesFromInbox();
+    if (text === lastInboxText) {
+        log('Inbox unchanged, skipping render');
+        return;
+    }
+    lastInboxText = text;
     log(`Loaded ${messages.length} messages from ${INBOX_PATH}`);
 
     if (messages.length === 0) {
