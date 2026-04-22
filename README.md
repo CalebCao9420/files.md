@@ -286,6 +286,7 @@ Read 4K randomly from SSD = 150,000 ns
 ```
 
 ## ADRs (Architecture Decision Records)
+- It was mentally taxing to see two buttons/messages "to inbox" and "to today", it was not as mentally easy just to drop a task for today. Because it went to inbox, and 1 more click needed. That one click was the reason adding new tasks became frustrating. I let go of two different flow, and now everything goes to inbox, and every item is inbox is a markdown checklist item. As a bonus, PWA app is now very handy as it shows tasks for today by default. Also, maybe "inbox" is a mentally overloaded term, and "today" sounds better. Will see.
 - Even though I want to store links as plain markdown links, visually I want to work with them as if they were minimal [links]. For that I decided to hide (...) part when cursor is on the line. The (...) part is only hidden for markdown-files link.
 - Brought back standart Markdown Links. I want the knowledge base to be cross-platform. It should work in GitHub.
 - Tried to move web/* stuff in the root folder for simplicity. Bad decision - there should be an explicit dir which we can use as public DOCROOT on our server.
