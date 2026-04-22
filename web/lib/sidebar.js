@@ -1,10 +1,3 @@
-/**
- * TreeJS is a JavaScript librarie for displaying TreeViews
- * on the web.
- *
- * @author Matthias Thalmann
- */
-
 let tree;
 
 function renderSidebar(focusDir = '', modifiedPaths) {
@@ -48,39 +41,6 @@ function renderSidebar(focusDir = '', modifiedPaths) {
     });
     root.addChild(inbox)
 
-    // Process directories
-    // for (const dir in files) {
-    //     if (dir === 'media') {
-    //         continue;
-    //     }
-    //
-    //     let dirNode = new TreeNode(dir, {expanded: false, dir: true});
-    //
-    //     // Process files in directory
-    //     for (let file in files[dir]) {
-    //         let fileNode = new TreeNode(file.replace(/\.md$/, ''), {expanded: false});
-    //         fileNode.on('click', async function (n, node) {
-    //             await openFile(node.parent.toString(), node.toString() + '.md');
-    //         });
-    //         dirNode.addChild(fileNode);
-    //
-    //         // Restore selected state for file nodes
-    //         if (selectedNodes.has(file.replace(/\.md$/, ''))) {
-    //             fileNode.setSelected(true);
-    //         }
-    //     }
-    //
-    //     root.addChild(dirNode);
-    //
-    //     // Handle focus directory or restore previous state
-    //     if (dir === focusDir) {
-    //         dirNode.setExpanded(true);
-    //         dirNode.setSelected(true);
-    //     } else {
-    //         if (expandedDirs.has(dir)) dirNode.setExpanded(true);
-    //         if (selectedNodes.has(dir)) dirNode.setSelected(true);
-    //     }
-    // }
     let dirNodes = {'/': root};
 
     // First pass: create all directories
