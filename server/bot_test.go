@@ -1928,50 +1928,6 @@ func TestShowSchedule(t *testing.T) {
 	r.Equal("<b>01 January, Thursday</b>\n- Filename", tgram.SentTexts[0])
 }
 
-// TODO today.md
-//func TestAngerInTodayTasks(t *testing.T) {
-//	r := require.New(t)
-//
-//	savedCtime := fs.Ctime
-//	defer func() {
-//		fs.Ctime = savedCtime
-//	}()
-//	fs.Ctime = func(fi os.FileInfo) int64 {
-//		return 0
-//	}
-//
-//	mode := userconfig.DefaultConfig.Mode
-//	userconfig.DefaultConfig.Mode = userconfig.ModeTasks
-//	defer func() {
-//		userconfig.DefaultConfig.Mode = mode
-//	}()
-//
-//	savedNow := now
-//	defer func() {
-//		now = savedNow
-//	}()
-//	now = func() time.Time {
-//		return time.Date(1970, 1, 2, 0, 0, 0, 0, time.UTC)
-//	}
-//
-//	userFS, err := fs.NewFS("/", afero.NewMemMapFs())
-//	r.NoError(err)
-//	err = userFS.Write("today", "Angry task.md", "")
-//	r.NoError(err)
-//
-//	tgram := tg.NewFakeTG()
-//
-//	bot := NewBot(-1, tgram, userFS, db.NewFakeDB(), fakeConfig())
-//	err = bot.Reply(tg.NewUpdCmd(-1, tg.NewCmd("today", nil)))
-//	r.NoError(err)
-//
-//	r.Equal("<b>1</b> left"+wideSpacer, tgram.LastSentText)
-//	r.Equal(tg.NewKeyboard([]tg.Row{
-//		tg.NewBtn("🙄 Angry task", tg.NewCmd("c", []string{"today", "9c556351f34"})),
-//	},
-//	), tgram.LastSentKeyboard)
-//}
-
 func TestMoveToChecklistSplittable(t *testing.T) {
 	r := require.New(t)
 
@@ -4465,28 +4421,6 @@ func TestShowToday_JournalOnlyMode(t *testing.T) {
 	r.Nil(tgram.LastSentKeyboard) // No keyboard should be sent
 }
 
-//	func TestShowToday_OneFileOnlyMode(t *testing.T) {
-//		r := require.New(t)
-//
-//		userFS, err := fs.NewFS("/", afero.NewMemMapFs())
-//		r.NoError(err)
-//		err = userFS.CreateDirsIfNotExist()
-//		r.NoError(err)
-//
-//		tgram := tg.NewFakeTG()
-//
-//		cfg := fakeConfig()
-//		err = cfg.SetMode(userconfig.ModeOneFile)
-//		r.NoError(err)
-//
-//		bot := NewBot(-1, tgram, userFS, db.NewFakeDB(), cfg)
-//		err = bot.ShowToday(nil)
-//		r.NoError(err)
-//
-//		// Should send "What's on your mind?" message (same as journal mode)
-//		r.Contains(tgram.LastSentText, "What's on your mind?")
-//		r.Nil(tgram.LastSentKeyboard) // No keyboard should be sent
-//	}
 func TestShowToday_NormalMode(t *testing.T) {
 	r := require.New(t)
 
@@ -4641,29 +4575,6 @@ func TestShowToday_TodayCommandModeJournal(t *testing.T) {
 
 	r.Contains(tgram.LastSentText, "What's on your mind?")
 }
-
-//func TestShowToday_TodayCommandModeOneFile(t *testing.T) {
-//	r := require.New(t)
-//
-//	userFS, err := fs.NewFS("/", afero.NewMemMapFs())
-//	r.NoError(err)
-//	err = userFS.CreateDirsIfNotExist()
-//	r.NoError(err)
-//
-//	tgram := tg.NewFakeTG()
-//	cfg := fakeConfig()
-//
-//	tgram = tg.NewFakeTG()
-//
-//	err = cfg.SetMode(userconfig.ModeOneFile)
-//	r.NoError(err)
-//
-//	bot := NewBot(-1, tgram, userFS, db.NewFakeDB(), cfg)
-//	err = bot.Reply(tg.NewUpdCmd(-1, tg.NewCmd("today", nil)))
-//	r.NoError(err)
-//
-//	r.Contains(tgram.LastSentText, "What's on your mind?")
-//}
 
 func TestScheduleForTmrw(t *testing.T) {
 	r := require.New(t)
