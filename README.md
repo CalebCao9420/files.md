@@ -78,7 +78,7 @@ For me, that was chatting. It feels so natural to share an insight with friends 
 
 Only this time, I was writing a message to a bot:
 
-<img>
+<img src="https://github.com/zakirullin/files.md/raw/main/web/bot.gif" alt="Telegram Bot" title="Telegram Bot"/>
 
 And it will save our message to an `.md` file nicely.  
 
