@@ -65,14 +65,6 @@ func TestExcludeSystemDirs(t *testing.T) {
 	r.Equal([]File{{Name: "not-a-system-dir"}}, noChecklists)
 }
 
-func TestExcludeTaskDirs(t *testing.T) {
-	r := require.New(t)
-
-	noChecklists := ExcludeTaskDirs([]File{{Name: "not-a-task-dir"}, {Name: "today"}, {Name: "later"}})
-
-	r.Equal([]File{{Name: "not-a-task-dir"}}, noChecklists)
-}
-
 func TestIsMultiline(t *testing.T) {
 	r := require.New(t)
 
@@ -171,7 +163,7 @@ func TestExcludeEverythingButUserDirs(t *testing.T) {
 	entries, err := fs.FilesAndDirs("/")
 	r.NoError(err)
 
-	dirs := OnlyDirs(ExcludeTaskDirs(ExcludeSystemDirs(entries)))
+	dirs := OnlyDirs(ExcludeSystemDirs(entries))
 	r.Len(dirs, 1)
 	r.Equal("dir", dirs[0].Name)
 }

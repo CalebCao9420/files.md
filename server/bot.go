@@ -143,7 +143,6 @@ const (
 	CmdComplete                        = "c"
 	CmdCompleteFromInbox               = "c_ch"
 	CmdPostpone                        = "post"
-	CmdShowMultilineTask               = "task"
 	CmdShowLongItem                    = "item"
 	CmdShowLongItemFromInbox           = "item_i"
 	CmdShowFile                        = "file"
@@ -351,7 +350,6 @@ func (b *Bot) handlers() map[string]func([]string) error {
 		CmdDownload:            b.download,
 		// Button's commands (callbacks)
 		CmdShowRenameFile:                  b.showRenameFile,
-		CmdShowMultilineTask:               b.showMultilineTask,
 		CmdShowLongItem:                    b.showLongItem,
 		CmdShowLongItemFromInbox:           b.showLongItemFromInbox,
 		CmdShowFile:                        b.showFile,
@@ -1169,25 +1167,7 @@ func (b *Bot) ShowToday(_ []string) error {
 }
 
 func (b *Bot) showLaterTasks(_ []string) error {
-	files, err := b.fs.FilesAndDirs(fs.DirLater)
-	if err != nil {
-		return fmt.Errorf("show list: can't get files in %s dir: %w", fs.DirLater, err)
-	}
-
 	var kb tg.Keyboard
-	for _, file := range files {
-		var btn tg.Btn
-		name := i18n.AddEmoji(fs.UnsanitizeFilename(file.DisplayName))
-		if file.IsMultiline {
-			cmd := tg.NewCmd(CmdShowMultilineTask, []string{fs.DirLater, fs.Hash(file.Name)})
-			btn = tg.NewBtn(txt.Emoji(i18n.Emoji("eyes"), fs.UnsanitizeFilename(file.DisplayName)), cmd)
-		} else {
-			cmd := tg.NewCmd(CmdComplete, []string{fs.DirLater, fs.Hash(file.Name)})
-			btn = tg.NewBtn(name, cmd)
-		}
-
-		kb.AddRow(btn)
-	}
 
 	// Adding tasks from Later.md
 	laterChecklistMD, err := b.fs.Read(fs.DirUserRoot, fs.LaterFilename)
@@ -1640,58 +1620,6 @@ func (b *Bot) showWatch(_ []string) error {
 
 func (b *Bot) showShop(_ []string) error {
 	return b.showChecklist([]string{fs.Hash(fs.ShopFilename)})
-}
-
-// TODO today.md
-func (b *Bot) showMultilineTask(params []string) error {
-	dir := params[0]
-	filenameHash := params[1]
-
-	filename, err := b.fs.Unhash(dir, filenameHash)
-	if err != nil {
-		return fmt.Errorf("show task: %w", err)
-	}
-
-	content, err := b.fs.Read(dir, filename)
-	if err != nil {
-		return fmt.Errorf("show task: %w", err)
-	}
-
-	var moveToLaterBtn tg.Btn
-	btnLabel := i18n.StrMoveToLaterLong
-	toDir := fs.DirLater
-	if dir == fs.DirLater {
-		btnLabel = i18n.StrToToday
-		toDir = fs.DirToday
-	}
-	moveToLaterBtn = tg.NewBtn(btnLabel, tg.NewCmd(CmdMoveToExistingDirFromToday, []string{toDir, dir, filenameHash}))
-
-	moveBtn := tg.NewBtn(
-		txt.Emoji(i18n.Emoji("right arrow"), b.tr("Move to")),
-		tg.NewCmd(CmdShowMoveToFromToday, []string{filenameHash}),
-	)
-
-	kb := tg.NewKeyboard([]tg.Row{
-		tg.NewRow(moveToLaterBtn, moveBtn),
-		tg.NewRow(
-			tg.NewBtn(i18n.StrBack, tg.NewCmd(dir, []string{dir})),
-			tg.NewBtn(i18n.StrComplete, tg.NewCmd(CmdComplete, []string{dir, filenameHash})),
-		),
-	})
-
-	md := fmt.Sprintf("**%s**\n%s", fs.DisplayName(filename), content)
-	err = b.showMD(md, kb)
-	if err != nil {
-		return fmt.Errorf("show task: %w", err)
-	}
-
-	msgID, hasLastKeyboard := b.db.LastKeyboardMsgID()
-	if hasLastKeyboard {
-		b.db.SetRecentFilenameByMsgID(msgID, filename)
-		b.db.SetRecentDirByMsgID(msgID, dir)
-	}
-
-	return nil
 }
 
 // TODO today.md move to today/later

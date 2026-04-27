@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/zakirullin/files.md/server/config"
+	"github.com/zakirullin/files.md/server/fs"
 	"github.com/zakirullin/files.md/server/i18n"
 	"github.com/zakirullin/files.md/server/pkg/tg"
 	"github.com/zakirullin/files.md/server/pkg/txt"
@@ -193,6 +194,10 @@ func (b *Bot) addToQuickBtns(params []string) error {
 
 	if !found {
 		return fmt.Errorf("unknown command: %s", cmd)
+	}
+
+	if cmd == "Habits" {
+		b.fs.CreateDirsIfNotExist(fs.DirHabits, fs.DirInsights)
 	}
 
 	err := b.cfg.AddQuickCmd(cmd)

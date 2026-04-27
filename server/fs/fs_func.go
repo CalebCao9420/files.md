@@ -98,19 +98,6 @@ func ExcludeSystemDirs(dirs []File) []File {
 	return newDirs
 }
 
-func ExcludeTaskDirs(dirs []File) []File {
-	var newDirs []File
-	for _, dir := range dirs {
-		if slices.Contains([]string{DirToday, DirLater}, dir.Name) {
-			continue
-		}
-
-		newDirs = append(newDirs, dir)
-	}
-
-	return newDirs
-}
-
 func ExcludeConfig(files []File) []File {
 	var newFiles []File
 	for _, file := range files {
@@ -125,7 +112,7 @@ func ExcludeConfig(files []File) []File {
 }
 
 func OnlyNoteDirs(dirs []File) []File {
-	return ExcludeSystemDirs(ExcludeTaskDirs(ExcludeChecklists(dirs)))
+	return ExcludeSystemDirs(ExcludeChecklists(dirs))
 }
 
 func OnlyChecklists(dirs []File) []File {
