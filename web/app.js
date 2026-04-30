@@ -71,7 +71,7 @@ async function init() {
             document.getElementById('open-folder').style.display = 'inline';
             // TODO maybe ask user to check "Allow on every visit" on left part of the sidebar
             await removeSavedRootDirHandle();
-            alert('Can\'t access folder.\n\nPlease, open folder again and check "Allow on every visit" checkbox');
+            alert('Can\'t access folder.\n\nPlease, reopen the folder again and check "Allow on every visit" checkbox');
         }
     }
 

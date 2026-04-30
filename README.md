@@ -81,6 +81,7 @@ Open `today`, type in a note:
 <div align="center">
     <img src="https://github.com/zakirullin/files.md/raw/main/web/img/note1.png" alt="Taking notes" title="Taking notes" width="350"/>
 </div>
+
 Press `Enter`.  
 Then hover over the note (can be done later):  
 <div align="center">
