@@ -673,33 +673,78 @@ func TestSaveFromReplyPhotoWithCaption(t *testing.T) {
 //	r.Equal("First task.md", laterTasks[0].Name)
 //}
 
-func TestCompleteTask(t *testing.T) {
+func completeTask(t *testing.T, initial, hashed string) string {
+	t.Helper()
+
 	savedNow := now
-	defer func() {
-		now = savedNow
-	}()
+	t.Cleanup(func() { now = savedNow })
 	now = func() time.Time {
 		return time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC)
 	}
 
 	r := require.New(t)
-
 	userFS, err := fs.NewFS("/", afero.NewMemMapFs())
 	r.NoError(err)
+	r.NoError(userFS.Write("/", "Today.md", initial))
 
-	err = userFS.Write("/", "Today.md", "- [ ] `00:00` New task")
+	bot := NewBot(-1, tg.NewFakeTG(), userFS, db.NewFakeDB(), fakeConfig())
+	r.NoError(bot.Reply(tg.NewUpdCmd(-1, tg.NewCmd("c", []string{todayBlockHash(hashed)}))))
+
+	got, err := userFS.Read("/", "Today.md")
 	r.NoError(err)
+	return got
+}
 
-	tgram := tg.NewFakeTG()
+func TestCompleteTask_Incomplete_NoTimestamp_NoHeader(t *testing.T) {
+	got := completeTask(t, "- [ ] New task", "- [ ] New task")
+	require.Equal(t, "- [x] New task", got)
+}
 
-	bot := NewBot(-1, tgram, userFS, db.NewFakeDB(), fakeConfig())
-	err = bot.Reply(tg.NewUpdCmd(-1, tg.NewCmd("c", []string{"58d765d4752"})))
-	r.NoError(err)
+func TestCompleteTask_Incomplete_WithTimestamp_NoHeader(t *testing.T) {
+	got := completeTask(t, "- [ ] `00:00` New task", "- [ ] `00:00` New task")
+	require.Equal(t, "- [x] `00:00` New task", got)
+}
 
-	todayMD, err := userFS.Read("/", "Today.md")
-	r.NoError(err)
+func TestCompleteTask_Incomplete_NoTimestamp_WithHeader(t *testing.T) {
+	got := completeTask(t,
+		"#### 1 January, Thursday\n- [ ] New task",
+		"- [ ] New task",
+	)
+	require.Equal(t, "#### 1 January, Thursday\n- [x] New task", got)
+}
 
-	r.Equal("- [x] `00:00` New task", todayMD)
+func TestCompleteTask_Incomplete_WithTimestamp_WithHeader(t *testing.T) {
+	got := completeTask(t,
+		"#### 1 January, Thursday\n- [ ] `09:30` New task",
+		"- [ ] `09:30` New task",
+	)
+	require.Equal(t, "#### 1 January, Thursday\n- [x] `09:30` New task", got)
+}
+
+func TestCompleteTask_Completed_NoTimestamp_NoHeader(t *testing.T) {
+	got := completeTask(t, "- [x] Done task", "- [x] Done task")
+	require.Equal(t, "- [ ] Done task", got)
+}
+
+func TestCompleteTask_Completed_WithTimestamp_NoHeader(t *testing.T) {
+	got := completeTask(t, "- [x] `00:00` Done task", "- [x] `00:00` Done task")
+	require.Equal(t, "- [ ] `00:00` Done task", got)
+}
+
+func TestCompleteTask_Completed_NoTimestamp_WithHeader(t *testing.T) {
+	got := completeTask(t,
+		"#### 1 January, Thursday\n- [x] Done task",
+		"- [x] Done task",
+	)
+	require.Equal(t, "#### 1 January, Thursday\n- [ ] Done task", got)
+}
+
+func TestCompleteTask_Completed_WithTimestamp_WithHeader(t *testing.T) {
+	got := completeTask(t,
+		"#### 1 January, Thursday\n- [x] `09:30` Done task",
+		"- [x] `09:30` Done task",
+	)
+	require.Equal(t, "#### 1 January, Thursday\n- [ ] `09:30` Done task", got)
 }
 
 func TestToday(t *testing.T) {
