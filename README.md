@@ -53,8 +53,9 @@ Open a folder to store your files locally.
 3) Open the link in your Chrome browser
 4) Done! The app and the bot are synchronized now 
 
-## Are there enough features and plugins?
-Enough to do the real work.  
+## A real-world example
+**Q**: Are there enough features and plugins?  
+**A**: Enough to do the real work.  
 
 1) I used [files.md](https://files.md) to grow my knowledge about brain and software development
 2) I added new notes to either `brain` or `dev` folders. One idea per note
@@ -79,7 +80,7 @@ Leonardo da Vinci, Charles Darwin, Jules Verne and many others took notes using 
 You don't need to learn anything new to start taking notes.    
 We'll reuse a well familiar pattern: chatting with friends.  
 
-Only this time, we are going to messages to the bot:
+Only this time, we are going to messages to the bot (or to the web app):
 
 <div align="center">
     <img src="https://github.com/zakirullin/files.md/raw/main/web/img/bot.gif" alt="Telegram Bot" title="Telegram Bot" width="350"/>
@@ -138,10 +139,10 @@ Use your brain to think through the notes. Apply and experience the knowledge.
 **Harm caused at the emotional level must be healed at the emotional level.**  
 
 Not through intellectual work and taking notes.  
-No amount of self-help books can heal emotional wounds.  
 Reading without action is entertainment. A form of procrastination.  
+No amount of self-help books can heal emotional wounds.  
 What can help is psychotherapy, rescripting and chair work. Meditation.  
-**Healing happens by feeling.**    
+**Healing happens by feeling.**  
 
 Notes and intellectual work can actually prevent healing, see below.  
 
