@@ -207,7 +207,7 @@ You drop a message and continue being in the flow.
 No energy is spent, no flow is interrupted.   
 Your to-do list shouldn't create a feeling of guilt, it should instead free your mind.   
 
-## Journaling 💚
+## Journal 💚
 Are you feeling good about something? Send a message.  
 Hover over a bubble and press "To Journal".  
 
