@@ -56,18 +56,18 @@ Open a folder to store your files locally.
 ## How to take notes 🗒️
 Leonardo da Vinci, Charles Darwin, Jules Verne and many others took notes using just pen and paper.
 
-You don't need to learn anything new to start taking notes.    
-We'll reuse a well familiar pattern: chatting with friends.  
+You don't need to learn anything new to start taking notes.   
+We'll use a pattern that you know already: chatting with friends.  
 
-Only this time, we are going to messages to the bot (or to the web app):
+Only this time, we are going to messages to the bot (or to the web app):  
 
 <div align="center">
     <img src="https://github.com/zakirullin/files.md/raw/main/web/img/bot.gif" alt="Telegram Bot" title="Telegram Bot" width="350"/>
 </div>
 
-That's it, the `.md` note is saved in the `brain` directory.
+That's it, the `.md` note is saved in the `brain` directory.  
 
-Later you can open [app.files.md](https://app.files.md) and make some connections between new and old notes.
+Later you can open [app.files.md](https://app.files.md) and make some connections between new and old notes.  
 
 - You can start with no structure at all, 0 folders
 - One idea per note
@@ -80,6 +80,18 @@ That's all you need to take notes.
 My friends and I have been using this setup for five years and it works well.
 
 Telegram bot: [@FilesMDBot](https://t.me/FilesMDBot) (other messengers will follow).
+
+## Taking notes in the web app
+Type in a note:
+<div align="center">
+    <img src="https://github.com/zakirullin/files.md/raw/main/web/img/note1.png" alt="Taking notes" title="Taking notes" width="350"/>
+</div>
+
+Press `Enter`. Then hover over the note (can be done later):
+<div align="center">
+    <img src="https://github.com/zakirullin/files.md/raw/main/web/img/note2.png" alt="Taking notes" title="Taking notes" width="350"/>
+</div>
+Click "To File", then select "brain" directory.  
 
 ## A real-world example
 1) I used [files.md](https://files.md) to grow my knowledge about brain and software development
@@ -100,18 +112,6 @@ All this activity helped me to:
 Are there enough features and plugins?  
 Enough to do the real work.  
 To achieve all that, **you'll have to use your brain**, not advanced templates or AI workflows.
-
-## Taking notes in the web app
-Open `today`, type in a note:
-<div align="center">
-    <img src="https://github.com/zakirullin/files.md/raw/main/web/img/note1.png" alt="Taking notes" title="Taking notes" width="350"/>
-</div>
-
-Press `Enter`. Then hover over the note (can be done later):  
-<div align="center">
-    <img src="https://github.com/zakirullin/files.md/raw/main/web/img/note2.png" alt="Taking notes" title="Taking notes" width="350"/>
-</div>
-Click "To File", then select "brain" directory.  
 
 ## Second Brain? 🧠
 I'll quote [I Deleted My Second Brain](https://www.joanwestenberg.com/i-deleted-my-second-brain-692aa40d59d5f06dd5131e43/):
