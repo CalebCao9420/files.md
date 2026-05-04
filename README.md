@@ -213,7 +213,12 @@ You drop a message and continue being in the flow.
 </div>
 
 No energy is spent, no flow is interrupted.   
-Your to-do list shouldn't create a feeling of guilt, it should instead free your mind.   
+
+Add only small, actionable items.  
+Not things like `Plan a vacation`.  
+Add the first tiny step of what should be done anyway.     
+Not what you wish to be done, but don't have motivation yet.  
+**Your tasks should not create a feeling of guilt**.  
 
 ## Journal 💚
 Are you feeling good about something? Send a message.  
