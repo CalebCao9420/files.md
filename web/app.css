@@ -97,7 +97,9 @@ body {
 #open-folder {
     align-items: center;
     gap: 8px;
-    margin: 8px;
+    /* left margin compensates for #sidebar's 5px padding-left so all four
+       gaps look equal (top/right/bottom = 8px, left = 3 + 5 = 8). */
+    margin: 8px 8px 8px 3px;
     padding: 10px 12px;
     background: var(--col-bg);
     border: 1px solid var(--col-border);
