@@ -196,8 +196,8 @@ const WELCOME_FILES = {
     },
     "🪴 Welcome.md": {
         "content":
-            "Open [chat](cmd:openChat) to dump whatever's on your mind.\n\n" +
             "Select local [folder](cmd:openDir) to persist files.\n\n" +
+            "Open [chat](cmd:openChat) to dump whatever's on your mind.\n\n" +
             "[Markdown Guide](/Markdown%20Guide.md)\n[Hotkeys](/Hotkeys.md)\n[Links](/Links.md)",
         isFile: true,
     },

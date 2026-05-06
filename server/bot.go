@@ -1663,6 +1663,7 @@ func (b *Bot) showChecklist(params []string) error {
 }
 
 func (b *Bot) showStart(params []string) error {
+	// For now it is not used
 	if len(params) > 0 {
 		mode := strings.ToLower(params[0])
 		if mode == "notes" {
@@ -1675,6 +1676,9 @@ func (b *Bot) showStart(params []string) error {
 			return b.setFullMode(nil)
 		}
 	}
+
+	// We can tolerate an error.
+	_ = b.setFullMode(nil)
 
 	_, err := b.tg.Send(b.userID, "Welcome! 👋\n\n<b>Send me anything, and I’ll save it to files!</b>\n\nClick /app to connect the web app.\n\nBy default <b>Full Mode</b> is enabled, which can feel a bit overwhelming. You can switch to <b>Notes Only</b> or <b>Tasks Only</b> mode in /settings menu.", nil, tg.MarkupHTML)
 
