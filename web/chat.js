@@ -16,6 +16,15 @@ chatInput.addEventListener('input', autoResize);
 // Initial resize to set proper height
 autoResize();
 
+chat.addEventListener('mouseover', function (e) {
+    const message = e.target.closest('.message');
+    if (!message) return;
+    const shown = chat.querySelector('.message.actions-shown');
+    if (shown && shown !== message) {
+        shown.classList.remove('actions-shown');
+    }
+});
+
 async function sendToChat() {
     const text = chatInput.value.trim();
     if (!text) return;
@@ -39,6 +48,10 @@ async function sendToChat() {
     chatInput.value = '';
     chatIsClean = false;
     await renderMessages();
+    const allMessages = chat.querySelectorAll('.message');
+    if (allMessages.length > 0) {
+        allMessages[allMessages.length - 1].classList.add('actions-shown');
+    }
     scrollToBottom();
 }
 

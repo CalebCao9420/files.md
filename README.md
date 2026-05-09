@@ -15,16 +15,17 @@ All in plain `.md` files, local-first. LLM-friendly.
 Chatbot for access from anywhere.  
 
 Try it out: [app.files.md](https://app.files.md).
+Telegram bot: [@FilesMDBot](https://t.me/FilesMDBot) 
 
-## Taking notes is extremely simple
-Open the chat, write a note and press `Enter`.
+## Saving things is simple 
+Open the chat, write something and press `Enter`:
 
 <div align="center">
-    <img src="https://github.com/zakirullin/files.md/raw/main/web/img/note1.png" alt="Taking notes" title="Taking notes" width="350"/>
+    <img src="https://github.com/zakirullin/files.md/raw/main/web/img/bot.gif" alt="Saving things in bot" title="Saving things in bot" width="350"/>
 </div>
 
-That's it. Nothing to learn or setup.  
-Later you can hover the note to move it to any folder.  
+Optionally, choose a folder.  
+That's it. 
 
 ## Another note-taking app?
 Maybe. But this time: 
@@ -57,28 +58,18 @@ Maybe. But this time:
 
 Pin the bot in your contact list, so that it is easily accessible.  
 
-## How to take notes 🗒️
-Send a message to the chat:  
+**Other messengers will follow**.   
 
+## Taking notes in the web app
+Open the chat and send a message:    
 <div align="center">
-    <img src="https://github.com/zakirullin/files.md/raw/main/web/img/bot.gif" alt="Telegram Bot" title="Telegram Bot" width="350"/>
+    <img src="https://github.com/zakirullin/files.md/raw/main/web/img/note1.png" alt="Telegram Bot" title="Telegram Bot" width="350"/>
 </div>
 
-The note is saved in the `brain` directory.  
+Move it anywhere later.  
+With this flow you can save anything.  
 
-Later you can open [app.files.md](https://app.files.md) and make connections between notes.  
-
-- You can start with no structure at all, 0 folders
-- One idea per note
-- A note should be understood without context
-- Related notes should be linked between each other
-- **Notes should be revisited and thought through**
-
-My friends and I have been using this setup for five years, and it works well.
-
-Telegram bot: [@FilesMDBot](https://t.me/FilesMDBot) (other messengers will follow).
-
-## A real-world example
+## How to take notes
 1) I used [files.md](https://files.md) to grow my knowledge about brain and software development
 2) I added new notes to either `brain` or `dev` folders. One idea per note
 3) I made connections between the notes. Everything is connected, just as in our brain
@@ -94,6 +85,14 @@ All this activity helped me to:
 - **Write insightful texts**
 
 To achieve all that, **you'll have to use your brain**, not advanced templates or AI workflows.
+
+- You can start with no structure at all, 0 folders
+- One idea per note
+- A note should be understood without context
+- Related notes should be linked between each other
+- **Notes should be revisited and thought through**
+
+My friends and I have been using this setup for five years, and it works well.
 
 ## Second Brain?
 I'll quote [I Deleted My Second Brain](https://www.joanwestenberg.com/i-deleted-my-second-brain-692aa40d59d5f06dd5131e43/):
