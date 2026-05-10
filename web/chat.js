@@ -5,7 +5,7 @@ const chatInput = document.getElementById('inbox-input');
 const chatContainer = document.getElementById('inbox-container');
 
 const MAX_TITLE_LENGTH = 100;
-const RECENT_FILES = 2;
+const RECENT_FILES = 1;
 
 // Cache of the last Inbox.md content we rendered from. renderMessages skips
 // work when the file's content hasn't changed.
