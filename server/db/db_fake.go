@@ -7,8 +7,7 @@ import (
 // FakeDB is a fake database, used for testing
 // We don't have to clear it after each test
 type FakeDB struct {
-	DirByMessageID      string
-	FilenameByMessageID string
+	HashOrPathByMID     string
 	InputExpectationCMD *tg.Cmd
 	LastKeyboardMID     int
 	RecentCMD           string
@@ -61,6 +60,14 @@ func (db *FakeDB) DirByMsgID(msgID int) (string, bool) {
 
 func (db *FakeDB) SetRecentDirByMsgID(msgID int, filename string) {
 	db.DirByMessageID = filename
+}
+
+func (db *FakeDB) ChatMsgHashByMsgID(msgID int) (string, bool) {
+	return db.ChatMsgHashByMID, db.ChatMsgHashByMID != ""
+}
+
+func (db *FakeDB) SetChatMsgHashByMsgID(msgID int, msgHash string) {
+	db.ChatMsgHashByMID = msgHash
 }
 
 func (db *FakeDB) RecentCommand() (string, bool) {

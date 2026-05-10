@@ -12,8 +12,7 @@ import (
 
 // In-memory database
 var (
-	filenameByMsgID       sync.Map
-	dirByMsgID            sync.Map
+	hashOrPathByMsgID     sync.Map
 	inputExpectations     sync.Map
 	recentCommands        sync.Map
 	recentCommandsTargets sync.Map
@@ -70,30 +69,19 @@ func (db *DB) DelInputExpectation() {
 	inputExpectations.Delete(inputExpectationKey(db.UserID))
 }
 
-func (db *DB) FilenameByMsgID(msgID int) (string, bool) {
-	filename, ok := filenameByMsgID.Load(filenameByMsgIDKey(db.UserID, msgID))
+// HashOrPathByMsgID returns the target the bot rendered for this msgID -
+// either a chat-block hash or an absolute file path. Callers distinguish
+// the two by the leading "/" (paths) vs no slash (hash).
+func (db *DB) HashOrPathByMsgID(msgID int) (string, bool) {
+	v, ok := hashOrPathByMsgID.Load(hashOrPathByMsgIDKey(db.UserID, msgID))
 	if !ok {
 		return "", false
 	}
-
-	return filename.(string), true
+	return v.(string), true
 }
 
-func (db *DB) DirByMsgID(msgID int) (string, bool) {
-	filename, ok := dirByMsgID.Load(dirByMsgIDKey(db.UserID, msgID))
-	if !ok {
-		return "", false
-	}
-
-	return filename.(string), true
-}
-
-func (db *DB) SetRecentFilenameByMsgID(msgID int, filename string) {
-	filenameByMsgID.Store(filenameByMsgIDKey(db.UserID, msgID), filename)
-}
-
-func (db *DB) SetRecentDirByMsgID(msgID int, filename string) {
-	dirByMsgID.Store(dirByMsgIDKey(db.UserID, msgID), filename)
+func (db *DB) SetHashOrPathByMsgID(msgID int, value string) {
+	hashOrPathByMsgID.Store(hashOrPathByMsgIDKey(db.UserID, msgID), value)
 }
 
 func (db *DB) RecentCommand() (string, bool) {
@@ -156,12 +144,8 @@ func inputExpectationKey(userID int64) string {
 	return fmt.Sprintf("%d:inputExpectations", userID)
 }
 
-func dirByMsgIDKey(userID int64, msgID int) string {
-	return fmt.Sprintf("%d:dirByMsgID:%d", userID, msgID)
-}
-
-func filenameByMsgIDKey(userID int64, msgID int) string {
-	return fmt.Sprintf("%d:filenameByMsgID:%d", userID, msgID)
+func hashOrPathByMsgIDKey(userID int64, msgID int) string {
+	return fmt.Sprintf("%d:hashOrPathByMsgID:%d", userID, msgID)
 }
 
 func tmpFilePath(userID int64, name string) string {

@@ -91,6 +91,34 @@ func renameChatMsg(content, msgHash, newBody string) (string, error) {
 	return strings.Join(blocks, "\n"), nil
 }
 
+// appendToChatMsg appends newText to the chat block identified by msgHash,
+// preserving the marker/timestamp prefix. The appended text becomes a new
+// indented continuation line under the original entry.
+func appendToChatMsg(content, msgHash, newText string) (string, error) {
+	blocks := readChatMsgs(content)
+	idx := -1
+	for i, block := range blocks {
+		if inboxHeaderRegex.MatchString(block) {
+			continue
+		}
+		if chatBlockHash(block) == msgHash {
+			idx = i
+			break
+		}
+	}
+	if idx == -1 {
+		return "", fmt.Errorf("chat block not found for hash %q", msgHash)
+	}
+
+	newText = strings.TrimRight(newText, "\n")
+	if newText == "" {
+		return content, nil
+	}
+	blocks[idx] = strings.TrimRight(blocks[idx], "\n") + "\n" + newText
+
+	return strings.Join(blocks, "\n"), nil
+}
+
 // appendToChat writes a new entry to Inbox.md and returns its stable hash.
 func (b *Bot) appendToChat(content string, timezone *time.Location) (string, error) {
 	exists, err := b.fs.Exists(fs.DirUserRoot, fs.ChatFilename)

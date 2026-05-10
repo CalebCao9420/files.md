@@ -105,6 +105,8 @@ type Database interface {
 	DirByMsgID(msgID int) (string, bool)
 	SetRecentFilenameByMsgID(msgID int, filename string)
 	SetRecentDirByMsgID(msgID int, filename string)
+	ChatMsgHashByMsgID(msgID int) (string, bool)
+	SetChatMsgHashByMsgID(msgID int, msgHash string)
 	RecentCommand() (string, bool)
 	SetRecentCommand(cmd string)
 	RecentCommandParams() ([]string, bool)
@@ -492,8 +494,11 @@ func (b *Bot) saveFromTextMsg(u Update) error {
 		}
 	}
 
-	// Adding to an existing file
+	// Adding to an existing file or chat item
 	if replyMsgID, ok := u.ReplyToMsgID(); ok {
+		if msgHash, ok := b.db.ChatMsgHashByMsgID(replyMsgID); ok {
+			return b.addToRepliedChatMsg(msgHash, msg)
+		}
 		return b.addToRepliedFile(replyMsgID, msg)
 	}
 
@@ -599,7 +604,26 @@ func (b *Bot) saveImage(u Update) (string, error) {
 	return content, nil
 }
 
-// TODO add chat.md support
+// addToRepliedChatMsg appends newContent to the chat block identified by
+// msgHash (i.e. a reply to a previously-rendered chat item appends to that
+// item rather than creating a new one).
+func (b *Bot) addToRepliedChatMsg(msgHash, newContent string) error {
+	chatMD, err := b.fs.Read(fs.DirUserRoot, fs.ChatFilename)
+	if err != nil {
+		return fmt.Errorf("add to chat msg: can't read chat: %w", err)
+	}
+	updated, err := appendToChatMsg(chatMD, msgHash, newContent)
+	if err != nil {
+		return fmt.Errorf("add to chat msg: %w", err)
+	}
+	if err := b.fs.Write(fs.DirUserRoot, fs.ChatFilename, updated); err != nil {
+		return fmt.Errorf("add to chat msg: can't write chat: %w", err)
+	}
+
+	b.delAllKeyboards()
+	return b.ShowHome(nil)
+}
+
 func (b *Bot) addToRepliedFile(replyToMsgID int, newContent string) error {
 	dir, _ := b.db.DirByMsgID(replyToMsgID)
 	existingFilename, ok := b.db.FilenameByMsgID(replyToMsgID)
@@ -1564,6 +1588,13 @@ func (b *Bot) showLongItem(params []string) error {
 
 	if err := b.showMD(block, kb); err != nil {
 		return fmt.Errorf("show long item from inbox: %w", err)
+	}
+
+	// Track msgID → msgHash so a user reply to this rendered chat item
+	// gets routed back to it via addToRepliedFile's chat-item branch.
+	msgID, hasLastKeyboard := b.db.LastKeyboardMsgID()
+	if hasLastKeyboard {
+		b.db.SetChatMsgHashByMsgID(msgID, msgHash)
 	}
 
 	return nil
