@@ -72,3 +72,16 @@ If you have non-ASCI character in filenames, disable quoting:
 
 Systemd journal:  
 `sudo journalctl -u filesmd`
+
+Find forbidden character in filenames (can be executed in user's storage folder):
+`find . -name '*[<>:"|\?*]*'`
+
+Remove forbidden filename characters:
+```bash
+find . -type f -name '*[<>:"|\?*]*' -print0 | while IFS= read -r -d '' f; do
+  dir=$(dirname "$f")
+  base=$(basename "$f")
+  newbase="${base//[<>:\"|\\?*]/}"
+  [ "$base" != "$newbase" ] && [ -n "$newbase" ] && mv -n -- "$f" "$dir/$newbase"
+done
+```

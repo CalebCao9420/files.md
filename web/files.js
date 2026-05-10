@@ -279,9 +279,7 @@ async function syncTextsWithServer() {
                 }
                 saveServerFiles();
             } catch (error) {
-                console.warn(`Error saving file ${path}:`, error);
-                // Don't treat malformed filenames as sync error.
-                log(error);
+                logError(`Error saving file ${path}:`, error);
                 if (!error.message.includes('Name is not allowed')) {
                     failedAtLeastOnce = true;
                 }
@@ -386,7 +384,7 @@ async function syncLocalFileWithServer(path) {
     }
 }
 
-async function syncMedia() {
+async function syncMediaFiles() {
     // We should have at least one 200 response from service.
     // The first 200 response we get from /token, meaning that
     // our application is linked to the server for sync.
@@ -470,9 +468,20 @@ async function syncMedia() {
 
             // Skip download if the file already exists locally - media
             // files are write-once (binary, not edited), so a local copy
-            // is byte-for-byte identical to the server's copy.
+            // is byte-for-byte identical to the server's copy. Mark the
+            // file as known to the server, otherwise collectNewMediaFiles
+            // would treat it as a fresh local file and upload it back.
             if (await exists(`media/${filename}`)) {
                 log(`Skipping media file (already exists): ${filename}`);
+                server['media'][filename] = {
+                    isFile: true,
+                    lastModified: lastModified,
+                };
+                // TODO quite fragile, one problematic image shouldn't break others
+                if (lastModified > (server['mediaTimestamp'] || 0)) {
+                    server['mediaTimestamp'] = lastModified;
+                }
+                saveServerFiles();
                 continue;
             }
             log(`Downloading media file: ${filename}`);

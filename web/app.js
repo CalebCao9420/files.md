@@ -110,7 +110,7 @@ async function init() {
     perf = performance.now();
     await syncTextsWithServer();
     await renderSidebar();
-    await syncMedia();
+    await syncMediaFiles();
     log(`Files initialized in: ${(performance.now() - perf).toFixed(3)} milliseconds`);
 
 }
@@ -817,7 +817,7 @@ window.addEventListener('focus', async () => {
     // TODO check if access granted
 
     // Sync media first, so that new images for current file would be loaded
-    await syncMedia();
+    await syncMediaFiles();
     await syncCurrentText();
 
     const start = performance.now();
@@ -844,7 +844,7 @@ window.addEventListener('blur', async function() {
     if (Object.keys(files).length === 0) {
         return;
     }
-    await syncMedia();
+    await syncMediaFiles();
     await syncCurrentText();
 
     const savedDirectoryHandle = await getRootDirHandle();
