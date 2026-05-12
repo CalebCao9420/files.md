@@ -227,7 +227,9 @@ const WELCOME_FILES = {
         "content": "Links are important\n" +
             "\n" +
             "Relations among ideas are far more important than the ideas themselves.\n" +
-            "Learning is making meaningful connections.\n\n[Markdown Guide](/Markdown%20Guide.md)",
+            "Learning is making meaningful connections.\n\n" +
+            "Type `[` to insert a new link.\n\n" +
+            "[Markdown Guide](/Markdown%20Guide.md)",
         isFile: true,
     },
     "Markdown Guide.md": {
@@ -275,14 +277,8 @@ const WELCOME_FILES = {
     },
     "Hotkeys.md": {
         "content":
-            "#### Editor Functions\n" +
-            "\n" +
             "| Hotkey | Action |\n" +
             "| -------- | -------- |\n" +
-            "| `[` | Insert a link to a file |\n" +
-            "\n" +
-            "| Hotkey | Action |\n" +
-            "| -------- |-------- |\n" +
             "| `Cmd+P` / `Ctrl+P` | Open file search modal |\n" +
             "| `Cmd+N` / `Ctrl+N` | New file |\n" +
             "| `Cmd+M` / `Ctrl+M` | Move file |\n" +
@@ -292,17 +288,13 @@ const WELCOME_FILES = {
             "| `Cmd+[` / `Ctrl+[`  | Go to previous file   |\n" +
             "| `Cmd+]` / `Ctrl+]`  | Go to next file  |\n" +
             "| `Cmd+~` / `Ctrl+~` | Toggle sidebar |\n" +
-            "\n" +
-            "#### Text Formatting\n" +
-            "\n" +
-            "| Hotkey | Action |\n" +
-            "| -------- | -------- |\n" +
             "| `Cmd+B` / `Ctrl+B` | Toggle **bold** formatting |\n" +
             "| `Cmd+I` / `Ctrl+I` | Toggle *italic* formatting |\n" +
-            "| `Cmd+Y` / `Ctrl+Y`| Insert ✅ checkbox at line start |\n" +
-            "| `Cmd` / `Ctrl`+`Click`| Copy text from `inline` element |\n" +
-            "| `Cmd` / `Ctrl`+`Click`| To open a link like https//files.md |\n" +
-            "| `Ctrl` + `Cmd` + `Space`| Insert emoji (MacOS) |\n" +
+            "| `Cmd+Y` / `Ctrl+Y` | Insert ✅ checkbox at line start |\n" +
+            "| `Cmd` / `Ctrl` + `Click` | Copy text from `inline` element |\n" +
+            "| `Cmd` / `Ctrl` + `Click` | Open a link like https//files.md |\n" +
+            "| `Ctrl` + `Cmd` + `Space` | Insert emoji (MacOS) |\n" +
+            "| `[` | Insert a link to a file |\n" +
             "\n" +
             "[Markdown Guide](/Markdown%20Guide.md)",
         isFile: true,
