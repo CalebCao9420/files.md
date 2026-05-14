@@ -19,15 +19,6 @@ Telegram bot: [@FilesMDBot](https://t.me/FilesMDBot)
 
 **Other messengers will follow**.  
 
-## Saving things is simple 
-Open the chat, write something and press `Enter`:
-
-<div align="center">
-    <img src="https://github.com/zakirullin/files.md/raw/main/web/img/bot.gif" alt="Saving things in bot" title="Saving things in bot" width="350"/>
-</div>
-
-That's it. 
-
 ## Another note-taking app?
 Maybe. But this time: 
 - Only necessary features, **restrictions foster creativity**
@@ -39,9 +30,9 @@ Maybe. But this time:
 - Portable, no build systems, just open `web/index.html` 
 - Out of the box synchronization
 - The server is just one binary (or use iCloud/Dropbox/Google Drive for sync)
-- Telegram bot for on-the-go access to your files
+- Telegram chatbot for on-the-go access to your files
 
-## Web Application
+## How to use
 - Open [app.files.md](https://app.files.md) in Chrome browser
 - Click "Install files.md" on the right side of the address bar:
 <div align="center">
@@ -51,15 +42,7 @@ Maybe. But this time:
 - Open a local folder to persist changes  
 - Occasionally hit force-refresh (`Cmd+Shift+R`) to get new updates.  
 
-## Telegram bot
-1) Open [@FilesMDBot](https://t.me/FilesMDBot)
-2) Execute the `/app` command
-3) Open the link in your Chrome browser
-4) Done! The app and the bot are synchronized now 
-
-Pin the bot in your contact list, so that it is easily accessible.  
-
-## Taking notes in the web app
+## Taking notes
 Open the chat and send a message:    
 <div align="center">
     <img src="https://github.com/zakirullin/files.md/raw/main/web/img/note1.png" alt="Telegram Bot" title="Telegram Bot" width="350"/>
