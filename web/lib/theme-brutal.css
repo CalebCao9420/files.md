@@ -272,6 +272,12 @@
     width: 4px !important;
 }
 
+/* Subtle blue-tinted wash behind quoted text - reinforces the left bar
+   without competing with the body text. */
+.cm-s-hypermd-light pre.HyperMD-quote-1 {
+    background: color-mix(in srgb, var(--color-neo-blue) 5%, var(--col-bg)) !important;
+}
+
 /* `>` marker in neo-blue. No !important so hypermd.css's
    `pre.hmd-inactive-line span.cm-formatting-quote { color: transparent }`
    still wins on inactive lines and keeps the arrow hidden until the
