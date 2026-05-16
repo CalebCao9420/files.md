@@ -277,6 +277,14 @@
     left: 1px;
 }
 
+/* Nudge the first line of an inactive quote a few px right so it doesn't
+   hug the blue bar. app.css uses text-indent: -10px to undo the hidden
+   `> ` width; bumping the inactive value to -5 reveals a small left gap
+   on the first line without touching wrap lines or the active state. */
+.cm-s-hypermd-light pre.HyperMD-quote-1.hmd-inactive-line {
+    text-indent: -5px !important;
+}
+
 /* Inline code: lime-green chip with bold mono text and a thin dark
    outline. Bigger padding now that the body has 1.9 line-height to
    accommodate the taller chip without breaking flow. */
