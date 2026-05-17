@@ -7,9 +7,9 @@ const chatContainer = document.getElementById('inbox-container');
 const MAX_TITLE_LENGTH = 100;
 const RECENT_FILES = 1;
 
-// Cache of the last Inbox.md content we rendered from. renderMessages skips
+// Cache of the last Chat.md content we rendered from. renderMessages skips
 // work when the file's content hasn't changed.
-let lastInboxText = null;
+let lastChatText = null;
 
 // Add event listener for input changes
 chatInput.addEventListener('input', autoResize);
@@ -232,7 +232,7 @@ async function saveMessagesToChat(messages) {
     });
 
     await write(CHAT_PATH, content);
-    lastInboxText = content;
+    lastChatText = content;
 }
 
 // Toggle the checkbox marker on a single inbox line in place.
@@ -264,7 +264,7 @@ async function toggleChatMessage(timestamp, text, done) {
     const writable = await handle.createWritable();
     await writable.write(content);
     await writable.close();
-    lastInboxText = content;
+    lastChatText = content;
 }
 
 function initChat() {
@@ -795,11 +795,11 @@ function attachEventListeners() {
 
 async function renderMessages() {
     const { messages, text } = await parseMessagesFromChat();
-    if (text === lastInboxText) {
+    if (text === lastChatText) {
         log('Inbox unchanged, skipping render');
         return;
     }
-    lastInboxText = text;
+    lastChatText = text;
     log(`Loaded ${messages.length} messages from ${CHAT_PATH}`);
 
     if (messages.length === 0) {
