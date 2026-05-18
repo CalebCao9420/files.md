@@ -139,8 +139,8 @@ And that's an issue - in the AI age, your first brain is as valuable as ever.
 Use **your brain** to think through the notes.
 
 Before adding a new note, try to answer these questions:  
-- How this new knowledge can sharpen your judgment or expand your taxonomy?  
-- How can you see the world differently, given this new knowledge?  
+- How this new knowledge can sharpen my judgment or expand my taxonomy?  
+- How can I see the world differently, given this new knowledge?  
 
 ## Notes can prevent experience
 - Reading and taking notes can easily fool us into believing that we understand a text
