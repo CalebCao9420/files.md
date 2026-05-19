@@ -183,7 +183,6 @@ Drop a message and stay in flow.
 
 <div align="center">
     <img src="https://github.com/zakirullin/files.md/raw/main/web/img/task.png" title="Adding a task" width="350"/>
-    <sub>Select where to save</sub>
 </div>
 
 Add only small, actionable items.  
@@ -196,11 +195,11 @@ For tasks that should be done later press "To Later".
 
 
 ## Checklists 🛒
-A friend recommends a book.  
-You're out of butter and cheese.  
+A friend recommends you a book.  
+You're out of butter and buns.  
 Small things like these drain mental energy.  
-Drop them in chat, then sort into matching checklists.
-You can save to notes, journal and checklists.
+
+Drop all that to chat, then move to a matching checklist.  
 
 ## Files structure
 You don't have to think about the structure, it is predefined.  
