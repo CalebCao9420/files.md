@@ -81,19 +81,30 @@
         var span = document.createElement("span");
         span.setAttribute("class", "hmd-fold-math math-" + (isDisplayMode ? 2 : 1));
         span.setAttribute("title", expression);
-        var mathPlaceholder = document.createElement("span");
-        mathPlaceholder.setAttribute("class", "hmd-fold-math-placeholder");
-        mathPlaceholder.textContent = expression;
-        span.appendChild(mathPlaceholder);
         if (DEBUG) {
             console.log("insert", p1, p2, expression);
+        }
+        // PATCHED: pre-render synchronously when the renderer is ready, so CodeMirror
+        // measures the final math height on first paint. Without this, the span is
+        // sized by the 1-line raw-text placeholder, then jumps to full math height
+        // once KaTeX fills it - visible as flicker when leaving the block.
+        var foldMathAddon = exports.getAddon(cm);
+        var mathRenderer = foldMathAddon.createRenderer(span, isDisplayMode ? "display" : "");
+        var mathPlaceholder = null;
+        var preRendered = false;
+        if (mathRenderer.isReady()) {
+            mathRenderer.startRender(expression);
+            preRendered = true;
+        } else {
+            mathPlaceholder = document.createElement("span");
+            mathPlaceholder.setAttribute("class", "hmd-fold-math-placeholder");
+            mathPlaceholder.textContent = expression;
+            span.appendChild(mathPlaceholder);
         }
         var marker = cm.markText(p1, p2, {
             replacedWith: span,
         });
         span.addEventListener("click", function () { return fold_1.breakMark(cm, marker, tokenLength); }, false);
-        var foldMathAddon = exports.getAddon(cm);
-        var mathRenderer = foldMathAddon.createRenderer(span, isDisplayMode ? "display" : "");
         mathRenderer.onChanged = function () {
             if (mathPlaceholder) {
                 span.removeChild(mathPlaceholder);
@@ -103,19 +114,21 @@
         };
         marker.on("clear", function () { mathRenderer.clear(); });
         marker["mathRenderer"] = mathRenderer;
-        core_1.tryToRun(function () {
-            if (DEBUG)
-                console.log("[MATH] Trying to render ", expression);
-            if (!mathRenderer.isReady())
-                return false;
-            mathRenderer.startRender(expression);
-            return true;
-        }, 5, function () {
-            marker.clear();
-            if (DEBUG) {
-                console.log("[MATH] engine always not ready. faild to render ", expression, p1);
-            }
-        });
+        if (!preRendered) {
+            core_1.tryToRun(function () {
+                if (DEBUG)
+                    console.log("[MATH] Trying to render ", expression);
+                if (!mathRenderer.isReady())
+                    return false;
+                mathRenderer.startRender(expression);
+                return true;
+            }, 5, function () {
+                marker.clear();
+                if (DEBUG) {
+                    console.log("[MATH] engine always not ready. faild to render ", expression, p1);
+                }
+            });
+        }
         return marker;
     }
     exports.insertMathMark = insertMathMark;
