@@ -224,7 +224,9 @@ async function newFile(parentDir) {
     editor.setCursor({ line: 1, ch: 0 });
     editor.focus();
 
-    if (dirPath !== '/') {
+    // Skip toast when parent was explicit (right-click → New file): the user
+    // already knows where they clicked. Also skip at root (path is obvious).
+    if (parentDir === undefined && dirPath !== '/') {
         const toastMsg = document.createElement('span');
         const folder = dirPath.replace(/^\//, '').replace(/\/$/, '');
         toastMsg.append('Created at ');
