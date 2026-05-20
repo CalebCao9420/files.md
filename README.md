@@ -13,7 +13,7 @@ You can store your whole life:
 
 All in plain `.md` files, local-first. LLM-friendly. **Private - no data is sent to server**.    
 
-> Own your data as local files.  
+> Own your data as plain local files.  
 > **Own the software that opens those files**.  
 > Grow your knowledge with your brain.  
 > Grow the software around it with an LLM.  
