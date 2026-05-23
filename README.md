@@ -13,13 +13,13 @@ You can store your whole life:
 
 All in plain `.md` files, local-first. LLM-friendly. **Private - no data is sent to server**.    
 
+Try it out: [app.files.md](https://app.files.md) (Beta). Main site: [files.md](https://files.md).  
+
 > Own your data as plain local files.  
 > Own the software that opens those files.  
 > Grow your knowledge with files and your own brain.  
 > Grow the software around it with an LLM.  
 > **Plain files and self-owned software can last through the ages**.  
- 
-Try it out: [app.files.md](https://app.files.md) (Beta). Main site: [files.md](https://files.md).
 
 **I have been building this project for 5 years**. Consider **[supporting on GitHub 💚](https://github.com/sponsors/zakirullin)**.  
 
