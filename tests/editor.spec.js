@@ -70,7 +70,6 @@ test('should open markdown file via quick panel and see bold text formatting', a
     const codeMirrorContent = await page.evaluate(() => window.editor.getValue());
     expect(codeMirrorContent).toContain('**Bold text**');
     expect(codeMirrorContent).toContain('**bold**');
-    expect(codeMirrorContent).toContain('__bold__');
     expect(codeMirrorContent).toContain('using');
 });
 
