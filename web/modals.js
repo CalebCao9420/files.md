@@ -2,7 +2,7 @@ class SearchModal {
     static RECENT_RESULTS = 15;
 
     constructor() {
-        this.selectedMsgText = null;
+        this.selectedMsgElement = null;
         this.focusedIndex = 0;
         this.init();
     }
@@ -185,9 +185,9 @@ class SearchModal {
         searchModal.showResults(results);
     }
 
-    open(text = '', selectedMsgText = null, buttonElement  = null) {
+    open(text = '', buttonElement = null, messageElement = null) {
         moveModal.close();
-        this.selectedMsgText = selectedMsgText;
+        this.selectedMsgElement = messageElement;
 
         let modal = document.getElementById('search');
         modal.style.display = 'flex';
@@ -200,7 +200,7 @@ class SearchModal {
         const goToFileResults = document.getElementById('search-results');
         goToFileResults.innerHTML = '';
 
-        if (text === '' && this.selectedMsgText === null) {
+        if (text === '' && this.selectedMsgElement === null) {
             this.showRecentFiles();
         } else if (text === '') {
             this.showRootFiles();
@@ -208,7 +208,7 @@ class SearchModal {
             this.search();
         }
 
-        if (buttonElement && this.selectedMsgText !== null) {
+        if (buttonElement && this.selectedMsgElement !== null) {
             const rect = buttonElement.getBoundingClientRect();
             const modalHeight = 300;
             const viewportHeight = window.innerHeight;
@@ -253,7 +253,7 @@ class SearchModal {
         // Drop the keep-actions-visible flag set by to-file-btn (today.js).
         document.querySelectorAll('.message.actions-pinned')
             .forEach(m => m.classList.remove('actions-pinned'));
-        this.selectedMsgText = null;
+        this.selectedMsgElement = null;
     }
 
     showResults(results) {
@@ -264,7 +264,7 @@ class SearchModal {
         // We can either move message to a dir (creating new file).
         // Or to an existing file, prepending text to a file.
         let dirCount = 0;
-        if (this.selectedMsgText !== null) {
+        if (this.selectedMsgElement !== null) {
             const searchVal = (document.getElementById('search-input').value || '').toLowerCase();
             const dirs = this.getDirs().filter(d => searchVal === '' || d.toLowerCase().includes(searchVal));
             dirs.forEach((dir) => {
@@ -287,7 +287,7 @@ class SearchModal {
             if (path === CONFIG_PATH) {
                 return;
             }
-            if (this.selectedMsgText !== null && path === CHAT_PATH) {
+            if (this.selectedMsgElement !== null && path === CHAT_PATH) {
                 return;
             }
 
@@ -329,7 +329,7 @@ class SearchModal {
     }
 
     async moveToDir(toDir) {
-        if (this.selectedMsgText === null) {
+        if (this.selectedMsgElement === null) {
             this.close();
             return;
         }
@@ -341,10 +341,8 @@ class SearchModal {
             msgs = Array.from(selectedMessages).map(m => m.querySelector('.message-content').textContent);
             messagesToRemove = selectedMessages;
         } else {
-            const message = Array.from(document.querySelectorAll('.message'))
-                .find(el => el.dataset.text === this.selectedMsgText);
-            msgs = [this.selectedMsgText];
-            messagesToRemove = [message];
+            msgs = [this.selectedMsgElement.querySelector('.message-content').textContent];
+            messagesToRemove = [this.selectedMsgElement];
         }
 
         const destinations = [];
@@ -378,7 +376,7 @@ class SearchModal {
     }
 
     async moveToFile(path) {
-        if (this.selectedMsgText !== null) {
+        if (this.selectedMsgElement !== null) {
             const selectedMessages = document.querySelectorAll('.message.selected');
 
             let msgs = [];
@@ -387,16 +385,10 @@ class SearchModal {
                 msgs = Array.from(selectedMessages).map(msg => msg.querySelector('.message-content').textContent);
                 messagesToRemove = selectedMessages;
             } else {
-                const message = Array.from(document.querySelectorAll('.message'))
-                    .find(el => el.dataset.text === this.selectedMsgText);
-                const btn = message?.querySelector('button').textContent;
-                msgs = [this.selectedMsgText];
-                messagesToRemove = [message];
+                msgs = [this.selectedMsgElement.querySelector('.message-content').textContent];
+                messagesToRemove = [this.selectedMsgElement];
             }
 
-            // Apply ucfirst here, after the lookup in messagesToRemove has used
-            // the raw text. Capitalising earlier would break the dataset.text
-            // match in the else branch above.
             let callback = async text => await addHeaderAndText(path, todayHeader(), ucfirst(text), true, false);
             for (const msg of msgs) {
                 await moveFromChat(msg, callback);

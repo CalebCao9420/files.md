@@ -309,3 +309,48 @@ test('move-to-file works for messages that start with a lowercase letter', async
     // write step, AFTER the DOM lookup, so it doesn't break find()).
     expect(content).toContain('Lowercase start');
 });
+
+// Regression: a chat message containing `"` used to crash to-file because
+// escapeHtml() left quotes unescaped, the `data-text="..."` attribute closed
+// early at the first `"`, and the modal's `dataset.text === selectedMsgText`
+// lookup returned undefined.
+test('move-to-file works for messages containing double quotes', async ({page}) => {
+    await page.evaluate(async () => {
+        const root = await navigator.storage.getDirectory();
+        const fh = await root.getFileHandle('Notes.md', {create: true});
+        const w = await fh.createWritable();
+        await w.write('# Notes');
+        await w.close();
+        window.getTemporaryStorageDirHandle = async () => navigator.storage.getDirectory();
+    });
+    await page.evaluate(() => init(document.getElementById('editor')));
+
+    await page.click(`#tree .tree-item:has-text('chat')`);
+    await page.waitForSelector('#chat');
+    const quoted = 'catches "file changed in vim." Without it';
+    await page.keyboard.type(quoted);
+    await page.waitForTimeout(300);
+    await page.keyboard.press('Enter');
+    await page.waitForSelector('.message');
+
+    const errors = [];
+    page.on('pageerror', err => errors.push(err.message));
+
+    await page.hover('.message');
+    await page.locator('.to-file-btn').first().click({force: true});
+    await page.waitForSelector('#search', {state: 'visible'});
+
+    await page.locator('#search-results li[data-path="/Notes.md"]').click();
+    await page.waitForSelector('.message', {state: 'detached'});
+
+    expect(errors).toEqual([]);
+
+    await page.click(`#tree .tree-item:has-text('Notes')`);
+    await page.waitForTimeout(200);
+    const content = await page.evaluate(() =>
+        document.querySelector('.CodeMirror').CodeMirror.getValue());
+    // ucfirst capitalises the first letter at the write step (see the
+    // lowercase-letter regression test above). What matters here is that
+    // the embedded quotes round-trip intact.
+    expect(content).toContain('Catches "file changed in vim." Without it');
+});

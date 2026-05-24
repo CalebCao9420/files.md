@@ -603,15 +603,11 @@ function attachEventListeners() {
                 searchModal.close();
             } else {
                 const message = btn.closest('.message');
-                // Pass the text as-is so it matches el.dataset.text on the
-                // modal side. Capitalisation, if needed, is applied later
-                // when the text is written to a file.
-                const text = message.querySelector('.message-content').textContent;
                 // Keep this message's action row visible while the picker is
                 // open - mouse leaves the bubble as soon as the modal grabs
                 // focus, otherwise the buttons fade out under the user.
                 message.classList.add('actions-pinned');
-                searchModal.open('', text, e.target);
+                searchModal.open('', e.target, message);
             }
         });
     });
