@@ -301,9 +301,9 @@
 
 .cm-s-hypermd-light span.cm-inline-code:not(.cm-formatting):not(.cm-hmd-indented-code) {
     font-family: var(--font-mono-brutal) !important;
-    background: transparent !important;
-    color: #42A92C !important;
-    border: 1px solid color-mix(in srgb, var(--col-border), transparent 75%) !important;
+    background: #EFEFEF !important;
+    color: #C01343 !important;
+    border: 1px solid #D4D4D4 !important;
     border-radius: 4px !important;
     padding: 0.1em 0.4em !important;
     font-size: 0.9em !important;
@@ -335,7 +335,7 @@
 
 .cm-hmd-comment,
 .cm-hmd-comment-marker {
-    color: #42A92C !important;
+    color: var(--color-neo-orange) !important;
 }
 .cm-s-hypermd-light pre.hmd-inactive-line .cm-hmd-comment-marker {
     display: none;
