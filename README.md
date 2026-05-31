@@ -71,6 +71,8 @@ Choose where to save (can do later):
     <img src="https://github.com/zakirullin/files.md/raw/main/web/img/app.png" alt="Files.md screenshot" title="Files.md" width="700"/>
 </div>
 
+Everything can be synchronized with the chatbot.
+
 ## Chatbot
 Open the chat, write something and press `Enter`:
 
