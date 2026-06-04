@@ -30,6 +30,15 @@ function initEditor(el) {
         extraKeys: {
             // 'Shift-Space': 'autocomplete',
             'Cmd-[': false, 'Cmd-]': false,
+            // Mac's default delWrappedLineLeft is a no-op at column 0, so
+            // Cmd-Backspace gets stuck at the line start instead of joining
+            // with the previous line. Fall back to delCharBefore there.
+            'Cmd-Backspace': cm => {
+                if (cm.somethingSelected() || cm.getCursor().ch > 0) {
+                    return CodeMirror.Pass;
+                }
+                cm.execCommand('delCharBefore');
+            },
         },
         hintOptions: {
             hint: CompleteEmoji.createHintFunc(),
