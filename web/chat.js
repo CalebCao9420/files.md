@@ -129,7 +129,14 @@ async function toggleMicRecording() {
         chatMediaRecorder = null;
 
         const ext = getImageExtension(recordedType.split(';')[0]);
-        const fileName = `chat-${new Date().toISOString().replace(/[:.]/g, '-')}.${ext}`;
+        const now = new Date();
+        const dd = String(now.getDate()).padStart(2, '0');
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const yyyy = now.getFullYear();
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mi = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+        const fileName = `${dd}.${mm}.${yyyy} ${hh}h${mi}m${ss}s.${ext}`;
 
         try {
             const fileHandle = await writeMediaFile(fileName, blob);
@@ -395,10 +402,27 @@ function scrollToBottom() {
     }, 100);
 }
 
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// Swap media markdown (![](media/file.ext)) for an emoji + bare filename
+// in chat-message display. Original text stays in `data-text` so the
+// move/journal/archive actions still operate on the real markdown.
+function prettifyMediaTags(text) {
+    return text.replace(/!\[[^\]]*\]\(([^)]+)\)/g, (_, path) => {
+        const filename = path.split('/').pop();
+        const ext = filename.split('.').pop().toLowerCase();
+        const emoji = /^(mp3|ogg|oga|weba|wav)$/.test(ext) ? '🎵'
+            : /^(mp4|webm|mov)$/.test(ext) ? '🎬'
+            : '🖼️';
+        return `${emoji} ${filename}`;
+    });
 }
 
 function autoResize() {
@@ -731,10 +755,10 @@ function attachEventListeners() {
             let msgs = [];
             let messagesToRemove = [];
             if (selectedMessages.length > 0) {
-                msgs = Array.from(selectedMessages).map(msg => msg.querySelector('.message').textContent);
+                msgs = Array.from(selectedMessages).map(msg => msg.querySelector('.message-content').dataset.text);
                 messagesToRemove = selectedMessages;
             } else {
-                msgs = [btn.closest('.message').querySelector('.message-content').textContent];
+                msgs = [btn.closest('.message').querySelector('.message-content').dataset.text];
                 messagesToRemove = [btn.closest('.message')];
             }
 
@@ -770,7 +794,7 @@ function attachEventListeners() {
             let msgs = [];
             let messagesToRemove = [];
             if (selectedMessages.length > 0) {
-                msgs = Array.from(selectedMessages).map(msg => msg.querySelector('.message').textContent);
+                msgs = Array.from(selectedMessages).map(msg => msg.querySelector('.message-content').dataset.text);
                 messagesToRemove = selectedMessages;
             } else {
                 msgs = [btn.closest('.message').dataset.text];
@@ -815,10 +839,10 @@ function attachEventListeners() {
             let msgs = [];
             let messagesToRemove = [];
             if (selectedMessages.length > 0) {
-                msgs = Array.from(selectedMessages).map(msg => msg.querySelector('.message-content').textContent);
+                msgs = Array.from(selectedMessages).map(msg => msg.querySelector('.message-content').dataset.text);
                 messagesToRemove = selectedMessages;
             } else {
-                msgs = [btn.closest('.message').querySelector('.message-content').textContent];
+                msgs = [btn.closest('.message').querySelector('.message-content').dataset.text];
                 messagesToRemove = [btn.closest('.message')];
             }
 
@@ -859,10 +883,10 @@ function attachEventListeners() {
             let msgs = [];
             let messagesToRemove = [];
             if (selectedMessages.length > 0) {
-                msgs = Array.from(selectedMessages).map(msg => msg.querySelector('.message-content').textContent);
+                msgs = Array.from(selectedMessages).map(msg => msg.querySelector('.message-content').dataset.text);
                 messagesToRemove = selectedMessages;
             } else {
-                msgs = [btn.closest('.message').querySelector('.message-content').textContent];
+                msgs = [btn.closest('.message').querySelector('.message-content').dataset.text];
                 messagesToRemove = [btn.closest('.message')];
             }
 
@@ -944,7 +968,7 @@ async function renderMessages() {
             </button>
             <div class="message-content"
                  data-text="${escapeHtml(message.text)}"
-                 spellcheck="false">${escapeHtml(message.text)}</div>
+                 spellcheck="false">${escapeHtml(prettifyMediaTags(message.text))}</div>
             <div class="message-footer">
                 <span class="message-time">${message.timestamp}</span>
                 <div class="message-actions">

@@ -321,6 +321,12 @@ async function writeMediaFile(fileName, file) {
 
 function generateSafeFilename(originalName) {
     const now = new Date();
-    const timestamp = `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    return `${timestamp}-${originalName}`.replace(/[<>:"/\\|?*\s]/g, '-');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const yyyy = now.getFullYear();
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mi = String(now.getMinutes()).padStart(2, '0');
+    const ss = String(now.getSeconds()).padStart(2, '0');
+    const ext = originalName.includes('.') ? originalName.split('.').pop() : 'png';
+    return `${dd}.${mm}.${yyyy} ${hh}h${mi}m${ss}s.${ext}`;
 }

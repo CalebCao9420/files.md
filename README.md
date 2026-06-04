@@ -80,7 +80,9 @@ Open the chat, write something and press `Enter`:
     <img src="https://github.com/zakirullin/files.md/raw/main/web/img/bot.gif" alt="Saving things in bot" title="Saving things in bot" width="350"/>
 </div>
 
-That's it. Full bot's functionality:  
+That's it, your note is saved to an `.md` file.  
+
+Full bot's functionality:  
 <div align="center">
     <img src="https://github.com/zakirullin/files.md/raw/main/web/img/bot.png" width="700"/>
 </div>

@@ -354,3 +354,43 @@ test('move-to-file works for messages containing double quotes', async ({page}) 
     // the embedded quotes round-trip intact.
     expect(content).toContain('Catches "file changed in vim." Without it');
 });
+
+// Regression: clicking the complete checkbox on a message containing `"` used
+// to be a no-op - escapeHtml() left the quote unescaped in
+// `data-text="..."`, so el.dataset.text truncated at the first `"`, the
+// regex in toggleChatMessage didn't match anything, and the on-disk `- [ ]`
+// stayed `- [ ]`.
+test('complete-btn toggles a message containing double quotes', async ({page}) => {
+    await page.evaluate(() => {
+        window.getTemporaryStorageDirHandle = async () => navigator.storage.getDirectory();
+    });
+    await page.evaluate(() => init(document.getElementById('editor')));
+
+    await page.click(`#tree .tree-item:has-text('chat')`);
+    await page.waitForSelector('#chat');
+    const quoted = 'ask about "uuid": "019e4eea-32b1-7c08-a000-3a1ecd0a6c07"';
+    await page.keyboard.type(quoted);
+    await page.waitForTimeout(300);
+    await page.keyboard.press('Enter');
+    await page.waitForSelector('.message');
+
+    const errors = [];
+    page.on('pageerror', err => errors.push(err.message));
+
+    await page.hover('.message');
+    await page.locator('.message .complete-btn').first().click({force: true});
+    await expect(page.locator('.message.completed')).toHaveCount(1);
+
+    // Reread Chat.md from disk - the toggle should have rewritten the line
+    // from `- [ ]` to `- [x]`. Before the fix, the regex match in
+    // toggleChatMessage failed (dataset.text was truncated at the first `"`)
+    // and the file was left untouched.
+    await expect.poll(async () => {
+        return await page.evaluate(async () => {
+            const root = await navigator.storage.getDirectory();
+            const fh = await root.getFileHandle('Chat.md');
+            return (await fh.getFile()).text();
+        });
+    }).toMatch(/^- \[x\] `\d{2}:\d{2}` ask about "uuid": "019e4eea-32b1-7c08-a000-3a1ecd0a6c07"\s*$/m);
+    expect(errors).toEqual([]);
+});

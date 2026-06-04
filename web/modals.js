@@ -334,10 +334,10 @@ class SearchModal {
         let msgs = [];
         let messagesToRemove = [];
         if (selectedMessages.length > 0) {
-            msgs = Array.from(selectedMessages).map(m => m.querySelector('.message-content').textContent);
+            msgs = Array.from(selectedMessages).map(m => m.querySelector('.message-content').dataset.text);
             messagesToRemove = selectedMessages;
         } else {
-            msgs = [this.selectedMsgElement.querySelector('.message-content').textContent];
+            msgs = [this.selectedMsgElement.querySelector('.message-content').dataset.text];
             messagesToRemove = [this.selectedMsgElement];
         }
 
@@ -378,10 +378,10 @@ class SearchModal {
             let msgs = [];
             let messagesToRemove = [];
             if (selectedMessages.length > 0) {
-                msgs = Array.from(selectedMessages).map(msg => msg.querySelector('.message-content').textContent);
+                msgs = Array.from(selectedMessages).map(msg => msg.querySelector('.message-content').dataset.text);
                 messagesToRemove = selectedMessages;
             } else {
-                msgs = [this.selectedMsgElement.querySelector('.message-content').textContent];
+                msgs = [this.selectedMsgElement.querySelector('.message-content').dataset.text];
                 messagesToRemove = [this.selectedMsgElement];
             }
 
