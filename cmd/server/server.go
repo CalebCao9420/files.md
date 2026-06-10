@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -151,6 +152,11 @@ func processUserUpdates(userID int64, updates <-chan tgbotapi.Update, telegram *
 		}
 
 		if err := bot.Reply(upd); err != nil {
+			if errors.Is(err, tg.ErrFileTooBig) {
+				if _, sendErr := telegram.Send(userID, "This file is too big. Telegram allows bots to download files up to 20MB.", nil, ""); sendErr != nil {
+					slog.Error("Bot error: can't send file-too-big notice", "err", sendErr)
+				}
+			}
 			slog.Error("Bot error", "err", err)
 		}
 	}

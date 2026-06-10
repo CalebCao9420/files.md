@@ -3,6 +3,7 @@ package tg
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,12 +14,15 @@ import (
 )
 
 const (
-	MarkupMarkdown = "MarkdownV2"
-	MarkupHTML     = "Html"
+	MarkupHTML = "Html"
 )
 
+// ErrFileTooBig is returned when a file exceeds Telegram's hard limit on
+// bot downloads (20MB via the hosted Bot API).
+var ErrFileTooBig = errors.New("file is too big for Telegram bots (20MB max)")
+
 // TG is a simple wrapper over Telegram API.
-// It can send/edit messages with Keyboard attached.
+// It can send/edit messages. Keyboard can be attached.
 type TG struct {
 	api *tgbotapi.BotAPI
 }
@@ -198,6 +202,9 @@ func (tg *TG) AnswerInlineQuery(queryID string, results []interface{}, cacheTime
 func (tg *TG) DownloadFile(fileID string, outFile io.Writer) (string, error) {
 	file, err := tg.api.GetFile(tgbotapi.FileConfig{FileID: fileID})
 	if err != nil {
+		if strings.Contains(err.Error(), "file is too big") {
+			return "", fmt.Errorf("tg can't get file: %w", ErrFileTooBig)
+		}
 		return "", fmt.Errorf("tg can't get file: %w", err)
 	}
 
