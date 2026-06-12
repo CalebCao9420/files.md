@@ -942,7 +942,6 @@ async function renderMessages() {
             <div class="empty-state">
                 <img class="empty-icon" src="img/icon.png" alt="">
                 <div class="empty-title">Free your head</div>
-                <div class="empty-desc">Dump whatever’s on your mind here</div>
             </div>
         `;
         return;

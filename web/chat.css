@@ -359,15 +359,27 @@
     margin-bottom: 20px;
 }
 
-.empty-desc {
-    font-size: 16px;
-    max-width: 300px;
-    color: color-mix(in srgb, var(--col-tx-alt) 70%, transparent);
-}
-
 #chat-input-wrap {
     width: min(720px, calc(100% - 48px));
     margin: 0 auto 24px auto;
+}
+
+/* Empty chat: the composer sits right below the logo block, the whole
+   group vertically centered. With messages it docks back to the bottom. */
+#chat-container:not(.modal):has(.empty-state) {
+    justify-content: center;
+}
+
+#chat-container:not(.modal):has(.empty-state) #chat {
+    flex: 0 0 auto;
+}
+
+#chat-container:not(.modal):has(.empty-state) .empty-state {
+    position: static;
+}
+
+#chat-container:not(.modal):has(.empty-state) #chat-input-wrap {
+    margin-top: 16px;
 }
 
 #chat-input {

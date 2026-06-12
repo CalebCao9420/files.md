@@ -434,8 +434,7 @@
     line-height: 1.9 !important;
 }
 
-.empty-title,
-.empty-desc {
+.empty-title {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
     letter-spacing: 0.04em;
 }
@@ -443,12 +442,6 @@
     font-weight: 800 !important;
     margin-bottom: 20px !important;
 }
-.empty-desc {
-    font-weight: 500 !important;
-    letter-spacing: 0.08em;
-    color: var(--color-neo-orange) !important;
-}
-
 #search, #move,
 #search-input, #move-input,
 .message-content,
