@@ -22,7 +22,7 @@ You can use this app for Second Brain, Zettelkasten, Notes, Journaling, Tasks, C
 
 > Own your data as plain local files.  
 > Own the software that opens those files.   
-> Grow your knowledge with files and your own brain.  
+> Grow your personal workspace with files.  
 > Grow the software around it with an LLM.  
 > **Plain files and self-owned software can last through the ages**.  
 
