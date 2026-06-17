@@ -263,7 +263,15 @@
                 if (!isHiddenLinkHref) {
                     for (var iLineRange = 0; iLineRange < rangesInLine.length; iLineRange++) {
                         var userRange = rangesInLine[iLineRange];
-                        if (cm_utils_1.rangesIntersect(spanRange, userRange)) {
+                        // PATCHED, only a collapsed caret (or a synthetic
+                        // reveal range, e.g. fenced-block ``` lines) reveals
+                        // inline tokens. A non-empty selection keeps the line
+                        // active (so the inactive-line class / header markup
+                        // stays correct).
+                        var isCaret = userRange.reveal ||
+                            (userRange[0].line === userRange[1].line &&
+                                userRange[0].ch === userRange[1].ch);
+                        if (isCaret && cm_utils_1.rangesIntersect(spanRange, userRange)) {
                             shallHideTokens = false;
                             break;
                         }
@@ -346,7 +354,11 @@
                 var fenceLine = ~~fenceLineStr;
                 if (activedLines[fenceLine]) continue;
                 var lineLen = cm.getLine(fenceLine).length;
-                activedLines[fenceLine] = [[{ line: fenceLine, ch: 0 }, { line: fenceLine, ch: lineLen }]];
+                // PATCHED, tag as a synthetic reveal range so procLine still
+                // shows the ``` tokens even though it's not a collapsed caret.
+                var fenceRange = [{ line: fenceLine, ch: 0 }, { line: fenceLine, ch: lineLen }];
+                fenceRange.reveal = true;
+                activedLines[fenceLine] = [fenceRange];
             }
             this._rangesInLine = activedLines;
             if (DEBUG)
