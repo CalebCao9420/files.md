@@ -3564,6 +3564,21 @@
       if (hasLinesInBetween) {
         let startLine = sFrom.line;
         let endLine = sTo.line;
+        // PATCHED: per-line character-accurate rects are O(n) in lines and emit
+        // one measured <div> per line. On a huge selection (cmd+a with
+        // viewportMargin: Infinity, the whole doc rendered) that is thousands
+        // of divs - drawing and then compositing them while scrolling freezes
+        // the editor. For a large middle region fall back to a single
+        // full-width block (the original CodeMirror behavior); first/last lines
+        // stay character-accurate. The cap keeps normal selections pretty.
+        if (endLine - startLine > 200) {
+          // Content wraps at --normal-width (the editor centers text at that
+          // fixed width), so the block ends at leftSide + that width - same
+          // right edge as a regular selection, never the full editor width.
+          let normalWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--normal-width'));
+          let blockWidth = normalWidth ? normalWidth : rightSide - leftSide;
+          drawSelectionRect(leftSide, leftEnd.bottom, blockWidth, rightStart.top);
+        } else {
         // start and end lines are handled already, so we exclude them
         for (let lineNum = startLine + 1; lineNum <= endLine - 1; lineNum++) {
           let line = getLine(doc, lineNum);
@@ -3584,6 +3599,7 @@
             let width = right - left ;
             drawSelectionRect(left, firstCharPos.top, width + left, firstCharPos.bottom);
           });
+        }
         }
       }
     }
@@ -7935,7 +7951,9 @@
   function rangeForUnit(cm, pos, unit) {
     if (unit == "char") { return new Range(pos, pos) }
     if (unit == "word") { return cm.findWordAt(pos) }
-    if (unit == "line") { return new Range(Pos(pos.line, 0), clipPos(cm.doc, Pos(pos.line + 1, 0))) }
+    // PATCHED: end line-select at the line's own end, not column 0 of the next
+    // line.
+    if (unit == "line") { return new Range(Pos(pos.line, 0), Pos(pos.line, getLine(cm.doc, pos.line).text.length)) }
     var result = unit(cm, pos);
     return new Range(result.from, result.to)
   }
