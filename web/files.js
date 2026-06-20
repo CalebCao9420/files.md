@@ -1593,6 +1593,13 @@ function toFilename(path) {
     return filename;
 }
 
+// Percent-encode a path for use inside a markdown link's `](...)`. Spaces and
+// an unescaped `)` both close the link early, breaking any link/image whose
+// file name contains them. hmdResolveURL / hmdReadLink decode these back.
+function encodeLinkPath(path) {
+    return path.replace(/ /g, '%20').replace(/\(/g, '%28').replace(/\)/g, '%29');
+}
+
 // Dir with no slash at the end.
 // For '/' it returns '/'.
 function toDirPath(path) {

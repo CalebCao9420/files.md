@@ -79,6 +79,9 @@ function initEditor(el) {
         }
 
         path = path.replace(/%20/g, ' ');
+        // Decode parens escaped by encodeLinkPath when the link was written,
+        // so the bare-filename lookup below matches the real file.
+        path = path.replace(/%28/g, '(').replace(/%29/g, ')');
 
         // TODO really dirty fix for links like:
         // ../media/image.png, remove
@@ -127,6 +130,8 @@ function initEditor(el) {
     newEditor.hmdReadLink = async function (path) {
         path = path.replace(/\|.*]$/, '');
         path = path.replace('[', '').replace(']', '');
+        // Decode parens escaped by encodeLinkPath when the link was written.
+        path = path.replace(/%28/g, '(').replace(/%29/g, ')');
 
         // Handle action links
         if (path === 'cmd:openDir') {
@@ -271,7 +276,7 @@ function initEditor(el) {
                             imageUrl: URL.createObjectURL(file)
                         };
 
-                        const markdownImageSyntax = `![](media/${fileName})\n`;
+                        const markdownImageSyntax = `![](media/${encodeLinkPath(fileName)})\n`;
                         currentEditor.replaceSelection(markdownImageSyntax);
                         log(`Media saved as: ${fileName}`);
                     } else {

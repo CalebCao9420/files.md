@@ -157,7 +157,7 @@ async function toggleMicRecording() {
             const timestamp = now.toLocaleTimeString('en-US', {
                 hour12: false, hour: '2-digit', minute: '2-digit',
             });
-            const formattedContent = `\n- [ ] \`${timestamp}\` ![](media/${fileName})\n`;
+            const formattedContent = `\n- [ ] \`${timestamp}\` ![](media/${encodeLinkPath(fileName)})\n`;
             await writeAtEnd(CHAT_PATH, formattedContent);
 
             chatIsClean = false;
@@ -489,7 +489,7 @@ chatInput.addEventListener('paste', async (e) => {
 
             const saved = await writeMediaFile(fileName, file);
             if (saved) {
-                const imageMarkdown = `![${fileName}](media/${fileName})\n`;
+                const imageMarkdown = `![${fileName}](media/${encodeLinkPath(fileName)})\n`;
 
                 const cursorPos = chatInput.selectionStart;
                 const textBefore = chatInput.value.substring(0, cursorPos);
