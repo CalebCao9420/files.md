@@ -210,15 +210,7 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
                     var openTag_1, endTag_1, mathLevel;
                     if ((tmp = stream.match(/^\${1,2}/, false))) {
                         var lvl = tmp[0].length;
-                        // PATCHED: inline `$...$` must not have whitespace right
-                        // after the opening `$` ("$ x") nor right before the
-                        // closing `$` ("x $"), matching the common rule - so
-                        // prose like "I have $5 and $10" or "$asdfsdf $" stays
-                        // plain text. The `[^\\\s]\$` requires the closing `$` to
-                        // be preceded by a non-space, non-backslash char. $$
-                        // (display math) is unaffected.
-                        var spaceAfter = /\s/.test(stream.string.charAt(stream.pos + lvl));
-                        if (lvl === 2 || (!spaceAfter && stream.string.slice(stream.pos).match(/[^\\\s]\$/))) {
+                        if (lvl === 2 || stream.string.slice(stream.pos).match(/[^\\]\$/)) {
                             // $$ may span lines, $ must be paired on same line
                             openTag_1 = tmp[0];
                             endTag_1 = tmp[0];

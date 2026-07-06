@@ -2,53 +2,64 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#F8F8F7" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#262624" media="(prefers-color-scheme: dark)">
-    <title>Files.md</title>
-    <link rel="canonical" href="https://app.files.md/">
-    <link rel="icon" href="favicon.ico" sizes="48x48">
-    <link rel="icon" href="favicon.svg" sizes="any" type="image/svg+xml">
+    <meta name="description" content="Local-first markdown notes, project docs, and chat capture.">
+    <meta name="application-name" content="MD Toolkit">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="MD Toolkit">
+    <title>MD Toolkit</title>
+    <link rel="icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="img/icon.png">
     <link rel="manifest" href="manifest.json">
-    <link href="app.css?v=" rel="stylesheet">
-    <link href="lib/normalize.css?v=" rel="stylesheet">
-    <link href="lib/sidebar.css?v=" rel="stylesheet">
-    <link href="lib/codemirror.css?v=" rel="stylesheet">
-    <link href="lib/hypermd.css?v=" rel="stylesheet">
-    <link href="lib/theme-brutal.css?v=" rel="stylesheet">
-    <link href="lib/theme-brutal-dark.css?v=" rel="stylesheet">
-    <link href="chat.css?v=" rel="stylesheet">
-    <link href="lib/latex/katex.min.css?v=" rel="stylesheet">
-    <script src="lib/latex/katex.min.js?v="></script>
-    <script src="lib/sidebar.js?v="></script>
-    <script src="lib/codemirror.js?v="></script>
-    <script src="lib/core.js?v="></script>
-    <script src="lib/markdown.js?v="></script>
-    <script src="lib/hypermd.js?v="></script>
-    <script src="lib/keymap.js?v="></script>
-    <script src="lib/click.js?v="></script>
-    <script src="lib/hide-token.js?v="></script>
-    <script src="lib/fold.js?v="></script>
-    <script src="lib/fold-image.js?v="></script>
-    <script src="lib/fold-link.js?v="></script>
-    <script src="lib/fold-code.js?v="></script>
-    <script src="lib/latex/fold-math.js?v="></script>
-    <script src="lib/hypermd-mermaid.js?v="></script>
-    <script src="lib/table.js?v="></script>
-    <script src="lib/autocomplete-link.js?v="></script>
-    <script src="lib/show-hint.js?v="></script>
-    <script src="lib/autoscroll.js?v="></script>
-    <script src="lib/codemirror-go.js?v="></script>
-    <script src="lib/codemirror-python.js?v="></script>
-    <script src="lib/codemirror-javascript.js?v="></script>
-    <script src="lib/codemirror-php.js?v="></script>
-    <script src="lib/codemirror-shell.js?v="></script>
-    <script src="lib/similarity.js?v="></script>
-    <script src="lib/emoji.js?v="></script>
-    <script src="lib/fs.js?v="></script>
-    <script src="lib/md.js?v="></script>
-    <script src="welcome.js?v="></script>
-    <script src="files.js?v="></script>
+    <link href="app.css?v=1782106644345" rel="stylesheet">
+    <link href="lib/normalize.css?v=1782106644345" rel="stylesheet">
+    <link href="lib/sidebar.css?v=1782106644345" rel="stylesheet">
+    <link href="lib/codemirror.css?v=1782106644345" rel="stylesheet">
+    <link href="lib/hypermd.css?v=1782106644345" rel="stylesheet">
+    <link href="lib/theme-brutal.css?v=1782106644345" rel="stylesheet">
+    <link href="lib/theme-brutal-dark.css?v=1782106644345" rel="stylesheet">
+    <link href="chat.css?v=1782106644345" rel="stylesheet">
+    <link href="reading.css?v=1782106644345" rel="stylesheet">
+    <link href="lib/latex/katex.min.css?v=1782106644345" rel="stylesheet">
+    <script src="build-stamp.js"></script>
+    <script src="lib/latex/katex.min.js?v=1782106644345"></script>
+    <script src="lib/sidebar.js?v=1782106644345"></script>
+    <script src="lib/codemirror.js?v=1782106644345"></script>
+    <script src="lib/core.js?v=1782106644345"></script>
+    <script src="lib/markdown.js?v=1782106644345"></script>
+    <script src="lib/hypermd.js?v=1782106644345"></script>
+    <script src="lib/keymap.js?v=1782106644345"></script>
+    <script src="lib/click.js?v=1782106644345"></script>
+    <script src="lib/hide-token.js?v=1782106644345"></script>
+    <script src="lib/fold.js?v=1782106644345"></script>
+    <script src="lib/fold-image.js?v=1782106644345"></script>
+    <script src="lib/fold-link.js?v=1782106644345"></script>
+    <script src="lib/fold-code.js?v=1782106644345"></script>
+    <script src="lib/latex/fold-math.js?v=1782106644345"></script>
+    <script src="lib/hypermd-mermaid.js?v=1782106644345"></script>
+    <script src="lib/table-align.js?v=1782106644345"></script>
+    <script src="lib/autocomplete-link.js?v=1782106644345"></script>
+    <script src="lib/show-hint.js?v=1782106644345"></script>
+    <script src="lib/autoscroll.js?v=1782106644345"></script>
+    <script src="lib/codemirror-go.js?v=1782106644345"></script>
+    <script src="lib/codemirror-python.js?v=1782106644345"></script>
+    <script src="lib/codemirror-javascript.js?v=1782106644345"></script>
+    <script src="lib/codemirror-php.js?v=1782106644345"></script>
+    <script src="lib/codemirror-shell.js?v=1782106644345"></script>
+    <script src="lib/similarity.js?v=1782106644345"></script>
+    <script src="lib/emoji.js?v=1782106644345"></script>
+    <script src="config.js?v=1782106644345"></script>
+    <script src="desktop-shell.js?v=1782106644345"></script>
+    <script src="tauri-fs.js?v=1782106644345"></script>
+    <script src="lib/fs.js?v=1782106644345"></script>
+    <script src="lib/md.js?v=1782106644345"></script>
+    <script src="welcome.js?v=1782106644345"></script>
+    <script src="files.js?v=1782106644345"></script>
     <!-- mermaid.min.js is lazy-loaded on first ```mermaid encounter -->
 </head>
 <body>
@@ -63,7 +74,7 @@
         <button id="close-sidebar" data-tooltip="Close sidebar (⌘~)" aria-label="Close sidebar (⌘~)" onclick="toggleSidebar()">×</button>
     </div>
     <div id="toolbar">
-        <button id="new-file" data-tooltip="New File (⌘N)" aria-label="New File (⌘N)" onclick="newFile()">
+        <button id="new-file" data-tooltip="New File (⌘N) — choose template" aria-label="New File (⌘N)" onclick="newFile()">
             <svg width="22" height="22" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="10" stroke-linejoin="round" transform="matrix(1, 0, 0, -1, 0, 0)">
                 <path d="M208,36H48A12.01375,12.01375,0,0,0,36,48V208a12.01375,12.01375,0,0,0,12,12H156.68652a11.92174,11.92174,0,0,0,8.48536-3.51465l51.31347-51.31347A11.92174,11.92174,0,0,0,220,156.68652V48A12.01375,12.01375,0,0,0,208,36ZM164,206.34277V163.99219h42.35107Zm48-50.35058H160a3.99988,3.99988,0,0,0-4,4V212H48a4.00458,4.00458,0,0,1-4-4V48a4.00458,4.00458,0,0,1,4-4H208a4.00458,4.00458,0,0,1,4,4Z"></path>
             </svg>
@@ -79,6 +90,24 @@
                 <path stroke-linecap="round" stroke-width="2" d="M28 11v13a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h6c3 0 3 3 5 3h9.003C27.108 9 28 9.895 28 11z"/>
             </svg>
         </button>
+        <button id="vcs-status" type="button" class="vcs-status-btn" data-tooltip="未保存更改 / 版本管理" aria-label="Version control status">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24">
+                <circle cx="7" cy="7" r="2.2" stroke="currentColor" stroke-width="1.8"/>
+                <circle cx="17" cy="17" r="2.2" stroke="currentColor" stroke-width="1.8"/>
+                <path stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M9 7h6a4 4 0 014 4v6"/>
+            </svg>
+        </button>
+        <button id="toggle-read-mode" data-tooltip="Read mode (Ctrl+Shift+R)" aria-label="Toggle read mode" aria-pressed="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M4 6.5h11M4 10h16M4 13.5h13M4 17h9"/>
+                <path stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M17 5.5h3v13h-3"/>
+            </svg>
+        </button>
+        <button id="toggle-outline" data-tooltip="Outline (sidebar)" aria-label="Toggle outline panel" aria-pressed="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M5 7h14M5 12h10M5 17h14"/>
+            </svg>
+        </button>
         <button id="random-file" data-tooltip="Show Random File" aria-label="Show Random File" onclick="openRandomFile()">
             <?xml version="1.0" encoding="utf-8"?>
             <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -87,13 +116,25 @@
             </svg>
         </button>
     </div>
+    <div id="reading-panel" style="display: none">
+        <div id="doc-meta"></div>
+        <div id="doc-toc-header">
+            <button id="doc-toc-toggle" type="button" aria-expanded="true">
+                <span>Outline</span>
+                <span class="chevron">▾</span>
+            </button>
+        </div>
+        <div id="doc-toc-wrap">
+            <div id="doc-toc"></div>
+        </div>
+    </div>
     <div id="tree">
     </div>
-    <div id="open-folder" onclick="openDir()" title="Open folder" style="display: none">
+    <div id="open-folder" onclick="openDir()" title="Choose a folder on disk. Check «Allow on every visit» in Chrome/Edge." style="display: none">
         <svg width="20" height="20" fill="none" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-width="2" d="M28 11v13a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h6c3 0 3 3 5 3h9.003C27.108 9 28 9.895 28 11z"/>
         </svg>
-        <span>Open folder</span>
+        <span>Open folder — bind local .md files</span>
     </div>
 </div>
 
@@ -121,31 +162,16 @@
     </div>
     <div id="chat-container" style="display: none">
         <div id="chat" style="display: none;"></div>
-        <div id="chat-input-wrap" style="position: relative;">
-            <textarea id="chat-input" style="display: none;" class="input-field" placeholder="Dump your thoughts..." rows="1"></textarea>
-            <button id="mic-chat" onclick="toggleMicRecording()" title="Record voice message" aria-label="Record voice message" style="display: none">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <rect x="8" y="3" width="8" height="13" rx="4"/>
-                    <path d="M5 12a7 7 0 0 0 14 0"/>
-                    <line x1="12" y1="19" x2="12" y2="22"/>
-                    <line x1="8" y1="22" x2="16" y2="22"/>
-                </svg>
-            </button>
-            <button id="send-chat" onclick="sendToChat()" title="Send" aria-label="Send" style="display: none">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 32 32">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-width="3" d="M16 27V6"/>
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M24 13l-8-8-8 8"/>
-                </svg>
-            </button>
-        </div>
+        <textarea id="chat-input" style="display: none;" class="input-field" placeholder="Dump your thoughts..." rows="1"></textarea>
         <button id="close-chat" onclick="closeChatModal()" title="Close chat" style="display: none">×</button>
         <button id="fullscreen-chat" onclick="openChat()" title="Toggle fullscreen" style="display: none">⛶</button>
     </div>
+    <div id="plugin-views"></div>
 </div>
 
 <div id="search" style="display: none;">
     <form autocomplete="off">
-        <input type="text" id="search-input" placeholder="Go to file..." oninput="searchModal.search()">
+        <input type="text" id="search-input" placeholder="文件名 · in:docs · status:todo · #tag · docs/" oninput="searchModal.search()">
     </form>
     <ul id="search-results"></ul>
 </div>
@@ -155,22 +181,82 @@
     </form>
     <ul id="move-results"></ul>
 </div>
-<script src="editor.js?v="></script>
-<script src="app.js?v="></script>
-<script src="chat.js?v="></script>
-<script src="modals.js?v="></script>
+<div id="new-file-template" style="display: none" role="dialog" aria-labelledby="new-file-template-title">
+    <div id="new-file-template-title" class="new-file-template-heading">新建文档</div>
+    <p class="new-file-template-hint">选择新建 .md 文件的初始内容</p>
+    <ul id="new-file-template-options">
+        <li data-template="plain" tabindex="0">
+            <span class="new-file-template-name">纯 Markdown</span>
+            <span class="new-file-template-desc">仅文件名标题，不含 frontmatter</span>
+        </li>
+        <li data-template="frontmatter" tabindex="0">
+            <span class="new-file-template-name">带 frontmatter</span>
+            <span class="new-file-template-desc">status: draft · tags · date</span>
+        </li>
+    </ul>
+    <label class="new-file-template-remember">
+        <input type="checkbox" id="new-file-template-remember">
+        记住此选择（下次 Cmd+N 不再询问）
+    </label>
+</div>
+<div id="project-scaffold" style="display: none" role="dialog" aria-labelledby="project-scaffold-title">
+    <div id="project-scaffold-title" class="new-file-template-heading">项目文档结构</div>
+    <p class="new-file-template-hint">在 workspace 根目录创建约定文件夹（已存在则跳过）</p>
+    <ul id="project-scaffold-options">
+        <li data-scaffold="standard" tabindex="0">
+            <span class="new-file-template-name">标准结构</span>
+            <span class="new-file-template-desc">docs/ · issues/ · changelog/</span>
+        </li>
+        <li data-scaffold="docs-only" tabindex="0">
+            <span class="new-file-template-name">仅 docs/</span>
+            <span class="new-file-template-desc">docs/ + design/ 与 README</span>
+        </li>
+    </ul>
+</div>
+<div id="vcs-menu" style="display: none" role="dialog" aria-labelledby="vcs-menu-title">
+    <div class="vcs-menu-panel">
+        <header class="vcs-menu-header">
+            <h2 id="vcs-menu-title">版本管理</h2>
+            <button type="button" id="vcs-menu-close" aria-label="Close">×</button>
+        </header>
+        <div id="vcs-menu-body" class="vcs-menu-body"></div>
+    </div>
+</div>
+<script src="reading-parse.js?v=1782106644345"></script>
+<script src="reading.js?v=1782106644345"></script>
+<script src="templates.js?v=1782106644345"></script>
+<script src="plugins/kanban/default-seeds.js?v=1782106644345"></script>
+<script src="project-structure.js?v=1782106644345"></script>
+<script src="search.js?v=1782106644345"></script>
+<script src="mdtk-workspace-config.js?v=1782106644345"></script>
+<script src="plugins/chat-archive.js?v=1782106644345"></script>
+<script src="chat.js?v=1782106644345"></script>
+<script src="plugins.js?v=1782106644345"></script>
+<script src="vcs-repo.js?v=1782106644345"></script>
+<script src="vcs-menu.js?v=1782106644345"></script>
+<script src="vcs-dirty.js?v=1782106644345"></script>
+<script src="editor.js?v=1782106644345"></script>
+<script src="app.js?v=1782106644345"></script>
+<script src="modals.js?v=1782106644345"></script>
 <script>
-    window.COMMIT_HASH = '?v=';
+    if (!window.COMMIT_HASH) {
+        window.COMMIT_HASH = '?v=1782106644345';
+    }
     log('Current version:', window.COMMIT_HASH);
 
-    // Allow offline mode.
-    navigator.serviceWorker?.register('offline.js?v=')
-        .then(() => log('Service Worker registered'))
-        .catch(() => logError('Service Worker registration failed'));
+    // Offline SW is for browser/PWA only — Tauri loads local files; SW caches stale JS.
+    if (!window.__TAURI__) {
+        navigator.serviceWorker?.register('offline.js' + (window.COMMIT_HASH || ''))
+            .then(() => log('Service Worker registered'))
+            .catch(() => logError('Service Worker registration failed'));
+    }
 
     window.currentEditor = null;
     editor = initEditor(document.getElementById("editor-textarea"));
     init();
+    initReading();
+    initNewFileTemplates();
+    getProjectScaffoldModal();
     currentEditor = editor;
 
     editor2 = initEditor(document.getElementById("editor2-textarea"));

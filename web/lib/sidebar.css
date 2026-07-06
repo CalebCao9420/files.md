@@ -190,17 +190,22 @@
 }
 
 #close-sidebar {
-	position: absolute;
-	top: 2px;
-	right: 12px;
-	opacity: 0;
-	cursor: pointer;
-	font-size: 27px;
-	color: var(--col-link);
-	transition: opacity 0.2s;
-	border: none;
-	background: transparent;
-	z-index: 12;
+    position: absolute;
+    top: 4px;
+    right: 2px;
+    width: 28px;
+    height: 28px;
+    line-height: 26px;
+    text-align: center;
+    opacity: 0;
+    cursor: pointer;
+    font-size: 22px;
+    color: var(--col-link);
+    transition: opacity 0.2s;
+    border: none;
+    background: var(--col-bg-alt);
+    z-index: 12;
+    border-radius: 4px;
 }
 
 .sidebar-ctx-menu {

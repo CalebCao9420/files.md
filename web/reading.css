@@ -1,0 +1,174 @@
+#reading-panel {
+    border-bottom: 1px solid var(--col-border);
+    padding: 8px 10px 10px;
+    background: var(--col-bg-alt);
+    flex-shrink: 0;
+    font-family: inherit;
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+#reading-panel.outline-collapsed #doc-toc-header,
+#reading-panel.outline-collapsed #doc-toc-wrap {
+    display: none;
+}
+
+#doc-meta {
+    display: none;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.doc-meta-chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    max-width: 100%;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--col-bg);
+    border: 1px solid var(--col-border);
+    font-size: 0.85em;
+    line-height: 1.5;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.doc-meta-key {
+    opacity: 0.65;
+    text-transform: lowercase;
+}
+
+.doc-meta-key::after {
+    content: ':';
+}
+
+#doc-toc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+#doc-toc-toggle {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+    font-family: inherit;
+    font-size: 0.9em;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--col-tx-alt);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    line-height: 1.5;
+}
+
+#doc-toc-toggle:hover {
+    color: var(--col-tx-hover);
+}
+
+#doc-toc-toggle .chevron {
+    transition: transform 0.15s ease;
+}
+
+#reading-panel.outline-collapsed #doc-toc-toggle .chevron {
+    transform: rotate(-90deg);
+}
+
+#doc-toc-wrap {
+    min-height: 0;
+}
+
+#doc-toc {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 220px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.doc-toc-empty {
+    font-size: 0.85em;
+    opacity: 0.55;
+    padding: 6px 8px;
+    line-height: 1.5;
+}
+
+.doc-toc-item {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 6px 8px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    font: inherit;
+    font-family: inherit;
+    font-size: 0.92em;
+    line-height: 1.6;
+    min-height: calc(1.6em + 4px);
+    color: var(--col-tx-alt);
+    cursor: pointer;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.doc-toc-item:hover {
+    background: var(--col-bg-active);
+    color: var(--col-tx);
+}
+
+#toggle-read-mode.active,
+#toggle-outline.active {
+    background: var(--col-bg-active);
+    color: var(--col-tx-hover);
+}
+
+#toggle-outline:not(.active) {
+    opacity: 0.45;
+}
+
+body.read-mode #toolbar button:not(#toggle-read-mode):not(#open-folder-btn) {
+    opacity: 0.45;
+}
+
+body.read-mode #content .CodeMirror-scroll {
+    max-width: min(920px, 100%);
+}
+
+body.read-mode #content:has(#editor2-container.show) .CodeMirror-scroll {
+    max-width: none;
+}
+
+body.read-mode .CodeMirror.read-only-view {
+    cursor: default;
+}
+
+body.read-mode .CodeMirror.read-only-view .CodeMirror-cursor {
+    display: none !important;
+}
+
+body.read-mode #editor-container,
+body.read-mode #editor2-container {
+    background: var(--col-bg);
+}
+
+@media (max-width: 670px) {
+    #doc-toc {
+        max-height: 140px;
+    }
+}

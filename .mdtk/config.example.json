@@ -1,0 +1,4 @@
+{
+  "plugins": ["docs", "kanban"],
+  "workspacePath": "D:\\your\\notes"
+}

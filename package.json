@@ -1,0 +1,26 @@
+{
+  "name": "md-toolkit",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "tauri:icon": "tauri icon src-tauri/icons/icon.png -o src-tauri/icons",
+    "setup:tauri-nsis": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup-tauri-nsis.ps1",
+    "setup:updater-keys": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup-updater-keys.ps1",
+    "generate:latest-json": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/generate-latest-json.ps1"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.4.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@tauri-apps/plugin-process": "^2.3.1",
+    "@tauri-apps/plugin-updater": "^2.10.1"
+  }
+}

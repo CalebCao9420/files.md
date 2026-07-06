@@ -5,7 +5,6 @@
 const urlsToCache = [
     '/',
     '/favicon.ico',
-    '/favicon.svg',
     '/img/icon.png',
     '/img/icon_small.png',
     '/manifest.json',
@@ -44,6 +43,7 @@ const urlsToCache = [
     '/lib/codemirror-shell.js',
     '/lib/similarity.js',
     '/lib/emoji.js',
+    '/config.js',
     '/lib/fs.js',
     '/lib/md.js',
     '/app.js',
@@ -51,6 +51,17 @@ const urlsToCache = [
     '/files.js',
     '/editor.js',
     '/chat.js',
+    '/reading.css',
+    '/reading-parse.js',
+    '/reading.js',
+    '/templates.js',
+    '/project-structure.js',
+    '/project-structure.js',
+    '/search.js',
+    '/kanban.css',
+    '/ticket-statuses.js',
+    '/kanban-frontmatter.js',
+    '/kanban.js',
     '/modals.js',
     '/lib/latex/fold-math.js',
     '/lib/latex/katex.min.js',
@@ -75,7 +86,7 @@ const urlsToCache = [
     '/lib/latex/KaTeX_Size3-Regular.woff2',
     '/lib/latex/KaTeX_Size4-Regular.woff2',
     '/lib/latex/KaTeX_Typewriter-Regular.woff2',
-    '/lib/table.js',
+    '/lib/table-align.js',
 
 ];
 
@@ -100,7 +111,7 @@ self.addEventListener('install', event => {
         for (let url of urlsToCache) {
             // KaTeX fonts are referenced by katex.min.css with no version param,
             // so the cache key must match (no hash appended either).
-            const shouldAddRevisionHash = url !== "/" && url !== 'favicon.ico' && url !== 'favicon.svg' && !url.startsWith('/img/') && !url.endsWith('.woff2');
+            const shouldAddRevisionHash = url !== "/" && url !== 'favicon.ico' && !url.startsWith('/img/') && !url.endsWith('.woff2');
             if (shouldAddRevisionHash) {
                 url = url + COMMIT_HASH;
             }

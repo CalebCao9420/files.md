@@ -40,10 +40,6 @@
     animation: slideIn 0.3s ease-out;
     cursor: pointer;
     transition: background-color 0.2s;
-    width: min(720px, 100%);
-    margin-left: auto;
-    margin-right: auto;
-    box-sizing: border-box;
 }
 
 .complete-btn {
@@ -172,18 +168,35 @@
 
 .message-actions {
     padding: 3px;
+    padding-top: 40px;
+    margin-top: -37px;
     border-radius: 5px 5px 0 5px;
     display: flex;
+    flex-wrap: nowrap;
     gap: 3px;
     opacity: 0;
     transition: opacity 0.2s;
     position: absolute;
-    z-index: 1;
+    z-index: 2;
 
     left: 50%;
     transform: translateX(-50%);
 
     bottom: -4px;
+    max-width: min(calc(100vw - 32px), 720px);
+    overflow-x: auto;
+    overflow-y: hidden;
+    justify-content: center;
+    scrollbar-width: thin;
+}
+
+.message-actions::-webkit-scrollbar {
+    height: 4px;
+}
+
+.chat-archive-target .action-btn {
+    border-color: var(--col-link);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--col-link) 35%, transparent);
 }
 
 .message:hover:not(:has(.complete-btn:hover)) .message-actions,
@@ -319,7 +332,7 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.15s;
-    z-index: 10;
+    z-index: 20;
 }
 /* Small downward triangle pointing at the button — matches the label
    background so it reads as part of the same shape. */
@@ -336,7 +349,9 @@
     border-top: 4px solid var(--col-accent);
 }
 
-.btn-wrapper:hover .btn-label {
+.btn-wrapper:hover .btn-label,
+.action-btn:hover + .btn-label,
+.action-btn:focus-visible + .btn-label {
     opacity: 1;
     transition-delay: 0.25s;
 }
@@ -363,124 +378,29 @@
     margin-bottom: 20px;
 }
 
-#chat-input-wrap {
-    width: min(720px, calc(100% - 48px));
-    margin: 0 auto 24px auto;
-}
-
-/* Empty chat: the composer sits right below the logo block, the whole
-   group vertically centered. With messages it docks back to the bottom. */
-#chat-container:not(.modal):has(.empty-state) {
-    justify-content: center;
-}
-
-#chat-container:not(.modal):has(.empty-state) #chat {
-    flex: 0 0 auto;
-}
-
-#chat-container:not(.modal):has(.empty-state) .empty-state {
-    position: static;
-}
-
-#chat-container:not(.modal):has(.empty-state) #chat-input-wrap {
-    margin-top: 16px;
+.empty-desc {
+    font-size: 16px;
+    max-width: 300px;
+    color: color-mix(in srgb, var(--col-tx-alt) 70%, transparent);
 }
 
 #chat-input {
     background: var(--col-bg-alt);
-    border: 1px solid color-mix(in srgb, var(--col-tx), transparent 96%);
-    border-radius: 25px !important;
-    padding: 14px 64px 14px 22px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    padding: 12px 16px;
     font-size: 16px;
     resize: none;
-    min-height: 42px;
+    min-height: 48px;
     max-height: 250px;
-    width: 100%;
-    box-sizing: border-box;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.4;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    margin: 0 24px 24px 24px;
 }
 
 #chat-input:focus {
     outline: none;
-    border-color: color-mix(in srgb, var(--col-tx), transparent 92%);
-}
-
-#send-chat {
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    background: var(--color-neo-orange);
-    color: var(--col-bg);
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.15s, opacity 0.15s;
-    animation: chat-btn-pop 0.18s ease-out;
-}
-
-#send-chat:hover {
-    background: color-mix(in srgb, var(--color-neo-orange), #000 12%);
-}
-
-#send-chat svg {
-    width: 18px;
-    height: 18px;
-}
-
-#mic-chat {
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    background: transparent;
-    color: var(--col-tx-alt);
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.15s, color 0.15s;
-    animation: chat-btn-pop 0.18s ease-out;
-}
-
-@keyframes chat-btn-pop {
-    0%   { transform: translateY(-50%) scale(0.3); opacity: 0; }
-    70%  { transform: translateY(-50%) scale(1.1); opacity: 1; }
-    100% { transform: translateY(-50%) scale(1); }
-}
-
-#mic-chat:hover {
-    background: color-mix(in srgb, var(--color-neo-orange), transparent 80%);
-    color: var(--color-neo-orange);
-}
-
-#mic-chat.recording {
-    background: var(--color-neo-orange);
-    color: var(--col-bg);
-    animation: mic-pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes mic-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-neo-orange), transparent 50%); }
-    50%      { box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-neo-orange), transparent 90%); }
-}
-
-#mic-chat svg {
-    width: 18px;
-    height: 18px;
+    border: 1px solid var(--col-border);
 }
 
 .message.selected {
@@ -524,15 +444,6 @@
 
 #chat.block-selecting .message-content {
     user-select: none;
-}
-
-/* Rubber-band rectangle drawn while drag-selecting chat messages. */
-.chat-marquee {
-    position: fixed;
-    z-index: 50;
-    pointer-events: none;
-    border: 1px solid var(--color-neo-orange);
-    background: color-mix(in srgb, var(--color-neo-orange), transparent 90%);
 }
 
 #open-chat-modal {
@@ -588,7 +499,7 @@
     z-index: 1001;
     width: 30px;
     height: 30px;
-    display: flex;
+    display: flex !important;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
@@ -596,7 +507,7 @@
 }
 
 .modal-reversed {
-    display: flex;
+    display: flex !important;
     flex-direction: column-reverse !important;
 }
 

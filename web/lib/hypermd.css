@@ -70,23 +70,6 @@
 .CodeMirror pre.HyperMD-table-row .hmd-table-column-content {
     display: inline-block;
 }
-.CodeMirror pre.HyperMD-table-row > span:has(> .hmd-table-column) {
-    display: flex;
-    align-items: stretch;
-}
-.CodeMirror pre.HyperMD-table-row .hmd-table-column,
-.CodeMirror pre.HyperMD-table-row span.cm-hmd-table-sep {
-    flex: none;
-}
-.CodeMirror pre.HyperMD-table-row .hmd-table-column-content {
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    box-sizing: border-box;
-}
-.CodeMirror .hmd-table-measure .hmd-table-column-content {
-    max-width: none !important;
-    white-space: pre !important;
-}
 .CodeMirror pre.HyperMD-table-row .hmd-table-column-left {
     text-align: left;
 }
@@ -528,48 +511,73 @@ pre.CodeMirror-line:has(.hmd-fold-code-stub.hmd-fold-code-mermaid) {
 .cm-s-hypermd-light pre.HyperMD-quote-9 span.cm-formatting-quote:first-child {
     margin-left: -180px;
 }
+.cm-s-hypermd-light span.cm-hmd-list-indent {
+    display: inline-block;
+    width: 30px;
+    text-align: right;
+    white-space: pre;
+    box-sizing: border-box;
+    /*PATCHED, make lists prettier*/
+    /*border-right: 1px dashed #CCC;*/
+    overflow: hidden;
+    font-size: 0.5em;
+    line-height: 200%;
+}
 .cm-s-hypermd-light pre.HyperMD-list-line {
     padding-top: 0.3em;
     min-height: 1.5em;
 }
+.cm-s-hypermd-light pre.HyperMD-list-line span.cm-formatting-list,
+.cm-s-hypermd-light pre.HyperMD-list-line span.cm-hmd-list-indent {
+    text-align: right;
+    white-space: pre;
+    width: 30px;
+    float: left;
+}
+.cm-s-hypermd-light pre.HyperMD-list-line span.cm-hmd-list-indent {
+    margin-left: -60px;
+}
 .cm-s-hypermd-light pre.HyperMD-list-line.HyperMD-list-line-nobullet {
     padding-top: initial;
 }
+.cm-s-hypermd-light pre.HyperMD-list-line.HyperMD-list-line-nobullet span.cm-hmd-list-indent {
+    margin-left: -30px;
+}
+.cm-s-hypermd-light pre.HyperMD-list-line-1 {
+    padding-left: 45px;
+}
+.cm-s-hypermd-light pre.HyperMD-list-line-2 {
+    padding-left: 75px;
+}
+.cm-s-hypermd-light pre.HyperMD-list-line-3 {
+    padding-left: 105px;
+}
+.cm-s-hypermd-light pre.HyperMD-list-line-4 {
+    padding-left: 135px;
+}
+.cm-s-hypermd-light pre.HyperMD-list-line-5 {
+    padding-left: 165px;
+}
+.cm-s-hypermd-light pre.HyperMD-list-line-6 {
+    padding-left: 195px;
+}
+.cm-s-hypermd-light pre.HyperMD-list-line-7 {
+    padding-left: 225px;
+}
+.cm-s-hypermd-light pre.HyperMD-list-line-8 {
+    padding-left: 255px;
+}
+.cm-s-hypermd-light pre.HyperMD-list-line-9 {
+    padding-left: 285px;
+}
 .cm-s-hypermd-light span.cm-formatting-list {
+    margin-left: -30px;
+
     /*PATCHED*/
     font-variant-numeric: tabular-nums;
     /*font-family: "HyperMD-Bullets";*/
-    /*PATCHED, nudge the marker to the right so it doesn't sit flush against
-      the doc-body left edge - applied as margin on the marker span itself so
-      cursor positioning isn't affected (cursor stays at line column 0). */
-    margin-left: 0.5em;
+
     color: #666;
-}
-/*PATCHED, progressive indent for nested list markers so each nesting level
-  steps further right. Margin on the marker span keeps cursor placement intact. */
-.cm-s-hypermd-light pre.HyperMD-list-line-2 span.cm-formatting-list {
-    margin-left: 1.5em;
-}
-.cm-s-hypermd-light pre.HyperMD-list-line-3 span.cm-formatting-list {
-    margin-left: 2.5em;
-}
-.cm-s-hypermd-light pre.HyperMD-list-line-4 span.cm-formatting-list {
-    margin-left: 3.5em;
-}
-.cm-s-hypermd-light pre.HyperMD-list-line-5 span.cm-formatting-list {
-    margin-left: 4.5em;
-}
-.cm-s-hypermd-light pre.HyperMD-list-line-6 span.cm-formatting-list {
-    margin-left: 5.5em;
-}
-.cm-s-hypermd-light pre.HyperMD-list-line-7 span.cm-formatting-list {
-    margin-left: 6.5em;
-}
-.cm-s-hypermd-light pre.HyperMD-list-line-8 span.cm-formatting-list {
-    margin-left: 7.5em;
-}
-.cm-s-hypermd-light pre.HyperMD-list-line-9 span.cm-formatting-list {
-    margin-left: 8.5em;
 }
 /*PATCHED*/
 .cm-s-hypermd-light span.cm-formatting-list.cm-list-2 {

@@ -12,7 +12,14 @@ function findForbiddenChar(name) {
     return null;
 }
 
+function isTauriFs() {
+    return typeof isTauriWorkspaceBound === 'function' && isTauriWorkspaceBound();
+}
+
 async function getFileHandle(path, create = false) {
+    if (isTauriFs()) {
+        return tauriGetFileHandle(path, create);
+    }
     let dir, filename;
     if (path.includes('/')) {
         const parts = path.split('/');
@@ -119,7 +126,11 @@ async function remove(path) {
         logError('Malformed name, skipping file...');
         return;
     }
-    await fileHandle.remove()
+    if (isTauriFs()) {
+        await fileHandle.remove();
+    } else {
+        await fileHandle.remove();
+    }
     log(`File ${path} removed successfully.`);
 
     removeMemFile(path);
@@ -146,6 +157,13 @@ async function removeDir(dirPath) {
 
     const parts = trimPrefix(dirPath, '/').split('/').filter(Boolean);
     const dirName = parts.pop();
+
+    if (isTauriFs()) {
+        await tauriRemoveDir(dirPath);
+        removeMemDir(dirPath);
+        log(`Dir ${dirPath} removed.`);
+        return;
+    }
 
     const rootHandle = await getRootDirHandle();
     let parentHandle = rootHandle;
@@ -275,9 +293,13 @@ async function createDir(dirPath) {
     const parts = trimPrefix(dirPath, '/').split('/').filter(Boolean);
     if (parts.length === 0) return;
 
-    let dirHandle = await getRootDirHandle();
-    for (const seg of parts) {
-        dirHandle = await dirHandle.getDirectoryHandle(seg, { create: true });
+    if (isTauriFs()) {
+        await tauriCreateDir(dirPath);
+    } else {
+        let dirHandle = await getRootDirHandle();
+        for (const seg of parts) {
+            dirHandle = await dirHandle.getDirectoryHandle(seg, { create: true });
+        }
     }
 
     let cur = files;
@@ -291,6 +313,22 @@ async function createDir(dirPath) {
 
 async function writeMediaFile(fileName, file) {
     try {
+        if (isTauriFs()) {
+            const path = '/media/' + fileName;
+            await tauriCreateDir('/media');
+            const fileHandle = await tauriGetFileHandle(path, true);
+            const writable = await fileHandle.createWritable();
+            await writable.write(file);
+            await writable.close();
+            addMemFile(path, {
+                isFile: true,
+                path: path,
+                handle: fileHandle,
+                imageUrl: await getImageUrl(fileHandle),
+            });
+            return fileHandle;
+        }
+
         const rootHandle = await getRootDirHandle();
 
         let mediaHandle;
@@ -321,12 +359,6 @@ async function writeMediaFile(fileName, file) {
 
 function generateSafeFilename(originalName) {
     const now = new Date();
-    const dd = String(now.getDate()).padStart(2, '0');
-    const mm = String(now.getMonth() + 1).padStart(2, '0');
-    const yyyy = now.getFullYear();
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mi = String(now.getMinutes()).padStart(2, '0');
-    const ss = String(now.getSeconds()).padStart(2, '0');
-    const ext = originalName.includes('.') ? originalName.split('.').pop() : 'png';
-    return `${dd}.${mm}.${yyyy} ${hh}h${mi}m${ss}s.${ext}`;
+    const timestamp = `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    return `${timestamp}-${originalName}`.replace(/[<>:"/\\|?*\s]/g, '-');
 }

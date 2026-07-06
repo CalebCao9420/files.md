@@ -1,0 +1,684 @@
+// @ts-nocheck
+/// <reference path="../types/global.d.ts" />
+
+function insertGfmTable(cm) {
+    const cursor = cm.getCursor();
+    const template = [
+        '| Column | Column |',
+        '| ------ | ------ |',
+        '|        |        |',
+        '',
+    ].join('\n');
+    cm.replaceRange(template, cursor);
+    cm.setCursor({ line: cursor.line + 2, ch: 2 });
+    cm.focus();
+}
+
+/** Viewport rect for the main editor: window minus left sidebar (and optional split pane). */
+function getMainEditorViewportSize() {
+    const sidebar = document.getElementById('sidebar');
+    let left = 0;
+    if (sidebar && getComputedStyle(sidebar).display !== 'none') {
+        left = sidebar.getBoundingClientRect().right;
+    }
+
+    let right = window.innerWidth;
+    const editor2 = document.getElementById('editor2-container');
+    if (editor2
+        && editor2.classList.contains('show')
+        && editor2.style.display !== 'none'
+        && getComputedStyle(editor2).display !== 'none') {
+        right = editor2.getBoundingClientRect().left;
+    }
+
+    const w = Math.max(0, Math.floor(right - left));
+    const h = Math.max(0, Math.floor(window.innerHeight));
+    return { width: w, height: h };
+}
+
+function getEditor2ViewportSize() {
+    const box = document.getElementById('editor2-container');
+    if (!box) {
+        return { width: 0, height: 0 };
+    }
+    const rect = box.getBoundingClientRect();
+    return {
+        width: Math.max(0, Math.floor(rect.width)),
+        height: Math.max(0, Math.floor(window.innerHeight)),
+    };
+}
+
+/** CodeMirror defaults to 300px; size to window area excluding the left sidebar. */
+function fitEditorLayout(cm, options) {
+    if (!cm || typeof cm.getWrapperElement !== 'function') {
+        return;
+    }
+    const opts = options || {};
+    const wrap = cm.getWrapperElement();
+    const box = wrap && wrap.parentElement;
+    if (!box) {
+        return;
+    }
+
+    if (box.id === 'editor-container' && typeof isChat !== 'undefined' && isChat) {
+        return;
+    }
+
+    const scrollLeft = cm.getScrollInfo().left;
+    const scrollTop = cm.getScrollInfo().top;
+
+    let size;
+    if (box.id === 'editor-container') {
+        size = getMainEditorViewportSize();
+        box.style.width = size.width + 'px';
+        box.style.height = size.height + 'px';
+        box.style.flex = 'none';
+    } else if (box.id === 'editor2-container') {
+        size = getEditor2ViewportSize();
+    } else {
+        size = {
+            width: Math.floor(box.clientWidth),
+            height: Math.floor(box.clientHeight),
+        };
+    }
+
+    if (size.width < 1 || size.height < 1) {
+        return;
+    }
+    cm.setSize(size.width, size.height);
+    cm.refresh();
+    if (opts.resetScroll) {
+        cm.scrollTo(null, 0);
+    } else {
+        cm.scrollTo(scrollLeft, scrollTop);
+    }
+}
+
+let editorContainerResizeBound = false;
+let editorLayoutReflowTimer = null;
+
+function bindEditorContainerResize() {
+    if (editorContainerResizeBound) {
+        return;
+    }
+    editorContainerResizeBound = true;
+
+    const reflow = () => {
+        clearTimeout(editorLayoutReflowTimer);
+        editorLayoutReflowTimer = setTimeout(() => {
+            if (typeof isChat !== 'undefined' && isChat && typeof fitChatLayout === 'function') {
+                fitChatLayout();
+                return;
+            }
+            if (typeof editor !== 'undefined') {
+                fitEditorLayout(editor);
+            }
+            if (typeof editor2 !== 'undefined') {
+                fitEditorLayout(editor2);
+            }
+        }, 16);
+    };
+
+    window.addEventListener('resize', reflow);
+
+    if (typeof ResizeObserver !== 'undefined') {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar) {
+            new ResizeObserver(reflow).observe(sidebar);
+        }
+        const editor2 = document.getElementById('editor2-container');
+        if (editor2) {
+            new ResizeObserver(reflow).observe(editor2);
+        }
+    }
+}
+
+function initEditor(el) {
+    if (window.editor !== undefined && el.id === 'editor-textarea' ) {
+        editor.off();
+        const wrapper = editor.getWrapperElement();
+        if (wrapper && wrapper.parentNode) {
+            wrapper.parentNode.removeChild(wrapper);
+        }
+
+        editor2.off();
+        const wrapper2 = editor2.getWrapperElement();
+        if (wrapper2 && wrapper2.parentNode) {
+            wrapper2.parentNode.removeChild(wrapper2);
+        }
+    } else if (window.editor2 !== undefined && el.id === 'editor2-textarea') {
+        editor2.off();
+        const wrapper = editor2.getWrapperElement();
+        if (wrapper && wrapper.parentNode) {
+            wrapper.parentNode.removeChild(wrapper);
+        }
+    }
+
+    let newEditor = HyperMD.fromTextArea(el, {
+        dragDrop: false,
+        viewportMargin: 10,
+        mode: {
+            name: 'hypermd',
+            math: true,
+        },
+        lineNumbers: false,
+        extraKeys: {
+            // 'Shift-Space': 'autocomplete',
+            'Cmd-[': false, 'Cmd-]': false,
+        },
+        hintOptions: {
+            hint: CompleteEmoji.createHintFunc(),
+            closeCharacters: /$^/,
+            closeOnUnfocus: false,
+            completeSingle: false,
+            alignWithWord: false
+        },
+        hmdFoldEmoji: {
+            myEmoji: createAutocompleteDict
+        },
+        hmdFoldMath: {
+            renderer: KatexRenderer,
+        },
+        // Enable fold-code so ```mermaid blocks get rendered via the
+        // hypermd-mermaid renderer (registered as suggested:true on load).
+        hmdFoldCode: { mermaid: true },
+        hmdTableAlign: true,
+        configureMouse: () => ({addNew: false}) // disable multicursor
+    });
+    newEditor.setSize(null, null);
+    requestAnimationFrame(() => fitEditorLayout(newEditor));
+    newEditor.on('focus', function() {
+        currentEditor = newEditor; // FIXME possible RC here? If isMessingWithCurrentEditor is hold, this would overwrite
+        currentEditor.refresh(); // Cursor & hide tokens conflict if we don't call it
+        closeChatModal();
+        log('Focused to:', newEditor.path);
+    });
+
+    newEditor.hmdResolveURL = function (path) {
+        if (typeof path === 'undefined') {
+            return path
+        }
+
+        path = path.replace(/%20/g, ' ');
+
+        // TODO really dirty fix for links like:
+        // ../media/image.png, remove
+        if (path.startsWith('../')) {
+            path = path.replace('../', '');
+        }
+
+        // Bare domain like google.com/test - window.open treats it as a relative
+        // path without a protocol, which makes the PWA navigate to a sub-path.
+        // Exclude local-file extensions (md, image types) so `![](img.png)`
+        // isn't mistaken for a domain.
+        if (/^[a-z0-9-]+(\.[a-z0-9-]+)+(\/|$)/i.test(path)
+            && !/\.(md|png|jpg|jpeg|gif|webp|mp4|webm|mov|mp3|ogg|oga|wav)$/i.test(path)) {
+            return 'https://' + path;
+        }
+
+        if (/^(?!http|https|\[).+\.md$/.test(path)) {
+            const isMobile = window.matchMedia('(max-width: 670px)').matches;
+            const target = isMobile ? 'editor-textarea' : 'editor2-textarea';
+            const fullPath = path.startsWith('/') ? path : '/' + path;
+            openFile(fullPath, true, target);
+            return path;
+        }
+
+        // Look up by bare filename so media/img lookups work even when path
+        // has a folder prefix.
+        if (isMediaPath(path)) {
+            const bareName = path.split('/').pop();
+            if (files['media/'] && files['media/'][bareName]) {
+                return files['media/'][bareName].imageUrl;
+            }
+            if (files['img/'] && files['img/'][bareName]) {
+                return files['img/'][bareName].imageUrl;
+            }
+            // Fallback - look up bare filename in the global media index
+            // built by loadLocalFiles. Resolves media stored in any folder
+            // when the markdown link's path doesn't match.
+            if (mediaIndex[bareName] && mediaIndex[bareName].imageUrl) {
+                return mediaIndex[bareName].imageUrl;
+            }
+        }
+
+        return path;
+    };
+
+    newEditor.hmdReadLink = async function (path) {
+        path = path.replace(/\|.*]$/, '');
+        path = path.replace('[', '').replace(']', '');
+
+        // Handle action links
+        if (path === 'cmd:openDir') {
+            openDir();
+            return;
+        }
+        if (path === 'cmd:openChat') {
+            openChat();
+            return;
+        }
+
+        // If it is a web link open window blank
+        if (/^(http|https):\/\//.test(path)) {
+            window.open(path, '_blank');
+            return;
+        }
+
+        path += '.md';
+
+        // Phones don't have the room for the split-view editor2 -
+        // route link follows into the main editor instead.
+        const target = window.matchMedia('(max-width: 670px)').matches
+            ? 'editor-textarea'
+            : 'editor2-textarea';
+
+        if (getMemFile(path) !== null) {
+            openFile(path, true, target)
+            return;
+        }
+
+        // Try to find filename is any folder
+        let filename = toFilename(path);
+        walk(files, (path, isFile) => {
+            if (!isFile) {
+                return;
+            }
+
+            if (toFilename(path) === filename) {
+                openFile(path, true, target);
+                return false;
+            }
+        });
+    };
+
+    newEditor.on('inputRead', async function (cm, change) {
+        if (change.text.length === 1 && change.text[0] === '`') {
+            const cursor = cm.getCursor();
+            const line = cm.getLine(cursor.line);
+            const before = line.slice(0, cursor.ch);
+            const after = line.slice(cursor.ch);
+            // Trigger only on the third backtick at the start of a line.
+            if (!/^ {0,3}`{3}$/.test(before)) return;
+            if (after.length > 0) return;
+            // Skip when this ``` is closing an already-open fence.
+            if (cursor.line > 0) {
+                const prevState = cm.getStateAfter(cursor.line - 1);
+                if (prevState && prevState.fencedEndRE) return;
+            }
+            cm.replaceRange('\n\n```', cursor);
+            cm.setCursor({ line: cursor.line + 1, ch: 0 });
+            return;
+        }
+        if (change.text.length === 1 && change.text[0] === '[') {
+            const cursor = cm.getCursor();
+            // Skip the link autocomplete when the [ is preceded by a
+            // backslash - that's an escaped bracket, not the start of a link.
+            const charBefore = cursor.ch >= 2 ? cm.getRange({line: cursor.line, ch: cursor.ch - 2}, {line: cursor.line, ch: cursor.ch - 1}) : '';
+            if (charBefore === '\\') {
+                return;
+            }
+            // Skip when the [ sits inside an inline code span (`...[...`).
+            // The token at the cursor carries the `inline-code` style and we
+            // don't want to insert links into code.
+            const token = cm.getTokenAt(cursor);
+            if (token && token.type && /\binline-code\b/.test(token.type)) {
+                return;
+            }
+            cm.showHint({
+                completeSingle: false, updateOnCursorActivity: true,
+            })
+        }
+    })
+
+    // Auto-select/highlight title when clicking on the first line
+    // TODO clear on second click
+    newEditor.getWrapperElement().addEventListener('mousedown', function(e) {
+        // Get the position where the mouse was clicked
+        const coords = newEditor.coordsChar({left: e.clientX, top: e.clientY});
+
+        if (coords.line === 0) {
+            // Check if cursor is already on line 0
+            const currentCursor = newEditor.getCursor();
+            if (currentCursor.line === 0) {
+                // Cursor already on line 0, don't select
+                return;
+            }
+
+            // Cursor not on line 0, select the title
+            setTimeout(() => {
+                const lineLength = newEditor.getLine(0).length;
+                newEditor.setSelection(
+                    {line: 0, ch: 2},  // Start from character 2 (skip "# ")
+                    {line: 0, ch: lineLength}
+                );
+            }, 150);
+        }
+    }, true);
+
+    // Force '# ' to remain at first line.
+    newEditor.on('change', function (cm, change) {
+        if (change.from.line === 0) {
+            const line = cm.getLine(0);
+            if (!line.startsWith('# ')) {
+                const content = line.replace(/^#*\s*/, '');
+                cm.replaceRange('# ' + content, {line: 0, ch: 0}, {line: 0, ch: line.length});
+            }
+        }
+    });
+
+    // Image upload
+    newEditor.on('paste', async (_, event) => {
+        const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+        for (const item of items) {
+            const isMedia = item.kind === 'file'
+                && (item.type.startsWith('image/') || item.type.startsWith('video/') || item.type.startsWith('audio/'));
+            if (isMedia) {
+                event.preventDefault();
+
+                const file = item.getAsFile();
+                const fileName = `${new Date().toISOString().replace(/[:.]/g, '-')}.${getImageExtension(item.type)}`;
+
+                try {
+                    const fileHandle = await writeMediaFile(fileName, file);
+                    if (fileHandle) {
+                        if (!files['media/']) {
+                            files['media/'] = {};
+                        }
+                        files['media/'][fileName] = {
+                            isFile: true,
+                            handle: fileHandle,
+                            lastModified: Date.now(),
+                            imageUrl: URL.createObjectURL(file)
+                        };
+
+                        const markdownImageSyntax = `![](media/${fileName})\n`;
+                        currentEditor.replaceSelection(markdownImageSyntax);
+                        log(`Media saved as: ${fileName}`);
+                    } else {
+                        logError('Failed to save the media.');
+                        alert('Failed to save the file. Please try again.');
+                    }
+                } catch (error) {
+                    logError('Error saving media:', error);
+                    alert('Error saving file: ' + error.message);
+                }
+            }
+        }
+    });
+
+    // Editor keybindings
+    newEditor.addKeyMap({
+        'Enter': function (cm) { // If header is selected, enter should move cursor to next line
+            const cursor = cm.getCursor();
+            // If there's a selection on the header line, just move cursor
+            if (cursor.line === 0) {
+                if (cm.somethingSelected()) {
+                    const selections = cm.listSelections();
+                    const isHeaderSelection = selections.some(sel =>
+                        sel.anchor.line === 0 || sel.head.line === 0
+                    );
+
+                    if (isHeaderSelection) {
+                        // Clear selection and move cursor to start of line 1
+                        cm.setCursor({line: 1, ch: 0});
+                        return;
+                    }
+                } else {
+                    // No selection, just move cursor to next line
+                    cm.setCursor({line: 1, ch: 0});
+                    return;
+                }
+            }
+
+            // For all other lines, use default Enter behavior
+            return CodeMirror.Pass;
+        },
+        'Cmd-A': function (cm) {
+            const cursor = cm.getCursor();
+
+            // If cursor is on the first line, select all text in that line
+            if (cursor.line === 0) {
+                const lineLength = cm.getLine(0).length;
+                cm.setSelection(
+                    {line: 0, ch: 0},
+                    {line: 0, ch: lineLength}
+                );
+                return;
+            }
+
+            // Otherwise, use default Cmd-A behavior (select all except first line)
+            const lastLine = cm.lastLine();
+            const lastLineLength = cm.getLine(lastLine).length;
+
+            cm.setSelection(
+                {line: 1, ch: 0},
+                {line: lastLine, ch: lastLineLength},
+                {scroll: false}
+            );
+        },
+        'Ctrl-A': function (cm) {
+            const cursor = cm.getCursor();
+
+            // If cursor is on the first line, select all text in that line
+            if (cursor.line === 0) {
+                const lineLength = cm.getLine(0).length;
+                cm.setSelection(
+                    {line: 0, ch: 0},
+                    {line: 0, ch: lineLength}
+                );
+                return;
+            }
+
+            // Otherwise, use default Cmd-A behavior (select all except first line)
+            const lastLine = cm.lastLine();
+            const lastLineLength = cm.getLine(lastLine).length;
+
+            cm.setSelection(
+                {line: 1, ch: 0},
+                {line: lastLine, ch: lastLineLength},
+                {scroll: false}
+            );
+        },
+        'Cmd-Y': function (cm) {
+            var cursor = cm.getCursor();
+            var lineStart = {line: cursor.line, ch: 0};
+            cm.replaceRange('??', lineStart);
+            cm.focus();
+        },
+        'Ctrl-Y': function (cm) {
+            var cursor = cm.getCursor();
+            var lineStart = {line: cursor.line, ch: 0};
+            cm.replaceRange('??', lineStart);
+            cm.focus();
+        },
+        'Cmd-B': function (cm) {
+            let selection = cm.getSelection();
+            let trimmedSelection = selection.trim();
+            let prefix = selection.slice(0, selection.indexOf(trimmedSelection));
+            let suffix = selection.slice(selection.indexOf(trimmedSelection) + trimmedSelection.length);
+
+            const isBold = trimmedSelection.startsWith('**') && trimmedSelection.endsWith('**');
+
+            let start = cm.getCursor('start');
+            let end = cm.getCursor('end');
+
+            if (isBold) {
+                cm.replaceSelection(prefix + trimmedSelection.slice(2, -2) + suffix);
+                cm.setSelection(
+                    {line: start.line, ch: start.ch + prefix.length},
+                    {line: end.line, ch: end.ch - suffix.length - 4}
+                );
+            } else {
+                cm.replaceSelection(prefix + `**${trimmedSelection}**` + suffix);
+                cm.setSelection(
+                    {line: start.line, ch: start.ch + prefix.length},
+                    {line: end.line, ch: end.ch - suffix.length + 4}
+                );
+            }
+            cm.focus();
+        },
+        'Cmd-I': function (cm) {
+            let selection = cm.getSelection();
+            let trimmedSelection = selection.trim();
+            let prefix = selection.slice(0, selection.indexOf(trimmedSelection));
+            let suffix = selection.slice(selection.indexOf(trimmedSelection) + trimmedSelection.length);
+
+            const isItalic = trimmedSelection.startsWith('*') && trimmedSelection.endsWith('*');
+
+            let start = cm.getCursor('start');
+            let end = cm.getCursor('end');
+
+            if (isItalic) {
+                cm.replaceSelection(prefix + trimmedSelection.slice(1, -1) + suffix);
+                cm.setSelection(
+                    {line: start.line, ch: start.ch + prefix.length},
+                    {line: end.line, ch: end.ch - suffix.length - 2}
+                );
+            } else {
+                cm.replaceSelection(prefix + `*${trimmedSelection}*` + suffix);
+                cm.setSelection(
+                    {line: start.line, ch: start.ch + prefix.length},
+                    {line: end.line, ch: end.ch - suffix.length + 2}
+                );
+            }
+            cm.focus();
+        },
+        'Cmd-Shift-T': insertGfmTable,
+        'Ctrl-Shift-T': insertGfmTable,
+    });
+
+    function showCopiedToast() {
+        const toast = document.createElement('div');
+        toast.textContent = 'Copied!';
+        toast.style.cssText = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: var(--col-bg-alt); color: var(--col-tx); padding: 8px 16px; border-radius: 5px;
+            border: 1px solid var(--col-border);
+            z-index: 9999; font-size: 14px;
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => document.body.removeChild(toast), 1000);
+    }
+
+    newEditor.getWrapperElement().addEventListener('mousedown', function (e) {
+        if (!isMetaKey(e)) return;
+
+        e.preventDefault();
+
+        const code = e.target.closest('.cm-inline-code');
+        if (!code) return;
+
+        navigator.clipboard.writeText(code.textContent);
+        showCopiedToast();
+    }, true);
+
+    newEditor.on('renderLine', function (cm, lineHandle, el) {
+        if (el.querySelector('.code-copy-btn')) return;
+        const lineNo = lineHandle.lineNo();
+        if (lineNo == null) return;
+        const here = cm.getStateAfter(lineNo);
+        const prev = lineNo > 0 ? cm.getStateAfter(lineNo - 1) : null;
+        if (!(here && here.fencedEndRE && (!prev || !prev.fencedEndRE))) return;
+        if (/^\s*```\s*mermaid\b/.test(cm.getLine(lineNo))) return;
+        const btn = document.createElement('button');
+        btn.className = 'code-copy-btn';
+        btn.title = 'Copy';
+        btn.onmousedown = function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const begin = lineHandle.lineNo();
+            const lines = [];
+            for (let L = begin + 1, last = cm.lineCount(); L < last; L++) {
+                const st = cm.getStateAfter(L);
+                if (!st || !st.fencedEndRE) break;
+                lines.push(cm.getLine(L));
+            }
+            navigator.clipboard.writeText(lines.join('\n'));
+            showCopiedToast();
+        };
+        el.appendChild(btn);
+    });
+
+    initAutoscroll(newEditor);
+    bindEditorForReading(newEditor);
+
+    if (typeof hookEditorDirty === 'function') {
+        hookEditorDirty(newEditor);
+    }
+
+    return newEditor;
+}
+
+// Focus last line before the links.
+function focusLastLine() {
+    let lastLine = currentEditor.lastLine();
+    let targetLine = lastLine;
+
+    // Eat all empty lines before first links.
+    while (lastLine >= 0) {
+        const lineContent = currentEditor.getLine(lastLine).trim();
+        if (lineContent === '') {
+            lastLine--;
+            continue;
+        }
+
+        lastLine = Math.min(lastLine + 1, currentEditor.lastLine());
+        break;
+    }
+    for (let i = lastLine; i >= 0; i--) {
+        const lineContent = currentEditor.getLine(i).trim();
+
+        if (!lineContent.startsWith('[') && (!lineContent.endsWith(']') || !lineContent.endsWith(')'))) {
+            targetLine = i;
+            break;
+        }
+    }
+    const targetChar = currentEditor.getLine(targetLine).length;
+    currentEditor.setCursor({ line: targetLine, ch: targetChar });
+    currentEditor.scrollTo(null, 0);
+    currentEditor.focus();
+    requestAnimationFrame(() => currentEditor.scrollTo(null, 0));
+}
+
+let savedScrollTop;
+function rememberEditorPos() {
+    savedScrollTop = editor.getScrollInfo().top;
+}
+
+function restoreEditorPos() {
+    if (savedScrollTop === undefined) {
+        return;
+    }
+    editor.refresh();
+    editor.scrollTo(null, savedScrollTop);
+}
+
+// KaTeX renderer for HyperMD's fold-math addon. fold-math instantiates
+// this class with (container, mode) and calls startRender/clear as the
+// user edits. mode === 'display' for $$...$$, anything else for $...$.
+function KatexRenderer(container, mode) {
+    this.container = container;
+    this.mode = mode;
+    this.span = document.createElement('span');
+    container.appendChild(this.span);
+}
+KatexRenderer.prototype.startRender = function (expr) {
+    try {
+        window.katex.render(expr, this.span, {
+            displayMode: this.mode === 'display',
+            throwOnError: false,
+        });
+    } catch (e) {
+        this.span.textContent = expr;
+    }
+    if (this.onChanged) this.onChanged(expr);
+};
+KatexRenderer.prototype.clear = function () {
+    if (this.span.parentNode === this.container) {
+        this.container.removeChild(this.span);
+    }
+};
+KatexRenderer.prototype.isReady = function () {
+    return true;
+};

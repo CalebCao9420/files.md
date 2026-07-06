@@ -1,987 +1,785 @@
-let chatIsClean = true; // Are there any unsaved changes?
+// Generated from src/ — edit TypeScript and run: npm run build
 
-const chat = document.getElementById('chat');
-const chatInput = document.getElementById('chat-input');
-const chatContainer = document.getElementById('chat-container');
-const sendChatBtn = document.getElementById('send-chat');
-const micChatBtn = document.getElementById('mic-chat');
-
+let chatIsClean = true;
+const chat = document.getElementById("chat");
+const chatInput = document.getElementById("chat-input");
+const chatContainer = document.getElementById("chat-container");
 const MAX_TITLE_LENGTH = 100;
 const RECENT_FILES = 1;
-
-// Cache of the last Chat.md content we rendered from. renderMessages skips
-// work when the file's content hasn't changed.
 let lastChatText = null;
-
-function updateChatActionButton() {
-    if (!sendChatBtn || !micChatBtn) return;
-    // Don't swap while a recording is in progress - keep the mic visible so
-    // the user can press it again to stop.
-    if (micChatBtn.classList.contains('recording')) return;
-    const hasText = chatInput.value.trim().length > 0;
-    sendChatBtn.style.display = hasText ? 'flex' : 'none';
-    micChatBtn.style.display = hasText ? 'none' : 'flex';
-}
-
-chatInput.addEventListener('input', () => {
-    autoResize();
-    updateChatActionButton();
-});
-// Initial resize to set proper height
+chatInput.addEventListener("input", autoResize);
 autoResize();
-
-chat.addEventListener('mouseover', function (e) {
-    const message = e.target.closest('.message');
-    if (!message) return;
-    const shown = chat.querySelector('.message.actions-shown');
-    if (shown && shown !== message) {
-        shown.classList.remove('actions-shown');
-    }
+chat.addEventListener("mouseover", function(e) {
+  const message = e.target.closest(".message");
+  if (!message) return;
+  const shown = chat.querySelector(".message.actions-shown");
+  if (shown && shown !== message) {
+    shown.classList.remove("actions-shown");
+  }
 });
-
 async function sendToChat() {
-    const text = chatInput.value.trim();
-    if (!text) return;
-
-    if (text.toLowerCase().endsWith(' jj') || text.toLowerCase().endsWith(' жж')) {
-        await addToJournal(text.slice(0, -3).trim());
-        chatInput.value = '';
-        chatIsClean = false;
-        // Reload from disk so the journal file/dir created by addToJournal
-        // shows up, then blink its row in the sidebar.
-        files = await loadLocalFiles(await getRootDirHandle());
-        renderSidebar('', [`/journal/${todayJournalFilename()}`]);
-        return;
-    }
-
-    const now = new Date();
-    const timestamp = now.toLocaleTimeString('en-US', {
-        hour12: false,
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-    const formattedContent = `\n- [ ] \`${timestamp}\` ${text}\n`;
-    await writeAtEnd(CHAT_PATH, formattedContent);
-
-    chatInput.value = '';
+  const text = chatInput.value.trim();
+  if (!text) return;
+  if (text.toLowerCase().endsWith(" jj") || text.toLowerCase().endsWith(" ??")) {
+    await addToJournal(text.slice(0, -3).trim());
+    chatInput.value = "";
     chatIsClean = false;
-    updateChatActionButton();
-    await renderMessages();
-    const allMessages = chat.querySelectorAll('.message');
-    if (allMessages.length > 0) {
-        allMessages[allMessages.length - 1].classList.add('actions-shown');
-    }
-    scrollToBottom();
+    files = await loadLocalFiles(await getRootDirHandle());
+    renderSidebar("", [`/journal/${todayJournalFilename()}`]);
+    return;
+  }
+  const now = /* @__PURE__ */ new Date();
+  const timestamp = now.toLocaleTimeString("en-US", {
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+  const formattedContent = `
+- [ ] \`${timestamp}\` ${text}
+`;
+  await writeAtEnd(CHAT_PATH, formattedContent);
+  chatInput.value = "";
+  chatIsClean = false;
+  await renderMessages();
+  const allMessages = chat.querySelectorAll(".message");
+  if (allMessages.length > 0) {
+    allMessages[allMessages.length - 1].classList.add("actions-shown");
+  }
+  scrollToBottom();
 }
-
-// Voice recording. First click starts capture, second click stops, saves to
-// media/, and appends a chat message with the audio markdown so the inline
-// audio player (fold-image.js) picks it up just like a pasted file.
-let chatMediaRecorder = null;
-let chatMediaStream = null;
-let chatMediaChunks = [];
-
-async function toggleMicRecording() {
-    const micBtn = document.getElementById('mic-chat');
-
-    if (chatMediaRecorder && chatMediaRecorder.state === 'recording') {
-        chatMediaRecorder.stop();
-        return;
-    }
-
-    let stream;
-    try {
-        stream = await navigator.mediaDevices.getUserMedia({audio: true});
-    } catch (err) {
-        logError('Microphone access denied:', err);
-        alert('Microphone access denied or unavailable: ' + err.message);
-        return;
-    }
-
-    chatMediaStream = stream;
-    chatMediaChunks = [];
-
-    // Pick a webm-compatible mime if the browser supports it; fall back to
-    // whatever MediaRecorder picks (Safari hands us mp4 here).
-    let mimeType = 'audio/webm';
-    if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = '';
-
-    chatMediaRecorder = new MediaRecorder(stream, mimeType ? {mimeType} : undefined);
-    chatMediaRecorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) chatMediaChunks.push(e.data);
-    };
-    chatMediaRecorder.onstop = async () => {
-        micBtn.classList.remove('recording');
-        updateChatActionButton();
-        // Release the mic so the OS indicator clears.
-        if (chatMediaStream) {
-            chatMediaStream.getTracks().forEach(t => t.stop());
-            chatMediaStream = null;
-        }
-
-        if (chatMediaChunks.length === 0) {
-            chatMediaRecorder = null;
-            return;
-        }
-
-        const recordedType = chatMediaRecorder.mimeType || 'audio/webm';
-        const blob = new Blob(chatMediaChunks, {type: recordedType});
-        chatMediaRecorder = null;
-
-        const ext = getImageExtension(recordedType.split(';')[0]);
-        const now = new Date();
-        const dd = String(now.getDate()).padStart(2, '0');
-        const mm = String(now.getMonth() + 1).padStart(2, '0');
-        const yyyy = now.getFullYear();
-        const hh = String(now.getHours()).padStart(2, '0');
-        const mi = String(now.getMinutes()).padStart(2, '0');
-        const ss = String(now.getSeconds()).padStart(2, '0');
-        const fileName = `${dd}.${mm}.${yyyy} ${hh}h${mi}m${ss}s.${ext}`;
-
-        try {
-            const fileHandle = await writeMediaFile(fileName, blob);
-            if (!fileHandle) {
-                logError('Failed to save voice message.');
-                alert('Failed to save voice message.');
-                return;
-            }
-            if (!files['media/']) files['media/'] = {};
-            files['media/'][fileName] = {
-                isFile: true,
-                handle: fileHandle,
-                lastModified: Date.now(),
-                imageUrl: URL.createObjectURL(blob),
-            };
-
-            const now = new Date();
-            const timestamp = now.toLocaleTimeString('en-US', {
-                hour12: false, hour: '2-digit', minute: '2-digit',
-            });
-            const formattedContent = `\n- [ ] \`${timestamp}\` ![](media/${encodeLinkPath(fileName)})\n`;
-            await writeAtEnd(CHAT_PATH, formattedContent);
-
-            chatIsClean = false;
-            await renderMessages();
-            scrollToBottom();
-        } catch (err) {
-            logError('Error saving voice message:', err);
-            alert('Error saving voice message: ' + err.message);
-        }
-    };
-
-    chatMediaRecorder.start();
-    micBtn.classList.add('recording');
+function getChatViewportSize() {
+  const sidebar = document.getElementById("sidebar");
+  let left = 0;
+  if (sidebar && getComputedStyle(sidebar).display !== "none") {
+    left = sidebar.getBoundingClientRect().right;
+  }
+  return {
+    width: Math.max(0, Math.floor(window.innerWidth - left)),
+    height: Math.max(0, Math.floor(window.innerHeight))
+  };
 }
-
+function fitChatLayout() {
+  const content = document.getElementById("content");
+  if (!content || !content.classList.contains("mdtk-chat-view")) {
+    return;
+  }
+  const box = document.getElementById("chat-container");
+  if (!box || getComputedStyle(box).display === "none") {
+    return;
+  }
+  const size = getChatViewportSize();
+  if (size.width < 1 || size.height < 1) {
+    return;
+  }
+  box.style.width = size.width + "px";
+  box.style.height = size.height + "px";
+  box.style.flex = "none";
+}
+function clearChatLayout() {
+  const box = document.getElementById("chat-container");
+  if (!box) {
+    return;
+  }
+  box.style.width = "";
+  box.style.height = "";
+  box.style.flex = "";
+}
+function showChatView() {
+  const content = document.getElementById("content");
+  const editorContainer = document.getElementById("editor-container");
+  if (content) {
+    content.classList.add("mdtk-chat-view");
+  }
+  if (editorContainer) {
+    editorContainer.style.display = "none";
+  }
+  const codemirror = document.querySelector(".CodeMirror-wrap");
+  if (codemirror) {
+    codemirror.style.display = "none";
+  }
+  fitChatLayout();
+}
+function hideChatView() {
+  const content = document.getElementById("content");
+  const editorContainer = document.getElementById("editor-container");
+  if (content) {
+    content.classList.remove("mdtk-chat-view");
+  }
+  if (editorContainer) {
+    editorContainer.style.display = "";
+  }
+  const codemirror = document.querySelector(".CodeMirror-wrap");
+  if (codemirror) {
+    codemirror.style.display = "block";
+  }
+  clearChatLayout();
+}
 async function openChat() {
-    closeChatModal();
-    chatContainer.style.display = 'flex';
-
-    if (currentEditor.path !== CHAT_PATH) {
-        const state = {path: editor.path};
-        history.pushState(state, '');
-    }
-
-    currentEditor.path = CHAT_PATH;
-
-    const codemirror = document.querySelector('.CodeMirror-wrap');
-    codemirror.style.display = 'none';
-    chat.style.display = 'flex';
-    chatInput.style.display = 'block';
-    updateChatActionButton();
-    hideEditor2();
-
-    const searchModal = document.getElementById('search');
-    if (searchModal.style.display === 'none') {
-        chatInput.focus();
-    }
-    isChat = true;
-    await renderMessages();
-    scrollToBottom();
-}
-
-async function openChatModal() {
-    chatContainer.classList.add('modal');
-    chatContainer.style.display = 'flex';
-    chat.style.display = 'block';
-    chatInput.style.display = 'block';
-    updateChatActionButton();
-    chat.style.display = 'flex';
-    chatInput.style.display = 'block';
-    updateChatActionButton();
-
+  closeChatModal();
+  if (typeof closePluginViews === "function") {
+    closePluginViews();
+  }
+  chatContainer.style.display = "flex";
+  if (currentEditor.path !== CHAT_PATH) {
+    const state = { path: editor.path };
+    history.pushState(state, "");
+  }
+  currentEditor.path = CHAT_PATH;
+  showChatView();
+  chat.style.display = "flex";
+  chatInput.style.display = "block";
+  hideEditor2();
+  const searchModal2 = document.getElementById("search");
+  if (searchModal2.style.display === "none") {
     chatInput.focus();
+  }
+  isChat = true;
+  hideReadingPanel();
+  if (typeof refreshChatArchiveUi === "function") {
+    refreshChatArchiveUi();
+  } else {
     await renderMessages();
+  }
+  scrollToBottom();
+  requestAnimationFrame(() => {
+    fitChatLayout();
     scrollToBottom();
+  });
 }
-
+async function openChatModal() {
+  chatContainer.classList.add("modal");
+  chatContainer.style.display = "flex";
+  chat.style.display = "block";
+  chatInput.style.display = "block";
+  chat.style.display = "flex";
+  chatInput.style.display = "block";
+  chatInput.focus();
+  await renderMessages();
+  scrollToBottom();
+}
 function closeChatModal() {
-    chatContainer.classList.remove('modal');
-    if (!isChat) {
-        chatContainer.style.display = 'none';
-        chat.style.display = 'none';
-        chatInput.style.display = 'none';
-        if (sendChatBtn) sendChatBtn.style.display = 'none';
-        if (micChatBtn) micChatBtn.style.display = 'none';
-    }
+  chatContainer.classList.remove("modal");
+  if (!isChat) {
+    chatContainer.style.display = "none";
+    chat.style.display = "none";
+    chatInput.style.display = "none";
+  }
 }
-
 async function toggleChatModal() {
-    if (isChat) {
-        return;
-    }
-
-    let isChatModal = document.getElementById('chat-container').classList.contains('modal');
-    if (isChatModal) {
-        closeChatModal();
-    } else {
-        openChatModal();
-    }
+  if (isChat) {
+    return;
+  }
+  let isChatModal = document.getElementById("chat-container").classList.contains("modal");
+  if (isChatModal) {
+    closeChatModal();
+  } else {
+    openChatModal();
+  }
 }
-
 async function parseMessagesFromChat() {
-    const file = await ((await getFileHandle(CHAT_PATH, true)).getFile());
-    let chat = await file.text();
-
-    // Normalize line endings
-    chat = chat.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    const lines = chat.split('\n');
-
-    const headerRegex = /^#### /;
-    // Block start: any `- [ ] ` / `- [x] ` checklist line (timestamp optional).
-    const timestampRegex = /^- \[[ xX]\] /;
-
-    const blocks = [];
-    let currentBlock = '';
-
-    for (const line of lines) {
-        const isHeader = headerRegex.test(line);
-        const isTimestamp = timestampRegex.test(line);
-
-        if (isHeader || isTimestamp) {
-            // Save previous block if exists
-            if (currentBlock.length > 0) {
-                blocks.push(currentBlock.trim());
-                currentBlock = '';
-            }
-
-            // Start new block
-            currentBlock = line;
-        } else {
-            // Continue current block
-            if (currentBlock.length > 0) {
-                currentBlock += '\n' + line;
-            }
-        }
-    }
-
-    // Add final block
-    if (currentBlock.length > 0) {
+  const file = await (await getFileHandle(CHAT_PATH, true)).getFile();
+  let chat2 = await file.text();
+  chat2 = chat2.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  const lines = chat2.split("\n");
+  const headerRegex = /^#### /;
+  const timestampRegex = /^- \[[ xX]\] /;
+  const blocks = [];
+  let currentBlock = "";
+  for (const line of lines) {
+    const isHeader = headerRegex.test(line);
+    const isTimestamp = timestampRegex.test(line);
+    if (isHeader || isTimestamp) {
+      if (currentBlock.length > 0) {
         blocks.push(currentBlock.trim());
+        currentBlock = "";
+      }
+      currentBlock = line;
+    } else {
+      if (currentBlock.length > 0) {
+        currentBlock += "\n" + line;
+      }
     }
-
-    // Parse blocks into messages
-    const messages = [];
-    let currentDate = null;
-
-    // TODO write clearer way
-    let numblocks = 0
-    for (let i = 0; i < blocks.length; i++) {
-        const block = blocks[i];
-
-        // Check if block is a date header
-        if (block.startsWith('####')) {
-            currentDate = block.replace(/^#+\s*/, '').trim();
-            numblocks++;
-            continue;
-        }
-
-        // Strip optional `- [ ]`/`- [x]` marker, then optional `HH:MM`
-        // timestamp. Lines without either are not chat entries.
-        let rest = block;
-        let mark = '';
-        const markerMatch = rest.match(/^- \[([ xX])\] /);
-        if (markerMatch) {
-            mark = markerMatch[1];
-            rest = rest.slice(markerMatch[0].length);
-        }
-        let timestamp = '';
-        const tsMatch = rest.match(/^`(\d{2}:\d{2})` /);
-        if (tsMatch) {
-            timestamp = tsMatch[1];
-            rest = rest.slice(tsMatch[0].length);
-        }
-        if (mark === '' && timestamp === '') {
-            continue;
-        }
-        const text = rest.trim();
-        if (text) {
-            messages.push({
-                index: i - numblocks,
-                done: mark === 'x' || mark === 'X',
-                text,
-                timestamp,
-                date: currentDate || new Date().toDateString(),
-            });
-        }
+  }
+  if (currentBlock.length > 0) {
+    blocks.push(currentBlock.trim());
+  }
+  const messages = [];
+  let currentDate = null;
+  let numblocks = 0;
+  for (let i = 0; i < blocks.length; i++) {
+    const block = blocks[i];
+    if (block.startsWith("####")) {
+      currentDate = block.replace(/^#+\s*/, "").trim();
+      numblocks++;
+      continue;
     }
-
-    return { messages, text: chat };
+    let rest = block;
+    let mark = "";
+    const markerMatch = rest.match(/^- \[([ xX])\] /);
+    if (markerMatch) {
+      mark = markerMatch[1];
+      rest = rest.slice(markerMatch[0].length);
+    }
+    let timestamp = "";
+    const tsMatch = rest.match(/^`(\d{2}:\d{2})` /);
+    if (tsMatch) {
+      timestamp = tsMatch[1];
+      rest = rest.slice(tsMatch[0].length);
+    }
+    if (mark === "" && timestamp === "") {
+      continue;
+    }
+    const text = rest.trim();
+    if (text) {
+      messages.push({
+        index: i - numblocks,
+        done: mark === "x" || mark === "X",
+        text,
+        timestamp,
+        date: currentDate || (/* @__PURE__ */ new Date()).toDateString()
+      });
+    }
+  }
+  return { messages, text: chat2 };
 }
-
 async function saveMessagesToChat(messages) {
-    // Group messages by date
-    const messagesByDate = {};
-    messages.forEach(msg => {
-        const date = msg.date || todayHeader().replace('#### ', '');
-        if (!messagesByDate[date]) {
-            messagesByDate[date] = [];
-        }
-        messagesByDate[date].push(msg);
+  const messagesByDate = {};
+  messages.forEach((msg) => {
+    const date = msg.date || todayHeader().replace("#### ", "");
+    if (!messagesByDate[date]) {
+      messagesByDate[date] = [];
+    }
+    messagesByDate[date].push(msg);
+  });
+  let content = "";
+  Object.entries(messagesByDate).forEach(([date, msgs]) => {
+    if (content) content += "\n";
+    content += `#### ${date}
+`;
+    msgs.forEach((msg) => {
+      const tsPart = msg.timestamp ? `\`${msg.timestamp}\` ` : "";
+      content += `- [${msg.done ? "x" : " "}] ${tsPart}${msg.text}
+`;
     });
-
-    let content = '';
-    Object.entries(messagesByDate).forEach(([date, msgs]) => {
-        if (content) content += '\n';
-        content += `#### ${date}\n`;
-        msgs.forEach(msg => {
-            const tsPart = msg.timestamp ? `\`${msg.timestamp}\` ` : '';
-            content += `- [${msg.done ? 'x' : ' '}] ${tsPart}${msg.text}\n`;
-        });
-    });
-
-    await write(CHAT_PATH, content);
-    lastChatText = content;
+  });
+  await write(CHAT_PATH, content);
+  lastChatText = content;
 }
-
-// Toggle the checkbox marker on a single chat line in place.
-// Matches any of the three shapes the line might be in on disk:
-//   `HH:MM` text          (legacy)
-//   - [ ] `HH:MM` text    (new, not done)
-//   - [x] `HH:MM` text    (new, done)
-// and rewrites it to the requested done/undone marker.
 async function toggleChatMessage(timestamp, text, done) {
-    const handle = await getFileHandle(CHAT_PATH, true);
-    const file = await handle.getFile();
-    let content = await file.text();
-
-    const escapeRegex = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const marker = done ? 'x' : ' ';
-    const re = timestamp
-        ? new RegExp(`^(?:- \\[[ xX]\\] )?\`${escapeRegex(timestamp)}\` ${escapeRegex(text)}\\s*$`, 'm')
-        : new RegExp(`^- \\[[ xX]\\] ${escapeRegex(text)}\\s*$`, 'm');
-    const replacement = timestamp
-        ? `- [${marker}] \`${timestamp}\` ${text}`
-        : `- [${marker}] ${text}`;
-
-    if (!re.test(content)) {
-        logError('toggleChatMessage: line not found', {timestamp, text});
-        return;
-    }
-    content = content.replace(re, replacement);
-
-    const writable = await handle.createWritable();
-    await writable.write(content);
-    await writable.close();
-    lastChatText = content;
+  const handle = await getFileHandle(CHAT_PATH, true);
+  const file = await handle.getFile();
+  let content = await file.text();
+  const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const marker = done ? "x" : " ";
+  const re = timestamp ? new RegExp(`^(?:- \\[[ xX]\\] )?\`${escapeRegex(timestamp)}\` ${escapeRegex(text)}\\s*$`, "m") : new RegExp(`^- \\[[ xX]\\] ${escapeRegex(text)}\\s*$`, "m");
+  const replacement = timestamp ? `- [${marker}] \`${timestamp}\` ${text}` : `- [${marker}] ${text}`;
+  if (!re.test(content)) {
+    logError("toggleChatMessage: line not found", { timestamp, text });
+    return;
+  }
+  content = content.replace(re, replacement);
+  const writable = await handle.createWritable();
+  await writable.write(content);
+  await writable.close();
+  lastChatText = content;
 }
-
 function initChat() {
-    chatInput.addEventListener('keydown', async function (e) {
-        if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
-            e.preventDefault();
-            await sendToChat();
-            autoResize();
-        }
-    });
+  chatInput.addEventListener("keydown", async function(e) {
+    if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
+      e.preventDefault();
+      await sendToChat();
+      autoResize();
+    }
+  });
 }
-
 function scrollToBottom() {
-    setTimeout(function () {
-        chat.scrollTop = chat.scrollHeight;
-    }, 100);
+  setTimeout(function() {
+    chat.scrollTop = chat.scrollHeight;
+  }, 100);
 }
-
-function escapeHtml(unsafe) {
-    return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
 }
-
-// Swap media markdown (![](media/file.ext)) for an emoji + bare filename
-// in chat-message display. Original text stays in `data-text` so the
-// move/journal/archive actions still operate on the real markdown.
-function prettifyMediaTags(text) {
-    return text.replace(/!\[[^\]]*\]\(([^)]+)\)/g, (_, path) => {
-        const filename = path.split('/').pop();
-        const ext = filename.split('.').pop().toLowerCase();
-        const emoji = /^(mp3|ogg|oga|weba|wav)$/.test(ext) ? '🎵'
-            : /^(mp4|webm|mov)$/.test(ext) ? '🎬'
-            : '🖼️';
-        return `${emoji} ${filename}`;
-    });
-}
-
 function autoResize() {
-    if (chatInput.value === '') {
-        chatInput.style.height = '';
-        return;
-    }
-    chatInput.style.height = '';
-    if (chatInput.scrollHeight > chatInput.clientHeight) {
-        chatInput.style.height = Math.min(chatInput.scrollHeight, 250) + 'px';
-    }
+  if (chatInput.value === "") {
+    chatInput.style.height = "";
+    return;
+  }
+  if (chatInput.value.split("\n").length <= 1) {
+    return;
+  }
+  chatInput.style.height = "auto";
+  chatInput.style.height = Math.min(chatInput.scrollHeight, 250) + "px";
 }
-
 function getRecentlyModifiedFiles(n) {
-    if (files === undefined) return [];
-
-    const entries = [];
-    for (const filename in files) {
-        const content = files[filename];
-        if (filename && content && !filename.endsWith('/') &&
-            ![
-                toFilename(CHAT_PATH),
-                toFilename(CONFIG_PATH),
-                toFilename(LATER_PATH),
-                toFilename(WATCH_PATH),
-                toFilename(READ_PATH),
-                toFilename(SHOP_PATH),
-            ].includes(filename)) {
-            entries.push([filename, content]);
-        }
+  if (files === void 0) return [];
+  const entries = [];
+  for (const filename in files) {
+    const content = files[filename];
+    if (filename && content && !filename.endsWith("/") && ![
+      toFilename(CHAT_PATH),
+      toFilename(CONFIG_PATH),
+      toFilename(LATER_PATH),
+      toFilename(WATCH_PATH),
+      toFilename(READ_PATH),
+      toFilename(SHOP_PATH)
+    ].includes(filename)) {
+      entries.push([filename, content]);
     }
-
-    for (let i = 0; i < entries.length - 1; i++) {
-        for (let j = i + 1; j < entries.length; j++) {
-            const aTime = new Date(entries[i][1].lastModified || 0);
-            const bTime = new Date(entries[j][1].lastModified || 0);
-            if (aTime < bTime) {
-                // Swap
-                const temp = entries[i];
-                entries[i] = entries[j];
-                entries[j] = temp;
-            }
-        }
+  }
+  for (let i = 0; i < entries.length - 1; i++) {
+    for (let j = i + 1; j < entries.length; j++) {
+      const aTime = new Date(entries[i][1].lastModified || 0);
+      const bTime = new Date(entries[j][1].lastModified || 0);
+      if (aTime < bTime) {
+        const temp = entries[i];
+        entries[i] = entries[j];
+        entries[j] = temp;
+      }
     }
-
-    // Take first 3 and extract filenames
-    const result = [];
-    const limit = Math.min(n, entries.length);
-    for (let i = 0; i < limit; i++) {
-        result.push(entries[i][0]);
-    }
-
-    return result;
+  }
+  const result = [];
+  const limit = Math.min(n, entries.length);
+  for (let i = 0; i < limit; i++) {
+    result.push(entries[i][0]);
+  }
+  return result;
 }
-
-chatInput.addEventListener('paste', async (e) => {
-    const items = e.clipboardData.items;
-
-    for (const item of items) {
-        if (item.kind === 'file' && item.type.startsWith('image/')) {
-            e.preventDefault();
-            const file = item.getAsFile();
-            const fileName = generateSafeFilename(file.name);
-
-            const saved = await writeMediaFile(fileName, file);
-            if (saved) {
-                const imageMarkdown = `![${fileName}](media/${encodeLinkPath(fileName)})\n`;
-
-                const cursorPos = chatInput.selectionStart;
-                const textBefore = chatInput.value.substring(0, cursorPos);
-                const textAfter = chatInput.value.substring(chatInput.selectionEnd);
-
-                chatInput.value = textBefore + imageMarkdown + textAfter;
-
-                const newCursorPos = cursorPos + imageMarkdown.length;
-                chatInput.setSelectionRange(newCursorPos, newCursorPos);
-                chatInput.focus();
-                autoResize();
-                updateChatActionButton();
-            }
-            break;
-        }
+chatInput.addEventListener("paste", async (e) => {
+  const items = e.clipboardData.items;
+  for (const item of items) {
+    if (item.kind === "file" && item.type.startsWith("image/")) {
+      e.preventDefault();
+      const file = item.getAsFile();
+      const fileName = generateSafeFilename(file.name);
+      const saved = await writeMediaFile(fileName, file);
+      if (saved) {
+        const imageMarkdown = `![${fileName}](media/${fileName})
+`;
+        const cursorPos = chatInput.selectionStart;
+        const textBefore = chatInput.value.substring(0, cursorPos);
+        const textAfter = chatInput.value.substring(chatInput.selectionEnd);
+        chatInput.value = textBefore + imageMarkdown + textAfter;
+        const newCursorPos = cursorPos + imageMarkdown.length;
+        chatInput.setSelectionRange(newCursorPos, newCursorPos);
+        chatInput.focus();
+      }
+      break;
     }
+  }
 });
-
 function todayJournalFilename() {
-    const now = new Date();
-    const monthNames = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    const monthIndex = parseInt(now.toLocaleDateString('en-US', {month: 'numeric',})) - 1;
-    const year = parseInt(now.toLocaleDateString('en-US', {year: 'numeric'}));
-    const month = (monthIndex + 1).toString().padStart(2, '0');
-    return `${year}.${month} ${monthNames[monthIndex]}.md`;
+  const now = /* @__PURE__ */ new Date();
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ];
+  const monthIndex = parseInt(now.toLocaleDateString("en-US", { month: "numeric" })) - 1;
+  const year = parseInt(now.toLocaleDateString("en-US", { year: "numeric" }));
+  const month = (monthIndex + 1).toString().padStart(2, "0");
+  return `${year}.${month} ${monthNames[monthIndex]}.md`;
 }
-
 function todayHeader(timezone) {
-    const now = new Date();
-    const monthNames = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    const dayNames = [
-        'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
-    ];
-
-    const day = parseInt(now.toLocaleDateString('en-US', {day: 'numeric', timeZone: timezone}));
-    const monthIndex = parseInt(now.toLocaleDateString('en-US', {month: 'numeric', timeZone: timezone})) - 1;
-    const year = parseInt(now.toLocaleDateString('en-US', {year: 'numeric', timeZone: timezone}));
-    const dayIndex = new Date(now.toLocaleDateString('en-US', {timeZone: timezone})).getDay();
-
-    return `#### ${day} ${monthNames[monthIndex]}, ${dayNames[dayIndex]}`;
+  const now = /* @__PURE__ */ new Date();
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ];
+  const dayNames = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday"
+  ];
+  const day = parseInt(now.toLocaleDateString("en-US", { day: "numeric", timeZone: timezone }));
+  const monthIndex = parseInt(now.toLocaleDateString("en-US", { month: "numeric", timeZone: timezone })) - 1;
+  const year = parseInt(now.toLocaleDateString("en-US", { year: "numeric", timeZone: timezone }));
+  const dayIndex = new Date(now.toLocaleDateString("en-US", { timeZone: timezone })).getDay();
+  return `#### ${day} ${monthNames[monthIndex]}, ${dayNames[dayIndex]}`;
 }
-
 async function addToJournal(text) {
-    text = ucfirst(text.trim());
-    const journalFilename = todayJournalFilename();
-    const journalPath = `journal/${journalFilename}`;
-    const journalHeader = todayHeader().replace(/^#### /, '## ');
-    await addHeaderAndText(journalPath, journalHeader, text);
+  text = ucfirst(text.trim());
+  const journalFilename = todayJournalFilename();
+  const journalPath = `journal/${journalFilename}`;
+  const journalHeader = todayHeader().replace(/^#### /, "## ");
+  await addHeaderAndText(journalPath, journalHeader, text);
 }
-
 async function moveFromChat(text, callback) {
-    await callback(text);
-
-    const { messages } = await parseMessagesFromChat();
-    const filteredMessages = messages.filter(msg => msg.text !== text);
-    await saveMessagesToChat(filteredMessages);
+  await callback(text);
+  const { messages } = await parseMessagesFromChat();
+  const filteredMessages = messages.filter((msg) => msg.text !== text);
+  await saveMessagesToChat(filteredMessages);
 }
-
-function attachEventListeners() {
-    document.addEventListener('keydown', function (e) {
-        if (isMetaKey(e) && e.key === 'a') {
-            const searchModal = document.getElementById('search');
-            const moveModal = document.getElementById('move');
-            if ((searchModal && searchModal.style.display !== 'none' && searchModal.style.display !== '') ||
-                (moveModal && moveModal.style.display !== 'none' && moveModal.style.display !== '')) {
-                return;
-            }
-
-            if (e.target.id !== 'chat-input') {
-                e.preventDefault();
-                const allMessages = chat.querySelectorAll('.message');
-                allMessages.forEach(message => message.classList.add('selected'));
-            }
-        }
-    });
-
-    chat.addEventListener('mousedown', function (e) {
-        // Mousedown in empty space (the margins around centered messages, or
-        // the gaps between them): draw a marquee rectangle and select every
-        // message it touches.
-        if (!e.target.closest('.message')) {
-            if (e.button !== 0) return;
-            e.preventDefault(); // don't start a native text selection
-            const startX = e.clientX, startY = e.clientY;
-            const messages = Array.from(chat.querySelectorAll('.message'));
-            const additive = isMetaKey(e) || e.shiftKey;
-            const preselected = additive
-                ? messages.filter(m => m.classList.contains('selected'))
-                : [];
-            let rectEl = null;
-            let dragging = false;
-
-            const intersects = (a, b) =>
-                a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
-
-            function handleMouseMove(e) {
-                const dx = e.clientX - startX, dy = e.clientY - startY;
-                if (!dragging && Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
-                dragging = true;
-                document.getSelection().removeAllRanges();
-
-                if (!rectEl) {
-                    rectEl = document.createElement('div');
-                    rectEl.className = 'chat-marquee';
-                    document.body.appendChild(rectEl);
-                    chat.classList.add('block-selecting');
-                }
-
-                const left = Math.min(startX, e.clientX);
-                const top = Math.min(startY, e.clientY);
-                const width = Math.abs(dx), height = Math.abs(dy);
-                rectEl.style.left = left + 'px';
-                rectEl.style.top = top + 'px';
-                rectEl.style.width = width + 'px';
-                rectEl.style.height = height + 'px';
-
-                const marquee = {left, top, right: left + width, bottom: top + height};
-                messages.forEach(m => {
-                    const hit = intersects(marquee, m.getBoundingClientRect());
-                    m.classList.toggle('selected', hit || preselected.includes(m));
-                });
-            }
-
-            function handleMouseUp() {
-                document.removeEventListener('mousemove', handleMouseMove);
-                document.removeEventListener('mouseup', handleMouseUp);
-                if (rectEl) rectEl.remove();
-                chat.classList.remove('block-selecting');
-                // Plain click on empty space (no drag): clear the selection.
-                if (!dragging && !additive) {
-                    document.querySelectorAll('.message.selected').forEach(m => m.classList.remove('selected'));
-                }
-            }
-
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp);
-            return;
-        }
-
-        const message = e.target.closest('.message');
-        if (!message || e.target.closest('.message-actions')) {
-            return;
-        }
-
-        if (isMetaKey(e)) {
-            message.classList.toggle('selected');
-            return;
-        }
-
-        if (e.shiftKey) {
-            const selectedMessages = document.querySelectorAll('.message.selected');
-            if (selectedMessages.length > 0) {
-                const allMessages = Array.from(chat.querySelectorAll('.message'));
-                const lastSelected = selectedMessages[selectedMessages.length - 1];
-                const startIndex = allMessages.indexOf(lastSelected);
-                const endIndex = allMessages.indexOf(message);
-                const minIndex = Math.min(startIndex, endIndex);
-                const maxIndex = Math.max(startIndex, endIndex);
-
-                for (let i = minIndex; i <= maxIndex; i++) {
-                    allMessages[i].classList.add('selected');
-                }
-                return;
-            }
-        }
-
-        document.querySelectorAll('.message.selected').forEach(m => m.classList.remove('selected'));
-        message.classList.add('selected');
-
-        let startMessage = message;
-        let allMessages = Array.from(chat.querySelectorAll('.message'));
-
-        function handleMouseMove(e) {
-            const currentMessage = e.target.closest('.message');
-            if (currentMessage && currentMessage !== startMessage) {
-                document.getSelection().removeAllRanges();
-
-                const startIndex = allMessages.indexOf(startMessage);
-                const endIndex = allMessages.indexOf(currentMessage);
-                const minIndex = Math.min(startIndex, endIndex);
-                const maxIndex = Math.max(startIndex, endIndex);
-
-                document.querySelectorAll('.message.selected').forEach(m => m.classList.remove('selected'));
-
-                for (let i = minIndex; i <= maxIndex; i++) {
-                    allMessages[i].classList.add('selected');
-                }
-            }
-        }
-
-        function handleMouseUp() {
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
-        }
-
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
-    });
-
-    chat.addEventListener('click', function (e) {
-        // Only clear selection if clicking outside messages AND not dragging
-        if (!e.target.closest('.message') && !e.detail > 1) {
-            document.querySelectorAll('.message.selected').forEach(m => m.classList.remove('selected'));
-        }
-    });
-
-    chat.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') {
-            const selectedMessages = chat.querySelectorAll('.message.selected');
-            if (selectedMessages.length > 0) {
-                selectedMessages.forEach(message => message.classList.remove('selected'));
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        }
-    }, true);
-
-    // Add event listeners for editing message content
-    // chatContainer.querySelectorAll('.message-content[contenteditable]').forEach(element => {
-    //     element.addEventListener('blur', function (e) {
-    //         saveEdit(e.target.dataset.noteId, e.target.textContent);
-    //         e.target.classList.remove('editing');
-    //     });
-    //
-    //     element.addEventListener('focus', function (e) {
-    //         e.target.classList.add('editing');
-    //     });
-    //
-    //     element.addEventListener('keydown', function (e) {
-    //         if (e.key === 'Enter' && !e.shiftKey) {
-    //             e.preventDefault();
-    //             e.target.blur();
-    //         }
-    //         if (e.key === 'Escape') {
-    //             e.target.textContent = messages.find(n => n.id == e.target.dataset.noteId).text;
-    //             e.target.blur();
-    //         }
-    //     });
-    // });
-
-    chat.querySelectorAll('.complete-btn').forEach(btn => {
-        btn.addEventListener('mousedown', function (e) { e.stopPropagation(); });
-        btn.addEventListener('click', async function (e) {
-            e.stopPropagation();
-            const el = btn.closest('.message');
-            el.classList.toggle('completed');
-            const done = el.classList.contains('completed');
-            try {
-                await toggleChatMessage(el.dataset.timestamp, el.dataset.text, done);
-            } catch (err) {
-                logError('Failed to toggle chat line:', err);
-                el.classList.toggle('completed'); // revert
-            }
-        });
-    });
-
-    chat.querySelectorAll('.to-file-btn').forEach(btn => {
-        btn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            const searchModalElement = document.getElementById('search');
-            if (searchModalElement.style.display !== 'none' && searchModalElement.style.display !== '') {
-                searchModal.close();
-            } else {
-                const message = btn.closest('.message');
-                // Keep this message's action row visible while the picker is
-                // open - mouse leaves the bubble as soon as the modal grabs
-                // focus, otherwise the buttons fade out under the user.
-                message.classList.add('actions-pinned');
-                searchModal.open('', e.target, message);
-            }
-        });
-    });
-
-    chat.querySelectorAll('.to-journal-btn').forEach(btn => {
-        btn.addEventListener('click', async function (e) {
-            e.stopPropagation();
-            const selectedMessages = document.querySelectorAll('.message.selected');
-
-            let msgs = [];
-            let messagesToRemove = [];
-            if (selectedMessages.length > 0) {
-                msgs = Array.from(selectedMessages).map(msg => msg.querySelector('.message-content').dataset.text);
-                messagesToRemove = selectedMessages;
-            } else {
-                msgs = [btn.closest('.message').querySelector('.message-content').dataset.text];
-                messagesToRemove = [btn.closest('.message')];
-            }
-
-            (async () => {
-                for (const msg of msgs) {
-                    await moveFromChat(msg, addToJournal);
-                }
-                await renderMessages();
-                // The journal file (or even the journal/ dir) may have
-                // just been created on disk. addToJournal goes through
-                // write(), which doesn't touch the in-memory `files` map,
-                // so reload from disk before rendering or the new entry
-                // won't show up in the sidebar.
-                files = await loadLocalFiles(await getRootDirHandle());
-                renderSidebar('', [`/journal/${todayJournalFilename()}`]);
-            })();
-
-            // TODO only remove if previous is successful
-            messagesToRemove.forEach(message => {
-                message.classList.add('removing');
-                setTimeout(() => {
-                    message.remove();
-                }, 300);
-            });
-            chatInput.focus();
-        });
-    });
-
-    chat.querySelectorAll('.to-checklist-btn').forEach(btn => {
-        btn.addEventListener('click', async function (e) {
-            e.stopPropagation();
-            const selectedMessages = document.querySelectorAll('.message.selected');
-            let msgs = [];
-            let messagesToRemove = [];
-            if (selectedMessages.length > 0) {
-                msgs = Array.from(selectedMessages).map(msg => msg.querySelector('.message-content').dataset.text);
-                messagesToRemove = selectedMessages;
-            } else {
-                msgs = [btn.closest('.message').dataset.text];
-                messagesToRemove = [btn.closest('.message')];
-            }
-
-
-            (async () => {
-                for (const msg of msgs) {
-                    await moveFromChat(msg, async msg => {
-                        await addChecklistItem(btn.dataset.checklist, msg)
-                    });
-                }
-                // The checklist file (Later.md / Read.md / Watch.md /
-                // Shop.md) may not exist yet - addChecklistItem creates it
-                // on disk via write() but doesn't touch the in-memory
-                // `files` map, so reload before rendering.
-                files = await loadLocalFiles(await getRootDirHandle());
-                // dataset.checklist is "Later.md"/"Read.md"/etc.; sidebar
-                // paths are absolute, so prepend / so the includes() match
-                // fires.
-                renderSidebar('', [joinPath('/', btn.dataset.checklist)]);
-            })();
-
-            messagesToRemove.forEach(message => {
-                message.classList.add('removing');
-                setTimeout(() => {
-                    message.remove();
-                }, 300);
-            });
-            setTimeout(() => {
-                renderMessages();
-            }, 500);
-            chatInput.focus();
-        });
-    });
-
-    chat.querySelectorAll('.to-archive-btn').forEach(btn => {
-        btn.addEventListener('click', async function (e) {
-            e.stopPropagation();
-            const selectedMessages = document.querySelectorAll('.message.selected');
-            let msgs = [];
-            let messagesToRemove = [];
-            if (selectedMessages.length > 0) {
-                msgs = Array.from(selectedMessages).map(msg => msg.querySelector('.message-content').dataset.text);
-                messagesToRemove = selectedMessages;
-            } else {
-                msgs = [btn.closest('.message').querySelector('.message-content').dataset.text];
-                messagesToRemove = [btn.closest('.message')];
-            }
-
-            const destinations = [];
-            (async () => {
-                for (const msg of msgs) {
-                    const [header, body] = extractHeaderAndBody(msg, MAX_TITLE_LENGTH);
-                    const path = joinPath('/', btn.dataset.dir, sanitizeFilename(header)) + '.md';
-                    destinations.push(path);
-                    for (const msg of msgs) {
-                        await moveFromChat(msg, async () => {
-                            await write(path, body)
-                        });
-                    }
-                }
-                await renderMessages();
-                // Reload from disk - write() above creates new files (and
-                // possibly the archive/ dir itself) without touching the
-                // in-memory `files` map.
-                files = await loadLocalFiles(await getRootDirHandle());
-                renderSidebar('', destinations);
-            })();
-
-            messagesToRemove.forEach(message => {
-                message.classList.add('removing');
-                setTimeout(() => {
-                    message.remove();
-                }, 300);
-            });
-            chatInput.focus();
-        });
-    });
-
-    chat.querySelectorAll('.to-recent-btn').forEach(btn => {
-        btn.addEventListener('click', async function (e) {
-            e.stopPropagation();
-            const selectedMessages = document.querySelectorAll('.message.selected');
-            let msgs = [];
-            let messagesToRemove = [];
-            if (selectedMessages.length > 0) {
-                msgs = Array.from(selectedMessages).map(msg => msg.querySelector('.message-content').dataset.text);
-                messagesToRemove = selectedMessages;
-            } else {
-                msgs = [btn.closest('.message').querySelector('.message-content').dataset.text];
-                messagesToRemove = [btn.closest('.message')];
-            }
-
-            const path = btn.dataset.filename;
-            let callback = async text => await addHeaderAndText(path, todayHeader(), text, true, false);
-            (async () => {
-                for (const msg of msgs) {
-                    await moveFromChat(msg, callback);
-                }
-                await renderMessages();
-                // The recent-file may not exist yet (addHeaderAndText goes
-                // through write() and doesn't touch the in-memory `files`
-                // map), so reload before rendering. dataset.filename is
-                // just "Foo.md"; the sidebar walker produces "/Foo.md" -
-                // normalize so modifiedPaths.includes(path) matches.
-                files = await loadLocalFiles(await getRootDirHandle());
-                renderSidebar('', [joinPath('/', path)]);
-            })();
-
-            messagesToRemove.forEach(message => {
-                message.classList.add('removing');
-                setTimeout(() => {
-                    message.remove();
-                }, 300);
-            });
-
-            chatInput.focus();
-        });
-    });
-
-    // Enable editing on double-click
-    chat.querySelectorAll('.message-content').forEach(content => {
-        content.addEventListener('dblclick', function (e) {
-            e.stopPropagation();
-            this.style.pointerEvents = 'auto';
-            this.classList.add('editing');
-            this.focus();
-        });
-    });
+function getChatActionMessages(btn) {
+  const selectedMessages = document.querySelectorAll(".message.selected");
+  if (selectedMessages.length > 0) {
+    return {
+      msgs: Array.from(selectedMessages).map((msg) => msg.querySelector(".message-content").textContent),
+      messagesToRemove: selectedMessages
+    };
+  }
+  const message = btn.closest(".message");
+  return {
+    msgs: [message.querySelector(".message-content").textContent],
+    messagesToRemove: [message]
+  };
 }
-
-async function renderMessages() {
-    const { messages, text } = await parseMessagesFromChat();
-    if (text === lastChatText) {
-        log('Chat unchanged, skipping render');
-        return;
+function removeChatMessagesWithAnimation(messagesToRemove) {
+  messagesToRemove.forEach((message) => {
+    message.classList.add("removing");
+    setTimeout(() => {
+      message.remove();
+    }, 300);
+  });
+}
+function renderPluginChatArchiveButtonsHtml() {
+  if (typeof getChatArchiveTargets !== "function") {
+    return "";
+  }
+  return getChatArchiveTargets().filter((target) => {
+    try {
+      return !target.isAvailable || target.isAvailable();
+    } catch {
+      return false;
     }
-    lastChatText = text;
-    log(`Loaded ${messages.length} messages from ${CHAT_PATH}`);
-
-    if (messages.length === 0) {
-        chat.innerHTML = `
+  }).map(
+    (target) => `
+                    <div class="btn-wrapper chat-archive-target">
+                        <button class="action-btn to-plugin-archive-btn" type="button" data-archive-target="${escapeHtml(target.id)}" title="${escapeHtml(target.label)}" aria-label="${escapeHtml(target.label)}">
+                            ${target.html}
+                        </button>
+                        <span class="btn-label">${escapeHtml(target.label)}</span>
+                    </div>`
+  ).join("");
+}
+function attachEventListeners() {
+  document.addEventListener("keydown", function(e) {
+    if (isMetaKey(e) && e.key === "a") {
+      const searchModal2 = document.getElementById("search");
+      const moveModal = document.getElementById("move");
+      if (searchModal2 && searchModal2.style.display !== "none" && searchModal2.style.display !== "" || moveModal && moveModal.style.display !== "none" && moveModal.style.display !== "") {
+        return;
+      }
+      if (e.target.id !== "chat-input") {
+        e.preventDefault();
+        const allMessages = chat.querySelectorAll(".message");
+        allMessages.forEach((message) => message.classList.add("selected"));
+      }
+    }
+  });
+  chat.addEventListener("mousedown", function(e) {
+    if (!e.target.closest(".message")) {
+      let handleMouseMove2 = function(e2) {
+        const currentMessage = e2.target.closest(".message");
+        if (currentMessage) {
+          document.getSelection().removeAllRanges();
+          if (!startMessage2) {
+            startMessage2 = currentMessage;
+            document.querySelectorAll(".message.selected").forEach((m) => m.classList.remove("selected"));
+            currentMessage.classList.add("selected");
+          } else if (currentMessage !== startMessage2) {
+            const startIndex = allMessages2.indexOf(startMessage2);
+            const endIndex = allMessages2.indexOf(currentMessage);
+            const minIndex = Math.min(startIndex, endIndex);
+            const maxIndex = Math.max(startIndex, endIndex);
+            document.querySelectorAll(".message.selected").forEach((m) => m.classList.remove("selected"));
+            for (let i = minIndex; i <= maxIndex; i++) {
+              allMessages2[i].classList.add("selected");
+            }
+          }
+        }
+      }, handleMouseUp2 = function() {
+        document.removeEventListener("mousemove", handleMouseMove2);
+        document.removeEventListener("mouseup", handleMouseUp2);
+      };
+      let allMessages2 = Array.from(chat.querySelectorAll(".message"));
+      let startMessage2 = null;
+      document.addEventListener("mousemove", handleMouseMove2);
+      document.addEventListener("mouseup", handleMouseUp2);
+      return;
+    }
+    const message = e.target.closest(".message");
+    if (!message || e.target.closest(".message-actions")) {
+      return;
+    }
+    if (isMetaKey(e)) {
+      message.classList.toggle("selected");
+      return;
+    }
+    if (e.shiftKey) {
+      const selectedMessages = document.querySelectorAll(".message.selected");
+      if (selectedMessages.length > 0) {
+        const allMessages2 = Array.from(chat.querySelectorAll(".message"));
+        const lastSelected = selectedMessages[selectedMessages.length - 1];
+        const startIndex = allMessages2.indexOf(lastSelected);
+        const endIndex = allMessages2.indexOf(message);
+        const minIndex = Math.min(startIndex, endIndex);
+        const maxIndex = Math.max(startIndex, endIndex);
+        for (let i = minIndex; i <= maxIndex; i++) {
+          allMessages2[i].classList.add("selected");
+        }
+        return;
+      }
+    }
+    document.querySelectorAll(".message.selected").forEach((m) => m.classList.remove("selected"));
+    message.classList.add("selected");
+    let startMessage = message;
+    let allMessages = Array.from(chat.querySelectorAll(".message"));
+    function handleMouseMove(e2) {
+      const currentMessage = e2.target.closest(".message");
+      if (currentMessage && currentMessage !== startMessage) {
+        document.getSelection().removeAllRanges();
+        const startIndex = allMessages.indexOf(startMessage);
+        const endIndex = allMessages.indexOf(currentMessage);
+        const minIndex = Math.min(startIndex, endIndex);
+        const maxIndex = Math.max(startIndex, endIndex);
+        document.querySelectorAll(".message.selected").forEach((m) => m.classList.remove("selected"));
+        for (let i = minIndex; i <= maxIndex; i++) {
+          allMessages[i].classList.add("selected");
+        }
+      }
+    }
+    function handleMouseUp() {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    }
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  });
+  chat.addEventListener("click", function(e) {
+    if (!e.target.closest(".message") && !e.detail > 1) {
+      document.querySelectorAll(".message.selected").forEach((m) => m.classList.remove("selected"));
+    }
+  });
+  chat.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") {
+      const selectedMessages = chat.querySelectorAll(".message.selected");
+      if (selectedMessages.length > 0) {
+        selectedMessages.forEach((message) => message.classList.remove("selected"));
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }
+  }, true);
+  chat.querySelectorAll(".complete-btn").forEach((btn) => {
+    btn.addEventListener("mousedown", function(e) {
+      e.stopPropagation();
+    });
+    btn.addEventListener("click", async function(e) {
+      e.stopPropagation();
+      const el = btn.closest(".message");
+      el.classList.toggle("completed");
+      const done = el.classList.contains("completed");
+      try {
+        await toggleChatMessage(el.dataset.timestamp, el.dataset.text, done);
+      } catch (err) {
+        logError("Failed to toggle chat line:", err);
+        el.classList.toggle("completed");
+      }
+    });
+  });
+  chat.querySelectorAll(".to-file-btn").forEach((btn) => {
+    btn.addEventListener("click", function(e) {
+      e.stopPropagation();
+      const searchModalElement = document.getElementById("search");
+      if (searchModalElement.style.display !== "none" && searchModalElement.style.display !== "") {
+        searchModal.close();
+      } else {
+        const message = btn.closest(".message");
+        message.classList.add("actions-pinned");
+        searchModal.open("", e.target, message);
+      }
+    });
+  });
+  chat.querySelectorAll(".to-journal-btn").forEach((btn) => {
+    btn.addEventListener("click", async function(e) {
+      e.stopPropagation();
+      const { msgs, messagesToRemove } = getChatActionMessages(btn);
+      (async () => {
+        for (const msg of msgs) {
+          await moveFromChat(msg, addToJournal);
+        }
+        await renderMessages();
+        files = await loadLocalFiles(await getRootDirHandle());
+        renderSidebar("", [`/journal/${todayJournalFilename()}`]);
+      })();
+      removeChatMessagesWithAnimation(messagesToRemove);
+      chatInput.focus();
+    });
+  });
+  chat.querySelectorAll(".to-checklist-btn").forEach((btn) => {
+    btn.addEventListener("click", async function(e) {
+      e.stopPropagation();
+      const selectedMessages = document.querySelectorAll(".message.selected");
+      let msgs = [];
+      let messagesToRemove = [];
+      if (selectedMessages.length > 0) {
+        msgs = Array.from(selectedMessages).map((msg) => msg.querySelector(".message").textContent);
+        messagesToRemove = selectedMessages;
+      } else {
+        msgs = [btn.closest(".message").dataset.text];
+        messagesToRemove = [btn.closest(".message")];
+      }
+      (async () => {
+        for (const msg of msgs) {
+          await moveFromChat(msg, async (msg2) => {
+            await addChecklistItem(btn.dataset.checklist, msg2);
+          });
+        }
+        files = await loadLocalFiles(await getRootDirHandle());
+        renderSidebar("", [joinPath("/", btn.dataset.checklist)]);
+      })();
+      messagesToRemove.forEach((message) => {
+        message.classList.add("removing");
+        setTimeout(() => {
+          message.remove();
+        }, 300);
+      });
+      setTimeout(() => {
+        renderMessages();
+      }, 500);
+      chatInput.focus();
+    });
+  });
+  chat.querySelectorAll(".to-plugin-archive-btn").forEach((btn) => {
+    btn.addEventListener("click", async function(e) {
+      e.stopPropagation();
+      const target = getChatArchiveTarget(btn.dataset.archiveTarget || "");
+      if (!target) {
+        return;
+      }
+      const { msgs, messagesToRemove } = getChatActionMessages(btn);
+      removeChatMessagesWithAnimation(messagesToRemove);
+      try {
+        await archiveChatMessages(msgs, (text) => target.archiveOne(text));
+      } catch (err) {
+        logError("Chat plugin archive failed:", err);
+        await renderMessages();
+        alert("\u5F52\u6863\u5931\u8D25: " + (err && err.message ? err.message : err));
+      }
+      chatInput.focus();
+    });
+  });
+  chat.querySelectorAll(".to-archive-btn").forEach((btn) => {
+    btn.addEventListener("click", async function(e) {
+      e.stopPropagation();
+      const { msgs, messagesToRemove } = getChatActionMessages(btn);
+      const destinations = [];
+      removeChatMessagesWithAnimation(messagesToRemove);
+      (async () => {
+        for (const msg of msgs) {
+          const [header, body] = extractHeaderAndBody(msg, MAX_TITLE_LENGTH);
+          const path = joinPath("/", btn.dataset.dir, sanitizeFilename(header)) + ".md";
+          destinations.push(path);
+          await moveFromChat(msg, async () => {
+            await write(path, body);
+          });
+        }
+        await renderMessages();
+        files = await loadLocalFiles(await getRootDirHandle());
+        renderSidebar("", destinations);
+      })();
+      chatInput.focus();
+    });
+  });
+  chat.querySelectorAll(".to-recent-btn").forEach((btn) => {
+    btn.addEventListener("click", async function(e) {
+      e.stopPropagation();
+      const selectedMessages = document.querySelectorAll(".message.selected");
+      let msgs = [];
+      let messagesToRemove = [];
+      if (selectedMessages.length > 0) {
+        msgs = Array.from(selectedMessages).map((msg) => msg.querySelector(".message-content").textContent);
+        messagesToRemove = selectedMessages;
+      } else {
+        msgs = [btn.closest(".message").querySelector(".message-content").textContent];
+        messagesToRemove = [btn.closest(".message")];
+      }
+      const path = btn.dataset.filename;
+      let callback = async (text) => await addHeaderAndText(path, todayHeader(), text, true, false);
+      (async () => {
+        for (const msg of msgs) {
+          await moveFromChat(msg, callback);
+        }
+        await renderMessages();
+        files = await loadLocalFiles(await getRootDirHandle());
+        renderSidebar("", [joinPath("/", path)]);
+      })();
+      messagesToRemove.forEach((message) => {
+        message.classList.add("removing");
+        setTimeout(() => {
+          message.remove();
+        }, 300);
+      });
+      chatInput.focus();
+    });
+  });
+  chat.querySelectorAll(".message-content").forEach((content) => {
+    content.addEventListener("dblclick", function(e) {
+      e.stopPropagation();
+      this.style.pointerEvents = "auto";
+      this.classList.add("editing");
+      this.focus();
+    });
+  });
+}
+async function renderMessages() {
+  const { messages, text } = await parseMessagesFromChat();
+  if (typeof shouldSkipChatRender === "function" && shouldSkipChatRender(text, lastChatText)) {
+    log("Chat unchanged, skipping render");
+    return;
+  }
+  lastChatText = text;
+  if (typeof markChatArchiveRendered === "function") {
+    markChatArchiveRendered();
+  }
+  log(`Loaded ${messages.length} messages from ${CHAT_PATH}`);
+  if (messages.length === 0) {
+    chat.innerHTML = `
             <div class="empty-state">
                 <img class="empty-icon" src="img/icon.png" alt="">
-                <div class="empty-title">Free your mind</div>
+                <div class="empty-title">Free your head</div>
+                <div class="empty-desc">Dump whatever?s on your mind here</div>
             </div>
         `;
-        return;
-    }
-
-    const recentFiles = getRecentlyModifiedFiles(RECENT_FILES);
-    const recentFilesButtons = recentFiles.map(filename => `
+    return;
+  }
+  const recentFiles = getRecentlyModifiedFiles(RECENT_FILES);
+  const recentFilesButtons = recentFiles.map((filename) => `
     <div class="btn-wrapper">
        <button class="action-btn to-recent-btn" data-filename="${filename}">
-           → ${filename.replace(/\.md$/, '').slice(0, 10)}${filename.replace(/\.md$/, '').length > 10 ? '…' : ''}
+           ${filename.replace(/\.md$/, "").slice(0, 10)}${filename.replace(/\.md$/, "").length > 10 ? "\u2026" : ""}
        </button>
-       <span class="btn-label">To ${filename.replace(/\.md$/, '')}</span>
+       <span class="btn-label">To ${filename.replace(/\.md$/, "")}</span>
     </div>
-    `).join('');
-
-    // add own class every other message
-    chat.innerHTML = messages.map((message, i) => `
-        <div class="message ${i % 2 === 1 ? 'own' : ''}${message.done ? ' completed' : ''}" data-text="${escapeHtml(message.text)}" data-timestamp="${message.timestamp}">
+    `).join("");
+  chat.innerHTML = messages.map((message, i) => `
+        <div class="message ${i % 2 === 1 ? "own" : ""}${message.done ? " completed" : ""}" data-text="${escapeHtml(message.text)}" data-timestamp="${message.timestamp}">
             <button class="complete-btn" title="Mark as done">
                 <svg width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6.5 17l6 6 13-13"/>
@@ -989,7 +787,7 @@ async function renderMessages() {
             </button>
             <div class="message-content"
                  data-text="${escapeHtml(message.text)}"
-                 spellcheck="false">${escapeHtml(prettifyMediaTags(message.text))}</div>
+                 spellcheck="false">${escapeHtml(message.text)}</div>
             <div class="message-footer">
                 <span class="message-time">${message.timestamp}</span>
                 <div class="message-actions">
@@ -1003,6 +801,8 @@ async function renderMessages() {
                         </button>
                     <span class="btn-label">To File</span>
                     </div>
+
+                    ${renderPluginChatArchiveButtonsHtml()}
                     
                     <div class="btn-wrapper">
                         <button class="action-btn to-journal-btn" data-text="${escapeHtml(message.text)}">
@@ -1071,7 +871,15 @@ async function renderMessages() {
                 </div>
             </div>
         </div>
-    `).join('');
-
-    attachEventListeners();
+    `).join("");
+  attachEventListeners();
 }
+function refreshChatArchiveUi() {
+  lastChatText = null;
+  if (isChat) {
+    void renderMessages();
+  }
+}
+Object.assign(globalThis, {
+  refreshChatArchiveUi
+});

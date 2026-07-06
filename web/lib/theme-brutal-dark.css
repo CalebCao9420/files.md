@@ -234,12 +234,12 @@
 }
 
 .cm-s-hypermd-light pre.HyperMD-quote-1:before {
-    background: var(--color-neo-orange) !important;
+    background: var(--color-neo-blue) !important;
     width: 4px !important;
 }
 
 .cm-s-hypermd-light pre.HyperMD-quote-1 {
-    background: color-mix(in srgb, var(--color-neo-orange) 8%, var(--col-bg)) !important;
+    background: color-mix(in srgb, var(--color-neo-blue) 8%, var(--col-bg)) !important;
 }
 /* Match escape chars to the theme text color (hypermd.css default is too light). */
 .cm-s-hypermd-light span.cm-hmd-escape-backslash,
@@ -263,7 +263,7 @@
 }
 
 .cm-s-hypermd-light span.cm-formatting-quote {
-    color: var(--color-neo-orange);
+    color: var(--color-neo-blue);
     position: relative;
     left: 1px;
 }
@@ -434,17 +434,24 @@
     line-height: 1.9 !important;
 }
 
-.empty-title {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-    letter-spacing: normal;
+.empty-title,
+.empty-desc {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    letter-spacing: 0.04em;
 }
 .empty-title {
-    font-weight: 400 !important;
-    font-size: 28px !important;
+    font-weight: 800 !important;
     margin-bottom: 20px !important;
 }
+.empty-desc {
+    font-weight: 500 !important;
+    letter-spacing: 0.08em;
+    color: var(--color-neo-orange) !important;
+}
+
 #search, #move,
 #search-input, #move-input,
+#nav-buttons,
 .message-content,
 .message-actions,
 .CodeMirror-hints,

@@ -20,7 +20,7 @@
     --col-tx-sel: #000 !important;
     --col-msg-sel: color-mix(in srgb, #000, transparent 60%) !important;
     --col-bg-active: #E0E0D8 !important;
-    --col-border: #B6B3A7 !important;
+    --col-border: #000 !important;
     --col-marker: var(--color-neo-orange);
     --col-accent: #000;
 }
@@ -97,17 +97,6 @@
 
     #open-sidebar {
         background: var(--col-bg-alt);
-    }
-
-    #open-folder {
-        color: var(--color-neo-blue);
-    }
-    #open-folder svg {
-        stroke: var(--color-neo-blue);
-    }
-    #open-folder:hover, #open-folder:hover svg {
-        color: var(--color-neo-orange);
-        stroke: var(--color-neo-orange);
     }
 
     .message.own {
@@ -471,20 +460,24 @@
     line-height: 1.9 !important;
 }
 
-.empty-title {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-    letter-spacing: normal;
+.empty-title,
+.empty-desc {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    letter-spacing: 0.04em;
 }
 .empty-title {
-    font-weight: 400 !important;
-    font-size: 28px !important;
+    font-weight: 800 !important;
     margin-bottom: 20px !important;
 }
-.empty-icon {
-    opacity: 0.75;
+.empty-desc {
+    font-weight: 500 !important;
+    letter-spacing: 0.08em;
+    color: var(--color-neo-orange) !important;
 }
+
 #search, #move,
 #search-input, #move-input,
+#nav-buttons,
 .message-content,
 .message-actions,
 .CodeMirror-hints,

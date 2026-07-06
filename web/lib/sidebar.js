@@ -1446,6 +1446,9 @@ function rootContextMenu(e) {
     openContextMenu(e, (item) => {
         addNewFileItem(item, '/');
         addNewDirItem(item, '/');
+        if (typeof scaffoldProjectDocs === 'function') {
+            item('Project docs scaffold…', () => scaffoldProjectDocs());
+        }
     });
 }
 

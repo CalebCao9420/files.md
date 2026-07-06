@@ -259,20 +259,7 @@
      */
     function tab(cm) {
         var _a;
-        // PATCHED: listSelections() returns the live selection ranges, and the
-        // code below mutates head/anchor in place. That silently rewrites the
-        // current selection, so the final setSelections() compares equal to it
-        // and CodeMirror skips the cursor redraw - the cursor visually stays
-        // in the old table cell while typing goes to the new one. Copy first.
-        var selections = cm.listSelections().map(function (r) {
-            return {
-                anchor: { line: r.anchor.line, ch: r.anchor.ch },
-                head: { line: r.head.line, ch: r.head.ch },
-                empty: function () {
-                    return this.anchor.line === this.head.line && this.anchor.ch === this.head.ch;
-                },
-            };
-        });
+        var selections = cm.listSelections();
         var beforeCur = [];
         var afterCur = [];
         var selected = [];

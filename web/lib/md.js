@@ -115,9 +115,7 @@ async function addHeaderAndText(path, header, text, atStart = false, withTimesta
         if (imgMatch) {
             const imgLink = imgMatch[0];
             const textContent = text.replace(imgLink, '').trim();
-            formattedContent = textContent
-                ? `${imgLink}\n${timestamp}${textContent}`
-                : imgLink;
+            formattedContent = `${imgLink}\n${timestamp}${textContent}`;
         }
     } else {
         formattedContent = `${timestamp}${text}`;
