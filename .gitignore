@@ -1,9 +1,51 @@
 .env
+.env.*
+!.env.example
 .vscode/**
 .idea/**
 **/.DS_Store
-storage
-fslog
-tests/node_modules/
-tests/test-results/
-tests/playwright-report/
+Thumbs.db
+
+# Local runtime / secrets
+storage/
+fslog/
+data/
+web/.launcher-hint.json
+
+# Machine-specific workspace config (copy from .mdtk/config.example.json)
+.mdtk/config.json
+
+# User-generated workspace content (do not publish)
+Chat.md
+issues/
+journal/
+archive/
+
+# Future TS toolchain
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Tauri build output
+src-tauri/target/
+latest.json
+*.sig
+
+# Updater / code signing (private key only — public key lives in tauri.conf.json)
+.tauri/
+*.key
+!*.key.pub
+*.pem
+
+# OS / editor
+*.log
+
+# Cursor local state
+.cursor/projects/
+.cursor/*.json
+.cursor/rules/
+
+# AI / local dev notes (keep on your machine, not for GitHub)
+PLAN.md
+PROGRESS.md
+MEMORY.md
