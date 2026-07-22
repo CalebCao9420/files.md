@@ -1,6 +1,6 @@
 [package]
 name = "md-toolkit"
-version = "1.0.0"
+version = "0.0.3"
 description = "MD Toolkit desktop shell (Tauri 2)"
 authors = ["MD Toolkit"]
 edition = "2021"

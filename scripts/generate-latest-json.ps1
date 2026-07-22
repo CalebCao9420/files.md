@@ -5,15 +5,16 @@
 #
 # Upload to Release assets:
 #   latest.json
-#   MD Toolkit_1.0.1_x64-setup.exe
-#   MD Toolkit_1.0.1_x64-setup.exe.sig
+#   MD.Toolkit_1.0.1_x64-setup.exe
+#   MD.Toolkit_1.0.1_x64-setup.exe.sig
 
 param(
     [Parameter(Mandatory = $true)]
     [string]$Version,
     [string]$Notes = "",
-    [string]$Repo = "YOUR_USER/YOUR_REPO",
-    [string]$BundleDir = ""
+    [string]$Repo = "CalebCao9420/files.md",
+    [string]$BundleDir = "",
+    [string]$AssetName = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -33,7 +34,9 @@ if (-not (Test-Path $sigPath)) {
 }
 
 $signature = (Get-Content $sigPath -Raw).Trim()
-$url = "https://github.com/$Repo/releases/download/v$Version/$($setup.Name)"
+$assetName = if ($AssetName) { $AssetName } else { $setup.Name }
+$encodedName = [uri]::EscapeDataString($assetName)
+$url = "https://github.com/$Repo/releases/download/v$Version/$encodedName"
 
 $manifest = @{
     version  = $Version
@@ -48,6 +51,17 @@ $manifest = @{
 } | ConvertTo-Json -Depth 5
 
 $outPath = Join-Path $Root "latest.json"
-Set-Content -Path $outPath -Value $manifest -Encoding utf8NoBOM
+$utf8NoBom = New-Object System.Text.UTF8Encoding $false
+[System.IO.File]::WriteAllText($outPath, $manifest, $utf8NoBom)
 Write-Host "Wrote $outPath"
 Write-Host $manifest
+Write-Host ""
+Write-Host "Upload to GitHub Release v$Version with EXACT asset names:" -ForegroundColor Cyan
+Write-Host "  1. $assetName"
+Write-Host "  2. $assetName.sig"
+Write-Host "  3. latest.json  (this file)"
+Write-Host ""
+Write-Host "Download URL in manifest:" -ForegroundColor Cyan
+Write-Host "  $url"
+Write-Host ""
+Write-Host "If GitHub asset name differs from build output, re-upload or pass -AssetName." -ForegroundColor Yellow

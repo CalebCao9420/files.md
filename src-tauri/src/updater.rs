@@ -1,4 +1,6 @@
-use tauri::AppHandle;
+use serde::Serialize;
+use tauri::{AppHandle, Emitter, Manager};
+use tauri::window::{ProgressBarState, ProgressBarStatus};
 use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
 use tauri_plugin_updater::UpdaterExt;
 
@@ -8,6 +10,22 @@ enum UpdatePrompt {
     OnAvailable,
     /// Tray menu: also confirm when already up to date.
     AlwaysNotify,
+}
+
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct HudPayload {
+    phase: &'static str,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    version: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    percent: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    message: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    downloaded: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    total: Option<u64>,
 }
 
 pub fn schedule_startup_check(app: &AppHandle) {
@@ -66,14 +84,151 @@ async fn check_for_updates(app: AppHandle, prompt: UpdatePrompt) -> Result<(), S
         return Ok(());
     }
 
-    update
-        .download_and_install(|_chunk, _total| {}, || {})
-        .await
-        .map_err(|e| e.to_string())?;
+    let version = update.version.clone();
+    push_hud(
+        &app,
+        HudPayload {
+            phase: "start",
+            version: Some(version.clone()),
+            percent: None,
+            message: None,
+            downloaded: None,
+            total: None,
+        },
+    );
 
+    let app_progress = app.clone();
+    let app_installing = app.clone();
+    let version_installing = version.clone();
+    let mut downloaded: u64 = 0;
+    let download_result = update
+        .download_and_install(
+            move |chunk_len, total| {
+                downloaded += chunk_len as u64;
+                let percent = total
+                    .filter(|t| *t > 0)
+                    .map(|t| ((downloaded.saturating_mul(100)) / t).min(100) as u32)
+                    .unwrap_or(0);
+                let message = format_download_message(downloaded, total);
+                push_hud(
+                    &app_progress,
+                    HudPayload {
+                        phase: "progress",
+                        version: None,
+                        percent: Some(percent),
+                        message: Some(message),
+                        downloaded: Some(downloaded),
+                        total,
+                    },
+                );
+                set_taskbar_progress(&app_progress, percent);
+            },
+            move || {
+                push_hud(
+                    &app_installing,
+                    HudPayload {
+                        phase: "installing",
+                        version: Some(version_installing.clone()),
+                        percent: None,
+                        message: None,
+                        downloaded: None,
+                        total: None,
+                    },
+                );
+            },
+        )
+        .await;
+
+    clear_taskbar_progress(&app);
+
+    if let Err(err) = download_result {
+        let msg = err.to_string();
+        push_hud(
+            &app,
+            HudPayload {
+                phase: "error",
+                version: None,
+                percent: None,
+                message: Some(msg.clone()),
+                downloaded: None,
+                total: None,
+            },
+        );
+        show_message(
+            &app,
+            "更新失败",
+            &format!("下载或安装更新时出错：\n\n{msg}"),
+            MessageDialogKind::Error,
+        );
+        return Err(msg);
+    }
+
+    push_hud(
+        &app,
+        HudPayload {
+            phase: "done",
+            version: Some(version),
+            percent: None,
+            message: None,
+            downloaded: None,
+            total: None,
+        },
+    );
     app.request_restart();
     #[allow(unreachable_code)]
     Ok(())
+}
+
+fn format_download_message(downloaded: u64, total: Option<u64>) -> String {
+    match total {
+        Some(total) if total > 0 => {
+            format!(
+                "正在下载更新… {} / {} MB",
+                bytes_to_mb(downloaded),
+                bytes_to_mb(total)
+            )
+        }
+        _ => format!("正在下载更新… {} MB", bytes_to_mb(downloaded)),
+    }
+}
+
+fn bytes_to_mb(bytes: u64) -> String {
+    format!("{:.1}", bytes as f64 / (1024.0 * 1024.0))
+}
+
+fn push_hud(app: &AppHandle, payload: HudPayload) {
+    let Ok(json) = serde_json::to_string(&payload) else {
+        return;
+    };
+    let js = format!(
+        "try{{globalThis.__mdtkUpdateHud?.({json});}}catch(e){{console.error('mdtk update hud',e);}}"
+    );
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.eval(&js);
+    }
+    // Keep event emit as a secondary channel for debugging/tools.
+    let event = format!("update-download-{}", payload.phase);
+    let _ = app.emit_to("main", &event, &payload);
+}
+
+fn set_taskbar_progress(app: &AppHandle, percent: u32) {
+    let Some(window) = app.get_webview_window("main") else {
+        return;
+    };
+    let _ = window.set_progress_bar(ProgressBarState {
+        status: Some(ProgressBarStatus::Normal),
+        progress: Some(percent.min(100) as u64),
+    });
+}
+
+fn clear_taskbar_progress(app: &AppHandle) {
+    let Some(window) = app.get_webview_window("main") else {
+        return;
+    };
+    let _ = window.set_progress_bar(ProgressBarState {
+        status: Some(ProgressBarStatus::None),
+        progress: None,
+    });
 }
 
 fn show_message(app: &AppHandle, title: &str, message: &str, kind: MessageDialogKind) {

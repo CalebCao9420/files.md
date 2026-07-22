@@ -16,6 +16,35 @@ $cargoBin = Join-Path $env:USERPROFILE ".cargo\bin"
 if ((Test-Path $cargoBin) -and ($env:Path -notlike "*$cargoBin*")) {
     $env:Path = "$cargoBin;$env:Path"
 }
+
+# Node/npm — some setups wrongly put node.exe (file) on PATH instead of its directory
+if (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
+  $nodeDirs = [System.Collections.Generic.List[string]]::new()
+  foreach ($entry in ($env:Path -split ';')) {
+    if (-not $entry) { continue }
+    if ($entry -match '\\node\.exe$' -and (Test-Path $entry)) {
+      $parent = Split-Path $entry -Parent
+      if ($parent -and -not $nodeDirs.Contains($parent)) { $nodeDirs.Add($parent) }
+    }
+  }
+  foreach ($candidate in @(
+      $env:MD_TOOLKIT_NODE_DIR,
+      (Join-Path $env:ProgramFiles "nodejs"),
+      (Join-Path ${env:ProgramFiles(x86)} "nodejs"),
+      "D:\Client\Environment\NodeJs"
+    )) {
+    if ($candidate -and (Test-Path (Join-Path $candidate "npm.cmd")) -and -not $nodeDirs.Contains($candidate)) {
+      $nodeDirs.Add($candidate)
+    }
+  }
+  foreach ($dir in $nodeDirs) {
+    $env:Path = "$dir;$env:Path"
+    if (Get-Command npm -ErrorAction SilentlyContinue) { break }
+  }
+}
+if (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
+  Write-Error "npm not found. Add your Node.js folder (containing npm.cmd) to PATH, or set MD_TOOLKIT_NODE_DIR."
+}
 $DefaultPort = 8765
 $Port = if ($env:MD_TOOLKIT_PORT) { [int]$env:MD_TOOLKIT_PORT } else { $DefaultPort }
 
@@ -248,7 +277,7 @@ if ($TauriBuild) {
             Write-Host "Installer output:" -ForegroundColor Green
             Get-ChildItem $bundleDir -Filter "*.exe" | ForEach-Object { Write-Host "  $($_.FullName)" }
         }
-        $releaseExe = Join-Path $Root "src-tauri\target\release\md-toolkit.exe"
+        $releaseExe = Join-Path $Root "src-tauri\target\release\MD.Toolkit.exe"
         if (Test-Path $releaseExe) {
             Write-Host "Portable exe:" -ForegroundColor Green
             Write-Host "  $releaseExe"

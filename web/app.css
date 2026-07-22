@@ -1225,3 +1225,126 @@ html.mdtk-app-shell #content {
     font-size: 0.8rem;
     color: var(--col-tx);
 }
+
+/* Tauri updater download HUD */
+.mdtk-update-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.48);
+    backdrop-filter: blur(3px);
+}
+
+.mdtk-update-overlay[hidden] {
+    display: none !important;
+}
+
+.mdtk-update-panel {
+    width: min(440px, calc(100vw - 32px));
+    padding: 22px 24px 18px;
+    border-radius: 14px;
+    border: 1px solid var(--col-border);
+    background: var(--col-bg);
+    color: var(--col-tx);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.28);
+}
+
+.mdtk-update-header {
+    margin-bottom: 12px;
+}
+
+.mdtk-update-panel h2 {
+    margin: 0;
+    font-size: 1.08rem;
+    font-weight: 600;
+}
+
+.mdtk-update-subtitle {
+    margin: 4px 0 0;
+    font-size: 0.82rem;
+    color: var(--col-tx-muted, #888);
+}
+
+.mdtk-update-status {
+    margin: 0 0 14px;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--col-tx);
+}
+
+.mdtk-update-bar {
+    height: 9px;
+    border-radius: 999px;
+    background: var(--col-border, #ddd);
+    overflow: hidden;
+}
+
+.mdtk-update-bar-fill {
+    height: 100%;
+    width: 0;
+    border-radius: 999px;
+    background: var(--col-accent, #3b82f6);
+    transition: width 0.18s ease;
+}
+
+.mdtk-update-percent {
+    margin: 8px 0 0;
+    min-height: 1.1em;
+    font-size: 0.82rem;
+    text-align: right;
+    color: var(--col-tx-muted, #666);
+    font-variant-numeric: tabular-nums;
+}
+
+.mdtk-update-actions {
+    margin-top: 14px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.mdtk-update-dismiss {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--col-border);
+    background: var(--col-bg);
+    color: var(--col-tx);
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.mdtk-update-dismiss:hover {
+    background: var(--col-hover, rgba(0, 0, 0, 0.04));
+}
+
+.mdtk-update-overlay--indeterminate .mdtk-update-bar-fill {
+    width: 38% !important;
+    animation: mdtk-update-indeterminate 1.15s ease-in-out infinite;
+}
+
+.mdtk-update-overlay--installing .mdtk-update-bar-fill {
+    animation: mdtk-update-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes mdtk-update-indeterminate {
+    0% { transform: translateX(-120%); }
+    100% { transform: translateX(280%); }
+}
+
+@keyframes mdtk-update-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+}
+
+.mdtk-update-overlay--error .mdtk-update-bar-fill {
+    background: #dc2626;
+    animation: none;
+    width: 0 !important;
+}
+
+.mdtk-update-overlay--error .mdtk-update-status {
+    color: #b91c1c;
+}

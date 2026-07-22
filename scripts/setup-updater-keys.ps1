@@ -10,7 +10,7 @@
 
 param(
     [string]$KeyPath = (Join-Path $env:USERPROFILE ".tauri\md-toolkit.key"),
-    [string]$GitHubRepo = "YOUR_USER/YOUR_REPO"
+    [string]$GitHubRepo = "CalebCao9420/files.md"
 )
 
 $ErrorActionPreference = "Stop"

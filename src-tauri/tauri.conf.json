@@ -1,7 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "MD Toolkit",
-  "version": "1.0.0",
+  "productName": "MD.Toolkit",
+  "mainBinaryName": "MD.Toolkit",
+  "version": "0.0.3",
   "identifier": "com.mdtoolkit.app",
   "build": {
     "beforeDevCommand": "npm run build",
